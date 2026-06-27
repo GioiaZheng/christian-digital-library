@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="搜索基督教数字图书馆的中文书目元数据。">
+  <meta name="theme-color" content="#173f35">
+  <title>书目目录｜基督教数字图书馆</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="./index.html" aria-label="基督教数字图书馆首页">
+        <span class="brand-mark" aria-hidden="true">典</span>
+        <span>
+          <strong>基督教数字图书馆</strong>
+          <small>中文基督教馆藏平台</small>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="主导航">
+        <a href="./index.html">首页</a>
+        <a href="./catalog.html" aria-current="page">书目</a>
+        <a href="./categories.html">分类</a>
+        <a href="./about.html">关于</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main-content">
+
+    <header class="page-hero">
+      <div class="shell">
+        <p class="eyebrow">书目搜索</p>
+        <h1>搜索书目</h1>
+        <p class="lead">可按书名、作者、标签、分类或简介检索。当前页面只搜索公开元数据。</p>
+      </div>
+    </header>
+    <section class="section">
+      <div class="shell">
+        <div class="search-panel" role="search">
+          <div class="field">
+            <label for="search-input">关键词</label>
+            <input id="search-input" type="search" placeholder="例如：马丁·路德、诗篇、家庭" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="category-filter">分类</label>
+            <select id="category-filter">
+              <option value="">全部分类</option>
+              <option value="bible-study">圣经研究</option><option value="theology">神学与教义</option><option value="church-history">教会历史</option><option value="spiritual-life">灵修与门徒训练</option><option value="family-ministry">婚姻家庭</option><option value="culture-society">文化与社会</option><option value="other">其他</option>
+            </select>
+          </div>
+        </div>
+        <p id="result-summary" class="result-summary" aria-live="polite">正在读取书目……</p>
+        <div id="search-results" class="grid"></div>
+        <noscript><div class="empty-state">搜索功能需要 JavaScript。你仍可前往“分类”页面浏览全部书目。</div></noscript>
+      </div>
+    </section>
+    <script src="assets/search.js" defer></script>
+  </main>
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <div>
+        <strong>基督教数字图书馆</strong>
+        <p>以审慎、清晰和可持续的方式整理中文基督教资源。</p>
+      </div>
+      <p>本站默认只展示书目信息，不提供未经授权的文件下载。</p>
+    </div>
+  </footer>
+</body>
+</html>

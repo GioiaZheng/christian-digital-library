@@ -1,0 +1,37 @@
+[
+  {
+    "id": "bible-study",
+    "name": "圣经研究",
+    "description": "圣经导论、注释、释经、原文研究与研经材料。"
+  },
+  {
+    "id": "theology",
+    "name": "神学与教义",
+    "description": "系统神学、教义研究、护教学与神学思想。"
+  },
+  {
+    "id": "church-history",
+    "name": "教会历史",
+    "description": "教会历史、宗教改革、人物传记与历史文献。"
+  },
+  {
+    "id": "spiritual-life",
+    "name": "灵修与门徒训练",
+    "description": "祷告、灵修、生命成长、牧养与门徒训练。"
+  },
+  {
+    "id": "family-ministry",
+    "name": "婚姻家庭",
+    "description": "婚姻、亲子、家庭关系与家庭事工。"
+  },
+  {
+    "id": "culture-society",
+    "name": "文化与社会",
+    "description": "基督信仰与文化、社会、伦理及公共生活。"
+  },
+  {
+    "id": "other",
+    "name": "其他",
+    "description": "暂未归入其他主题的资料。"
+  }
+]

@@ -1,0 +1,26 @@
+__pycache__/
+*.py[cod]
+.venv/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 大型馆藏文件必须进入 Cloudflare R2，不能新增到 GitHub。
+books/
+*.[pP][dD][fF]
+*.[eE][pP][uU][bB]
+*.[mM][oO][bB][iI]
+*.[aA][zZ][wW]3
+*.[zZ][iI][pP]
+*.[rR][aA][rR]
+*.[7][zZ]
+*.[tT][aA][rR]
+*.[gG][zZ]
+*.[dD][oO][cC]
+*.[dD][oO][cC][xX]
+
+# 本地密钥与环境配置
+.env
+.env.*
+!.env.example
