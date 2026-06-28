@@ -153,13 +153,17 @@ def render_book_card(
 ) -> str:
     author = book["author"] or "作者待核"
     byline = " · ".join(part for part in (author, book["year"]) if part)
-    description = book["description"] or "暂无内容简介。"
+    description = (
+        f'<p class="description">{escape(book["description"])}</p>'
+        if book["description"]
+        else ""
+    )
     category = categories[book["category"]]
     return f"""
         <article class="card">
           <h3><a href="{link_prefix}books/{escape(book['id'])}.html">{escape(book['clean_title'])}</a></h3>
           <p class="meta">{escape(byline)}</p>
-          <p class="description">{escape(description)}</p>
+          {description}
           <div class="card-footer">
             <span class="badge">{escape(category['name'])}</span>
             <span class="meta">查看书目 →</span>
@@ -197,21 +201,20 @@ def render_home(
       <div class="shell hero-grid">
         <div>
           <p class="eyebrow">中文基督教数字图书馆</p>
-          <h1>让珍贵的信仰文字，被认真整理，也被安心阅读。</h1>
-          <p class="lead">这是一个面向中文读者的基督教数字图书馆。我们从可靠的书目整理开始，逐步建设搜索、阅读、研究与知识服务。</p>
+          <h1>在浩繁馆藏中，找到想读的那一本。</h1>
+          <p class="lead">按书名、作者和主题检索中文基督教书目，快速浏览馆藏内容。</p>
           <div class="actions">
             <a class="button" href="catalog.html">搜索馆藏</a>
             <a class="button secondary" href="categories.html">按分类浏览</a>
           </div>
           <div class="stats" aria-label="馆藏统计">
-            <div class="stat"><strong>{len(books)}</strong><span>条公开书目</span></div>
+            <div class="stat"><strong>{len(books)}</strong><span>条馆藏书目</span></div>
             <div class="stat"><strong>{sum(1 for count in counts.values() if count)}</strong><span>个已有内容的分类</span></div>
-            <div class="stat"><strong>0</strong><span>个默认公开下载</span></div>
           </div>
         </div>
         <aside class="hero-note">
-          <strong>先辨明，再分享</strong>
-          <p>版权、版本或来源尚未核验的馆藏，只展示必要的目录信息。大型文件独立保存在私有对象存储中。</p>
+          <strong>目录持续整理</strong>
+          <p>书名、作者、版本与分类会在核对后逐步补充和修正。</p>
         </aside>
       </div>
     </section>
@@ -252,7 +255,7 @@ def render_catalog(template: Template, categories: list[dict[str, str]]) -> str:
       <div class="shell">
         <p class="eyebrow">书目搜索</p>
         <h1>搜索书目</h1>
-        <p class="lead">可按书名、作者、标签、分类或简介检索。当前页面只搜索公开元数据。</p>
+        <p class="lead">可按书名、作者、标签和分类检索。</p>
       </div>
     </header>
     <section class="section">
@@ -272,6 +275,7 @@ def render_catalog(template: Template, categories: list[dict[str, str]]) -> str:
         </div>
         <p id="result-summary" class="result-summary" aria-live="polite">正在读取书目……</p>
         <div id="search-results" class="grid"></div>
+        <div class="load-more-wrap"><button id="load-more" class="button secondary" type="button" hidden>显示更多</button></div>
         <noscript><div class="empty-state">搜索功能需要 JavaScript。你仍可前往“分类”页面浏览全部书目。</div></noscript>
       </div>
     </section>
@@ -369,11 +373,7 @@ def render_book_detail(
         if toc
         else '<section class="book-section"><h2>目录</h2><p class="meta">目录信息尚待整理。</p></section>'
     )
-    availability = (
-        "元数据显示该书可公开访问，但文件服务尚未启用；当前页面仍不提供下载链接。"
-        if book["can_public_download"]
-        else "当前仅展示书目信息，不提供公开下载。如需访问，请等待后续申请与审批功能上线。"
-    )
+    availability = "当前书目用于馆藏查询，文件访问按实际授权情况提供。"
     content = f"""
     <header class="page-hero"><div class="shell">
       <nav class="breadcrumbs" aria-label="面包屑"><a href="../categories.html">馆藏分类</a> / <a href="../categories/{escape(category['id'])}.html">{escape(category['name'])}</a> / 当前书目</nav>
@@ -406,18 +406,13 @@ def render_about(template: Template) -> str:
     content = """
     <header class="page-hero"><div class="shell">
       <p class="eyebrow">关于图书馆</p><h1>关于基督教数字图书馆</h1>
-      <p class="lead">我们想建设的不是一个随意堆放文件的下载站，而是一座可信、克制、可持续生长的中文数字图书馆。</p>
+      <p class="lead">整理中文基督教馆藏，让查找、浏览和使用资料更简单。</p>
     </div></header>
     <section class="section"><div class="shell prose">
-      <h2>从书目开始</h2>
-      <p>一条可靠的书目记录，应该能说明“这是什么、谁写的、哪个版本、属于什么主题，以及我们是否有权提供访问”。MVP 先把这些基础工作做扎实。</p>
-      <h2>文件不在网页里</h2>
-      <p>大型图书文件将存放在私有对象存储中。未来的用户系统会根据版权状态、用户身份和管理员审批，决定是否签发短时访问地址。</p>
-      <h2>面向研究与知识服务</h2>
-      <p>清洁的元数据将支持更好的全文检索、OCR、主题发现和 RAG。未来的 AI 回答必须保留出处，并尊重内容授权范围。</p>
-      <h2>共同维护</h2>
-      <p>欢迎协作者帮助核对书名、作者、版本、目录、分类和版权状态。对于不确定的信息，我们宁愿明确写“待核实”，也不把猜测当成事实。</p>
-      <div class="notice"><strong>版权说明</strong><p>本站默认不提供公开下载。若你是权利人并希望更正书目信息或提出内容请求，请通过项目 GitHub 仓库联系维护者。</p></div>
+      <h2>馆藏整理</h2>
+      <p>网站以书目为基础，持续核对书名、作者、版本、分类和目录。</p>
+      <h2>使用范围</h2>
+      <p>馆藏资料按实际授权情况提供访问，网站目录会随着整理进度持续更新。</p>
     </div></section>"""
     return render_layout(
         template,

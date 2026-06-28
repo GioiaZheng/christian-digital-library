@@ -17,7 +17,17 @@
   {
     "id": "spiritual-life",
     "name": "灵修与门徒训练",
-    "description": "祷告、灵修、生命成长、牧养与门徒训练。"
+    "description": "祷告、灵修、生命成长与门徒训练。"
+  },
+  {
+    "id": "pastoral",
+    "name": "讲道与牧养",
+    "description": "讲道、牧会、辅导、教会治理与事工实践。"
+  },
+  {
+    "id": "missions",
+    "name": "宣教与福音",
+    "description": "宣教、布道、福音传播与跨文化事工。"
   },
   {
     "id": "family-ministry",
@@ -28,6 +38,11 @@
     "id": "culture-society",
     "name": "文化与社会",
     "description": "基督信仰与文化、社会、伦理及公共生活。"
+  },
+  {
+    "id": "reference",
+    "name": "辞典与工具",
+    "description": "辞典、百科、手册、索引与研究工具。"
   },
   {
     "id": "other",

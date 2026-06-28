@@ -62,8 +62,14 @@ def create_sample_project(parent: Path) -> Path:
 class CatalogGenerationTests(unittest.TestCase):
     def test_empty_catalog_generates_core_pages(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory) / "site"
-            counts = GENERATOR.build_site(ROOT, output)
+            project = create_sample_project(Path(directory))
+            with (project / "data" / "books.csv").open(
+                "w", encoding="utf-8", newline=""
+            ) as target:
+                writer = csv.DictWriter(target, fieldnames=GENERATOR.BOOK_FIELDS)
+                writer.writeheader()
+            output = project / "site"
+            counts = GENERATOR.build_site(project, output)
 
             self.assertEqual(0, counts["books"])
             self.assertTrue((output / "index.html").is_file())

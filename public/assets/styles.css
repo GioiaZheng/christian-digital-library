@@ -270,7 +270,7 @@ h3 {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
   margin-top: 32px;
 }
@@ -470,6 +470,12 @@ h3 {
   margin-bottom: 18px;
   color: var(--muted);
   font-family: "Microsoft YaHei", sans-serif;
+}
+
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
 }
 
 .empty-state {

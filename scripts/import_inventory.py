@@ -1,0 +1,644 @@
+#!/usr/bin/env python3
+"""将私有存储清单转换为不含内部路径的公开书目 CSV。"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import re
+import sys
+import unicodedata
+from collections import defaultdict
+from pathlib import Path, PurePosixPath
+
+
+ROOT = Path(__file__).resolve().parents[1]
+BOOK_FIELDS = [
+    "id",
+    "clean_title",
+    "author",
+    "publisher",
+    "year",
+    "language",
+    "category",
+    "tags",
+    "description",
+    "table_of_contents",
+    "copyright_status",
+    "can_public_download",
+]
+MAPPING_FIELDS = [
+    "id",
+    "object_key",
+    "size",
+    "etag",
+    "clean_title",
+    "author",
+    "category",
+    "reviewed",
+]
+
+UNKNOWN_AUTHOR_WORDS = {
+    "麦种",
+    "麦种出版",
+    "华神",
+    "天道",
+    "好书",
+    "完整版",
+    "非完整版",
+}
+NON_AUTHOR_WORDS = (
+    "圣经",
+    "聖經",
+    "注释",
+    "註釋",
+    "神学",
+    "神學",
+    "教会",
+    "教會",
+    "福音",
+    "课程",
+    "課程",
+    "指南",
+    "系列",
+    "阅读",
+    "閱讀",
+    "精选",
+    "精選",
+    "书",
+    "書",
+    "记",
+    "記",
+    "传",
+    "傳",
+    "学",
+    "學",
+    "主义",
+    "主義",
+    "思想",
+    "信念",
+    "生活",
+    "秘诀",
+    "秘訣",
+    "真理",
+    "世界",
+    "人生",
+    "时代",
+    "時代",
+    "原则",
+    "原則",
+    "方法",
+    "道路",
+    "艺术",
+    "藝術",
+    "灵魂",
+    "靈魂",
+    "异象",
+    "異象",
+    "呼召",
+    "赞美",
+    "讚美",
+    "心语",
+    "心語",
+    "简释",
+    "簡釋",
+    "字字珠玑",
+    "字字珠璣",
+    "材料",
+    "导论",
+    "導論",
+    "出版",
+    "时间",
+    "時間",
+    "诗篇",
+    "詩篇",
+    "讲章",
+    "講章",
+)
+
+CATEGORY_RULES = [
+    ("reference", ("辞典", "詞典", "词典", "百科", "目录", "手册", "工具书", "索引")),
+    (
+        "bible-study",
+        (
+            "圣经",
+            "聖經",
+            "旧约",
+            "舊約",
+            "新约",
+            "新約",
+            "释经",
+            "釋經",
+            "解经",
+            "解經",
+            "研经",
+            "研經",
+            "注释",
+            "註釋",
+            "创世记",
+            "創世記",
+            "出埃及记",
+            "出埃及記",
+            "诗篇",
+            "詩篇",
+            "箴言",
+            "约翰福音",
+            "約翰福音",
+            "罗马书",
+            "羅馬書",
+            "希伯来书",
+            "希伯來書",
+            "利未记",
+            "利未記",
+            "民数记",
+            "民數記",
+            "申命记",
+            "申命記",
+            "约书亚记",
+            "約書亞記",
+            "士师记",
+            "士師記",
+            "路得记",
+            "路得記",
+            "撒母耳",
+            "列王纪",
+            "列王記",
+            "历代志",
+            "歷代志",
+            "以斯拉",
+            "尼希米",
+            "以斯帖",
+            "约伯",
+            "雅歌",
+            "以赛亚",
+            "以賽亞",
+            "耶利米",
+            "以西结",
+            "以西結",
+            "但以理",
+            "何西阿",
+            "约珥",
+            "約珥",
+            "阿摩司",
+            "俄巴底亚",
+            "約拿",
+            "约拿",
+            "弥迦",
+            "彌迦",
+            "那鸿",
+            "那鴻",
+            "哈巴谷",
+            "西番雅",
+            "哈该",
+            "哈該",
+            "撒迦利亚",
+            "撒迦利亞",
+            "玛拉基",
+            "瑪拉基",
+            "马太福音",
+            "馬太福音",
+            "马可福音",
+            "馬可福音",
+            "路加福音",
+            "使徒行传",
+            "使徒行傳",
+            "哥林多",
+            "加拉太",
+            "以弗所",
+            "腓立比",
+            "歌罗西",
+            "歌羅西",
+            "帖撒罗尼迦",
+            "帖撒羅尼迦",
+            "提摩太",
+            "提多书",
+            "提多書",
+            "腓利门",
+            "腓利門",
+            "雅各书",
+            "雅各書",
+            "彼得前",
+            "彼得后",
+            "彼得後",
+            "约翰壹",
+            "約翰壹",
+            "启示录",
+            "啟示錄",
+        ),
+    ),
+    ("missions", ("宣教", "差传", "差傳", "传福音", "傳福音", "传道", "傳道", "傅道", "布道", "佈道", "穆斯林", "回教徒")),
+    ("pastoral", ("讲道", "講道", "讲章", "講章", "牧会", "牧會", "牧养", "牧養", "教会治理", "教會治理", "辅导", "輔導", "事工", "教会成员", "教會成員")),
+    ("family-ministry", ("婚姻", "家庭", "亲子", "親子", "儿童", "兒童", "孩子", "青少年", "早教")),
+    (
+        "church-history",
+        (
+            "教会史",
+            "教會史",
+            "宗教改革",
+            "改教",
+            "历史",
+            "歷史",
+            "传记",
+            "傳記",
+            "路德",
+            "加尔文传",
+            "加爾文傳",
+            "奥古斯丁",
+            "奧古斯丁",
+            "简史",
+            "簡史",
+            "生平",
+            "内地会",
+            "內地會",
+            "清教徒",
+            "十字军",
+            "十字軍",
+            "威伯福斯",
+            "朋霍费尔",
+            "朋霍費爾",
+            "马礼逊",
+            "馬禮遜",
+        ),
+    ),
+    (
+        "theology",
+        (
+            "神学",
+            "神學",
+            "教义",
+            "教義",
+            "护教",
+            "護教",
+            "系统神学",
+            "系統神學",
+            "基督论",
+            "基督論",
+            "救赎",
+            "救贖",
+            "称义",
+            "稱義",
+            "改革宗",
+            "加尔文主义",
+            "加爾文主義",
+        ),
+    ),
+    (
+        "spiritual-life",
+        (
+            "灵修",
+            "靈修",
+            "祷告",
+            "禱告",
+            "门徒",
+            "門徒",
+            "圣洁",
+            "聖潔",
+            "敬拜",
+            "属灵生活",
+            "屬靈生活",
+            "生命成长",
+            "生命成長",
+            "信心",
+            "属灵",
+            "屬靈",
+            "灵性",
+            "靈性",
+            "灵命",
+            "靈命",
+            "与神",
+            "與神",
+            "与主",
+            "與主",
+            "主日",
+            "赞美",
+            "讚美",
+            "祝福",
+            "敬虔",
+        ),
+    ),
+    (
+        "theology",
+        (
+            "上帝",
+            "三位一体",
+            "三位一體",
+            "十字架",
+            "信经",
+            "信經",
+            "道成肉身",
+            "救恩",
+            "恩典",
+            "基督",
+            "圣灵",
+            "聖靈",
+            "信仰",
+            "教会",
+            "教會",
+        ),
+    ),
+    (
+        "culture-society",
+        (
+            "哲学",
+            "哲學",
+            "文化",
+            "社会",
+            "社會",
+            "伦理",
+            "倫理",
+            "政治",
+            "法律",
+            "科学",
+            "科學",
+            "教育",
+            "宗教",
+        ),
+    ),
+]
+
+
+def normalize(value: str) -> str:
+    return unicodedata.normalize("NFKC", value).strip()
+
+
+def remove_copy_markers(value: str) -> str:
+    previous = ""
+    while previous != value:
+        previous = value
+        value = re.sub(
+            r"\s*(?:[（(\[]\d+[）)\]]|[-_ ]?copy(?:\s*\d+)?|[-_ ]?compressed)$",
+            "",
+            value,
+            flags=re.IGNORECASE,
+        ).strip()
+    return value
+
+
+def clean_person(value: str) -> str:
+    value = normalize(value)
+    value = re.sub(r"^[\s_\-—:：]+", "", value)
+    value = re.sub(r"^[【\[(](?:中|英|美|德|俄|澳|法)[】\])]", "", value)
+    value = re.sub(r"【[^】]*(?:页|年|\d{4})[^】]*】", "", value)
+    value = re.sub(r"(?:著(?!名|作|者)|着|主编|編著|编著|编|編|译|譯|牧师|牧師|博士)+", "", value)
+    value = re.sub(r"(?:19|20)\d{2}(?:[.年]\d{1,2})?.*$", "", value)
+    for word in UNKNOWN_AUTHOR_WORDS:
+        value = re.sub(rf"(?:[\s_\-—]*{re.escape(word)})+$", "", value)
+    value = re.sub(r"[《》【】\[\]()（）'\"`]+", " ", value)
+    value = re.sub(r"[.:：·•—–_-]+", " ", value)
+    return re.sub(r"\s+", " ", value).strip()
+
+
+def looks_like_person(value: str) -> bool:
+    candidate = clean_person(value)
+    if not candidate or candidate in UNKNOWN_AUTHOR_WORDS or len(candidate) > 28:
+        return False
+    if any(word in candidate for word in NON_AUTHOR_WORDS):
+        return False
+    if candidate.isdigit():
+        return False
+    if re.fullmatch(r"[\u3400-\u9fff ]{2,12}", candidate):
+        return True
+    return bool(re.fullmatch(r"[A-Za-z\u3400-\u9fff ]{3,28}", candidate))
+
+
+def clean_title(value: str) -> str:
+    value = normalize(value)
+    value = re.sub(r"\.(?:pdf|rar|epub|mobi)$", "", value, flags=re.IGNORECASE)
+    value = re.sub(r"~?微信[:：]?[A-Za-z0-9_-]+.*$", "", value, flags=re.IGNORECASE)
+    value = remove_copy_markers(value)
+    value = re.sub(r"^喜乐出版社[-—_:： ]+", "", value)
+    value = re.sub(r"^[（(]\d+[）)]\s*", "", value)
+    value = re.sub(r"^[（(](?:华神|麦种|天道)[）)]\s*", "", value)
+    value = re.sub(r"(?:_|\s+)(?:\d{7,})$", "", value)
+    value = re.sub(r"\s*(?:完整版|非完整版|扫描版|掃描版)$", "", value)
+    value = re.sub(r"\s+(?:pdf|rar|SD)$", "", value, flags=re.IGNORECASE)
+    value = re.sub(r"【[^】]*(?:页|\d{4}[.年])[^】]*】", "", value)
+    value = value.strip("《》〈〉 ")
+    value = re.sub(r"^(?:0[1-9]|1[0-3])(?=巴克莱圣经注释)", "", value)
+    value = value.replace("_", " ")
+    value = re.sub(r"\s*(?:--+|——+)\s*", "：", value)
+    value = re.sub(r"[-—_ ]+[\u3400-\u9fff]{2,20}出版社.*$", "", value)
+    value = re.sub(r"[<>|\\/*?\"`~]+", " ", value)
+    value = re.sub(r"(?<=[\u3400-\u9fffA-Za-z0-9]):(?=[\u3400-\u9fff])", "：", value)
+    value = re.sub(r"(?<=[\u3400-\u9fff]),(?=[\u3400-\u9fff])", "，", value)
+    value = re.sub(r"\s+", " ", value).strip(" ._-：")
+    return value or "书名待核"
+
+
+def split_title_author(object_key: str) -> tuple[str, str]:
+    filename = PurePosixPath(object_key).name
+    stem = re.sub(r"\.zip$", "", normalize(filename), flags=re.IGNORECASE)
+    stem = re.sub(r"\.(?:pdf|rar|epub|mobi)$", "", stem, flags=re.IGNORECASE)
+    stem = re.sub(r"~?微信[:：]?[A-Za-z0-9_-]+.*$", "", stem, flags=re.IGNORECASE)
+    stem = remove_copy_markers(stem)
+    stem = re.sub(r"_(?:\d{7,})$", "", stem)
+
+    bibliographic = re.match(
+        r"^[（(](?:中|英|美|德|俄|澳|法)[）)](?P<author>[\u3400-\u9fff·.A-Za-z ]{2,24})著[；;].*?[.。]\s*(?P<title>.+?)(?:[.。]\s*(?:北京|上海|香港).*)?$",
+        stem,
+    )
+    if bibliographic and looks_like_person(bibliographic.group("author")):
+        return clean_title(bibliographic.group("title")), clean_person(
+            bibliographic.group("author")
+        )
+
+    author = ""
+    start = stem.find("《")
+    end = stem.find("》", start + 1)
+    if start >= 0 and end > start:
+        prefix, title, suffix = stem[:start], stem[start + 1 : end], stem[end + 1 :]
+        second_start = suffix.find("《")
+        second_end = suffix.find("》", second_start + 1)
+        if second_start >= 0 and second_end > second_start:
+            second_title = suffix[second_start + 1 : second_end]
+            if re.search(r"[\u3400-\u9fff]", second_title):
+                title = second_title
+            suffix = suffix[second_end + 1 :]
+        if looks_like_person(prefix):
+            author = clean_person(prefix)
+
+        volume = re.match(r"^\s*(卷?[上下]|上册|下册)\s*[-—_ ]+\s*(.+)$", suffix)
+        if volume:
+            title = f"{title} {volume.group(1)}"
+            suffix = volume.group(2)
+
+        role = re.search(
+            r"(?P<author>[A-Za-z.\s\u3400-\u9fff·、]{2,30}?)(?:著(?!名|作|者)|着|主编|編著|编著)",
+            suffix,
+        )
+        if not author and role and looks_like_person(role.group("author")):
+            author = clean_person(role.group("author"))
+        elif not author and looks_like_person(suffix):
+            author = clean_person(suffix)
+
+        working = re.sub(r"^改革宗经典[-—]+", "", title)
+        parts = [part.strip() for part in re.split(r"\s*[-—]\s*", working) if part.strip()]
+        numeric_tail = len(parts) >= 2 and all(
+            re.fullmatch(r"\d+", part) for part in parts[1:]
+        )
+        if not author and len(parts) >= 2 and not numeric_tail and looks_like_person(parts[0]):
+            author = clean_person(parts[0])
+            title = "：".join(parts[1:])
+        elif numeric_tail:
+            title = " ".join(parts)
+        else:
+            title = working
+        return clean_title(title), author
+
+    stem = stem.strip("《》")
+    role = re.search(
+        r"(?P<title>.+?)[_\-—\s]+(?P<author>[A-Za-z.\s\u3400-\u9fff·、]{2,30}?)(?:著(?!名|作|者)|着|主编|編著|编著)(?:\b|[-—_，,;；]|$)",
+        stem,
+    )
+    if role and looks_like_person(role.group("author")):
+        return clean_title(role.group("title")), clean_person(role.group("author"))
+
+    parts = [part.strip() for part in re.split(r"\s*(?:--+|——+|[-_])\s*", stem) if part.strip()]
+    while parts and (
+        clean_person(parts[-1]) in UNKNOWN_AUTHOR_WORDS
+        or re.search(r"出版社|出版|小组聚会材料|時間|时间", parts[-1])
+    ):
+        parts.pop()
+    if len(parts) >= 2 and looks_like_person(parts[-1]):
+        author = clean_person(parts[-1])
+        stem = "：".join(parts[:-1])
+    elif len(parts) >= 2 and looks_like_person(parts[0]):
+        author = clean_person(parts[0])
+        stem = "：".join(parts[1:])
+    elif parts:
+        stem = "：".join(parts)
+    return clean_title(stem), author
+
+
+def classify(title: str) -> tuple[str, list[str]]:
+    normalized = normalize(title).casefold()
+    for category, keywords in CATEGORY_RULES:
+        matches = [keyword for keyword in keywords if normalize(keyword).casefold() in normalized]
+        if matches:
+            return category, matches[:3]
+    return "other", []
+
+
+def load_mapping(path: Path) -> list[dict[str, str]]:
+    if not path.is_file():
+        return []
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        return list(csv.DictReader(handle))
+
+
+def write_csv(path: Path, fields: list[str], rows: list[dict[str, object]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def import_inventory(inventory_path: Path, mapping_path: Path, output_path: Path) -> int:
+    objects = json.loads(inventory_path.read_text(encoding="utf-8"))
+    if not isinstance(objects, list):
+        raise ValueError("清单必须是对象数组")
+
+    old_mapping = load_mapping(mapping_path)
+    by_key = {row["object_key"]: row for row in old_mapping if row.get("object_key")}
+    by_signature: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
+    for row in old_mapping:
+        if row.get("etag"):
+            by_signature[(row.get("size", ""), row["etag"])].append(row)
+
+    used_ids: set[str] = set()
+    next_id = max(
+        (int(match.group(1)) for row in old_mapping if (match := re.fullmatch(r"cdl-(\d+)", row.get("id", "")))),
+        default=0,
+    ) + 1
+    current_keys = {str(item["key"]) for item in objects}
+    mapping_rows: list[dict[str, object]] = []
+    public_rows: list[dict[str, object]] = []
+
+    for item in sorted(objects, key=lambda value: normalize(str(value["key"])).casefold()):
+        object_key = str(item["key"])
+        size = str(item.get("size", ""))
+        etag = str(item.get("etag", ""))
+        previous = by_key.get(object_key)
+        if previous is None and etag:
+            candidates = [
+                row
+                for row in by_signature.get((size, etag), [])
+                if row.get("object_key") not in current_keys and row.get("id") not in used_ids
+            ]
+            previous = candidates[0] if len(candidates) == 1 else None
+
+        if previous and previous.get("id") not in used_ids:
+            book_id = previous["id"]
+        else:
+            book_id = f"cdl-{next_id:06d}"
+            next_id += 1
+        used_ids.add(book_id)
+
+        title, author = split_title_author(object_key)
+        category, tags = classify(title)
+        reviewed = previous and previous.get("reviewed", "").lower() == "true"
+        if reviewed:
+            title = previous.get("clean_title", title) or title
+            author = previous.get("author", author)
+            category = previous.get("category", category) or category
+
+        mapping_rows.append(
+            {
+                "id": book_id,
+                "object_key": object_key,
+                "size": size,
+                "etag": etag,
+                "clean_title": title,
+                "author": author,
+                "category": category,
+                "reviewed": "true" if reviewed else "false",
+            }
+        )
+        public_rows.append(
+            {
+                "id": book_id,
+                "clean_title": title,
+                "author": author,
+                "publisher": "",
+                "year": "",
+                "language": "中文",
+                "category": category,
+                "tags": ";".join(tags),
+                "description": "",
+                "table_of_contents": "",
+                "copyright_status": "待核实",
+                "can_public_download": "false",
+            }
+        )
+
+    public_rows.sort(key=lambda row: (normalize(str(row["clean_title"])).casefold(), str(row["id"])))
+    write_csv(mapping_path, MAPPING_FIELDS, mapping_rows)
+    write_csv(output_path, BOOK_FIELDS, public_rows)
+    return len(public_rows)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="将私有清单转换为公开书目")
+    parser.add_argument("--inventory", type=Path, required=True, help="私有对象清单 JSON")
+    parser.add_argument("--mapping", type=Path, required=True, help="本机私有编号映射 CSV")
+    parser.add_argument("--output", type=Path, default=ROOT / "data" / "books.csv")
+    return parser.parse_args()
+
+
+def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    args = parse_args()
+    try:
+        count = import_inventory(args.inventory, args.mapping, args.output)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"导入失败：{exc}")
+        return 1
+    print(f"导入完成：生成 {count} 条公开书目。")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
