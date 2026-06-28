@@ -44,6 +44,16 @@ class InventoryImportTests(unittest.TestCase):
         self.assertEqual("示例教育文选", title)
         self.assertEqual("", author)
 
+    def test_leading_numeric_colon_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/2：在约伯的天平上.zip")
+        self.assertEqual("在约伯的天平上", title)
+        self.assertEqual("", author)
+
+    def test_book_title_quotes_are_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/“自然之書”讀解：科學詮釋學.zip")
+        self.assertEqual("自然之書讀解：科學詮釋學", title)
+        self.assertEqual("", author)
+
     def test_ids_survive_object_rename_with_same_signature(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

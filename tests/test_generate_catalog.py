@@ -47,6 +47,10 @@ def create_sample_project(parent: Path) -> Path:
         "tags": "示例;测试",
         "description": "用于自动化测试的虚构书目。",
         "table_of_contents": "第一章|第二章",
+        "preview_page_count": "5",
+        "preview_base_url": "",
+        "access_required": "true",
+        "access_url": "",
         "copyright_status": "公共领域",
         "can_public_download": "false",
     }
@@ -94,6 +98,12 @@ class CatalogGenerationTests(unittest.TestCase):
                 set(GENERATOR.BOOK_FIELDS) | {"category_name", "detail_url"},
                 set(catalog[0]),
             )
+            detail = (output / "books" / "sample-book.html").read_text(
+                encoding="utf-8"
+            )
+            self.assertIn("前 5 页预览", detail)
+            self.assertIn("下载或阅读全文", detail)
+            self.assertIn("需要密码", detail)
 
     def test_generated_site_has_no_download_links(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
