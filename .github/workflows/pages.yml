@@ -1,6 +1,7 @@
 name: 部署中文数字图书馆
 
 on:
+  pull_request:
   push:
     branches: [main]
   workflow_dispatch:
@@ -44,6 +45,7 @@ jobs:
           path: site
 
   deploy:
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

@@ -3,8 +3,12 @@
   const categorySelect = document.querySelector("#category-filter");
   const results = document.querySelector("#search-results");
   const summary = document.querySelector("#result-summary");
+  const loadMore = document.querySelector("#load-more");
 
-  if (!searchInput || !categorySelect || !results || !summary) return;
+  if (!searchInput || !categorySelect || !results || !summary || !loadMore) return;
+
+  const pageSize = 48;
+  let visibleCount = pageSize;
 
   const normalize = (value) => String(value || "").trim().toLocaleLowerCase("zh-CN");
 
@@ -28,7 +32,9 @@
 
     const bylineParts = [book.author || "作者待核", book.year].filter(Boolean);
     article.append(createText("p", "meta", bylineParts.join(" · ")));
-    article.append(createText("p", "description", book.description || "暂无内容简介。"));
+    if (book.description) {
+      article.append(createText("p", "description", book.description));
+    }
 
     const footer = document.createElement("div");
     footer.className = "card-footer";
@@ -55,7 +61,8 @@
       searchInput.value = params.get("q") || "";
       categorySelect.value = params.get("category") || "";
 
-      const render = () => {
+      const render = (resetVisible = false) => {
+        if (resetVisible) visibleCount = pageSize;
         const query = normalize(searchInput.value);
         const category = categorySelect.value;
         const filtered = books
@@ -74,22 +81,26 @@
           })
           .sort((a, b) => a.clean_title.localeCompare(b.clean_title, "zh-CN"));
 
+        const visibleBooks = filtered.slice(0, visibleCount);
         results.replaceChildren();
-        summary.textContent = query || category
-          ? `找到 ${filtered.length} 条符合条件的书目`
-          : `当前共收录 ${filtered.length} 条书目`;
+        summary.textContent = `找到 ${filtered.length} 条书目，当前显示 ${visibleBooks.length} 条`;
 
         if (!filtered.length) {
           const empty = createText("div", "empty-state", "没有找到匹配的书目，请尝试缩短关键词或更换分类。");
           results.append(empty);
         } else {
-          filtered.forEach((book) => results.append(renderBook(book)));
+          visibleBooks.forEach((book) => results.append(renderBook(book)));
         }
+        loadMore.hidden = visibleBooks.length >= filtered.length;
         setQueryString();
       };
 
-      searchInput.addEventListener("input", render);
-      categorySelect.addEventListener("change", render);
+      searchInput.addEventListener("input", () => render(true));
+      categorySelect.addEventListener("change", () => render(true));
+      loadMore.addEventListener("click", () => {
+        visibleCount += pageSize;
+        render();
+      });
       render();
     } catch (error) {
       summary.textContent = "书目数据加载失败，请稍后重试。";

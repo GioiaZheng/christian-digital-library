@@ -6,7 +6,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# 大型馆藏文件必须进入 Cloudflare R2，不能新增到 GitHub。
+# 大型馆藏文件存放在独立存储中，不能新增到 GitHub。
 books/
 *.[pP][dD][fF]
 *.[eE][pP][uU][bB]
@@ -24,3 +24,6 @@ books/
 .env
 .env.*
 !.env.example
+
+# 静态网站由部署流程生成
+site/
