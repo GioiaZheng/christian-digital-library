@@ -25,6 +25,10 @@ BOOK_FIELDS = [
     "tags",
     "description",
     "table_of_contents",
+    "preview_page_count",
+    "preview_base_url",
+    "access_required",
+    "access_url",
     "copyright_status",
     "can_public_download",
 ]
@@ -415,6 +419,8 @@ def clean_title(value: str) -> str:
     value = re.sub(r"\s+(?:pdf|rar|SD)$", "", value, flags=re.IGNORECASE)
     value = re.sub(r"【[^】]*(?:页|\d{4}[.年])[^】]*】", "", value)
     value = value.strip("《》〈〉 ")
+    value = re.sub(r"^\d{1,3}[：:]\s*", "", value)
+    value = re.sub(r"[“”‘’]", "", value)
     value = re.sub(r"^(?:0[1-9]|1[0-3])(?=巴克莱圣经注释)", "", value)
     value = value.replace("_", " ")
     value = re.sub(r"\s*(?:--+|——+)\s*", "：", value)
@@ -608,6 +614,10 @@ def import_inventory(inventory_path: Path, mapping_path: Path, output_path: Path
                 "tags": ";".join(tags),
                 "description": "",
                 "table_of_contents": "",
+                "preview_page_count": "5",
+                "preview_base_url": "",
+                "access_required": "true",
+                "access_url": "",
                 "copyright_status": "待核实",
                 "can_public_download": "false",
             }

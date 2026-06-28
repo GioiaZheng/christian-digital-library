@@ -28,6 +28,10 @@ BOOK_FIELDS = [
     "tags",
     "description",
     "table_of_contents",
+    "preview_page_count",
+    "preview_base_url",
+    "access_required",
+    "access_url",
     "copyright_status",
     "can_public_download",
 ]
@@ -106,11 +110,29 @@ def load_books(path: Path, valid_categories: set[str]) -> list[dict[str, Any]]:
                 raise CatalogError(
                     f"第 {line_number} 行 can_public_download 只能是 true 或 false"
                 )
+            if book["access_required"].lower() not in {"true", "false"}:
+                raise CatalogError(
+                    f"第 {line_number} 行 access_required 只能是 true 或 false"
+                )
+            if book["preview_page_count"]:
+                if not re.fullmatch(r"\d{1,2}", book["preview_page_count"]):
+                    raise CatalogError(
+                        f"第 {line_number} 行 preview_page_count 应为 0 到 20 的数字"
+                    )
+                preview_page_count = int(book["preview_page_count"])
+                if preview_page_count > 20:
+                    raise CatalogError(
+                        f"第 {line_number} 行 preview_page_count 不应超过 20"
+                    )
+            else:
+                preview_page_count = 0
             if book["year"] and not re.fullmatch(r"\d{4}", book["year"]):
                 raise CatalogError(f"第 {line_number} 行 year 应为四位年份或留空")
 
             seen.add(book_id)
             book["can_public_download"] = book["can_public_download"].lower() == "true"
+            book["access_required"] = book["access_required"].lower() == "true"
+            book["preview_page_count"] = preview_page_count
             book["tags"] = [
                 part.strip()
                 for part in re.split(r"[;；]", book["tags"])
@@ -349,6 +371,80 @@ def render_category_detail(
     )
 
 
+def render_preview_section(book: dict[str, Any]) -> str:
+    page_count = int(book.get("preview_page_count") or 0)
+    base_url = str(book.get("preview_base_url") or "").strip().rstrip("/")
+
+    if page_count <= 0:
+        return """
+        <section class="book-section">
+          <h2>预览</h2>
+          <div class="empty-state">预览页正在整理中。</div>
+        </section>"""
+
+    if base_url:
+        pages = "".join(
+            f"""
+            <figure class="preview-page">
+              <img src="{escape(base_url)}/page-{index}.jpg" alt="{escape(book['clean_title'])} 第 {index} 页预览" loading="lazy">
+              <figcaption>第 {index} 页</figcaption>
+            </figure>"""
+            for index in range(1, page_count + 1)
+        )
+    else:
+        pages = "".join(
+            f"""
+            <div class="preview-page preview-placeholder">
+              <span>第 {index} 页</span>
+              <small>预览图待生成</small>
+            </div>"""
+            for index in range(1, page_count + 1)
+        )
+
+    return f"""
+        <section class="book-section">
+          <div class="section-heading compact">
+            <div><h2>前 {page_count} 页预览</h2></div>
+            <span class="badge">公开预览</span>
+          </div>
+          <div class="preview-grid">{pages}</div>
+        </section>"""
+
+
+def render_access_section(book: dict[str, Any]) -> str:
+    access_url = str(book.get("access_url") or "").strip()
+
+    if not book.get("access_required"):
+        return """
+        <section class="access-panel">
+          <h2>全文访问</h2>
+          <p>此书目当前不需要访问密码。</p>
+        </section>"""
+
+    if access_url:
+        return f"""
+        <section class="access-panel">
+          <h2>下载或阅读全文</h2>
+          <p>下载文件或查看完整内容需要访问密码。</p>
+          <form class="access-form" action="{escape(access_url)}" method="post">
+            <input type="hidden" name="book_id" value="{escape(book['id'])}">
+            <label for="access-password-{escape(book['id'])}">访问密码</label>
+            <div class="access-form-row">
+              <input id="access-password-{escape(book['id'])}" name="password" type="password" autocomplete="current-password" required>
+              <button class="button" type="submit">解锁访问</button>
+            </div>
+          </form>
+          <p class="meta">密码由访问服务验证，网页不保存密码。</p>
+        </section>"""
+
+    return """
+        <section class="access-panel">
+          <h2>下载或阅读全文</h2>
+          <p>下载文件或查看完整内容需要访问密码。访问入口正在接入中。</p>
+          <button class="button" type="button" disabled>需要密码</button>
+        </section>"""
+
+
 def render_book_detail(
     template: Template,
     book: dict[str, Any],
@@ -384,11 +480,13 @@ def render_book_detail(
     <section class="section"><div class="shell book-layout">
       <div class="book-main">
         <section class="book-section"><h2>内容简介</h2><p>{escape(book['description'] or '暂无内容简介。')}</p></section>
+        {render_preview_section(book)}
         {toc_section}
         <section class="book-section"><h2>主题标签</h2><div class="tags">{tags or '<span class="meta">暂无标签</span>'}</div></section>
       </div>
       <aside class="book-aside">
         <section class="book-section"><h2>书目信息</h2><dl class="metadata-list">{metadata}</dl></section>
+        {render_access_section(book)}
         <div class="notice"><strong>访问说明</strong><p>{escape(availability)}</p></div>
       </aside>
     </div></section>"""
@@ -427,23 +525,9 @@ def public_catalog(
     books: list[dict[str, Any]], category_map: dict[str, dict[str, str]]
 ) -> list[dict[str, Any]]:
     """只返回可以进入公开静态站点的字段。"""
-    allowed = (
-        "id",
-        "clean_title",
-        "author",
-        "publisher",
-        "year",
-        "language",
-        "category",
-        "tags",
-        "description",
-        "table_of_contents",
-        "copyright_status",
-        "can_public_download",
-    )
     result = []
     for book in books:
-        item = {key: book[key] for key in allowed}
+        item = {key: book[key] for key in BOOK_FIELDS}
         item["category_name"] = category_map[book["category"]]["name"]
         item["detail_url"] = f"books/{book['id']}.html"
         result.append(item)
