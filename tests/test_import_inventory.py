@@ -29,7 +29,7 @@ class InventoryImportTests(unittest.TestCase):
         title, author = IMPORTER.split_title_author(
             "incoming/《07示例圣经注释-示例书卷》.zip"
         )
-        self.assertEqual("07示例圣经注释-示例书卷", title)
+        self.assertEqual("示例圣经注释-示例书卷", title)
         self.assertEqual("", author)
 
     def test_numeric_volume_is_kept_in_title(self) -> None:
@@ -52,6 +52,21 @@ class InventoryImportTests(unittest.TestCase):
     def test_book_title_quotes_are_removed(self) -> None:
         title, author = IMPORTER.split_title_author("incoming/“自然之書”讀解：科學詮釋學.zip")
         self.assertEqual("自然之書讀解：科學詮釋學", title)
+        self.assertEqual("", author)
+
+    def test_internal_catalog_code_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/003cc0701 合神心意的敬拜.zip")
+        self.assertEqual("合神心意的敬拜", title)
+        self.assertEqual("", author)
+
+    def test_short_zero_prefixed_series_number_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/02出埃及记卷上--赖建国--天道注释.zip")
+        self.assertEqual("出埃及记卷上：赖建国：天道注释", title)
+        self.assertEqual("", author)
+
+    def test_real_title_number_is_kept(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/21世纪基督教灵修学导论.zip")
+        self.assertEqual("21世纪基督教灵修学导论", title)
         self.assertEqual("", author)
 
     def test_ids_survive_object_rename_with_same_signature(self) -> None:
