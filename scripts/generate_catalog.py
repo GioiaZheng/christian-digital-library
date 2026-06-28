@@ -193,6 +193,17 @@ def render_book_card(
         </article>"""
 
 
+def good_homepage_feature(book: dict[str, Any]) -> bool:
+    title = str(book.get("clean_title") or "").strip()
+    if not title:
+        return False
+    if re.match(r"^[0-9A-Za-z]", title):
+        return False
+    if title.isdigit():
+        return False
+    return True
+
+
 def render_home(
     template: Template,
     books: list[dict[str, Any]],
@@ -200,7 +211,8 @@ def render_home(
     category_map: dict[str, dict[str, str]],
 ) -> str:
     counts = Counter(book["category"] for book in books)
-    featured = "".join(render_book_card(book, category_map) for book in books[:6])
+    featured_books = [book for book in books if good_homepage_feature(book)][:6] or books[:6]
+    featured = "".join(render_book_card(book, category_map) for book in featured_books)
     category_cards = "".join(
         f"""
         <article class="card">

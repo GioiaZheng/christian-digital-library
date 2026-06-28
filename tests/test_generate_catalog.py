@@ -118,6 +118,16 @@ class CatalogGenerationTests(unittest.TestCase):
 
             self.assertNotRegex(combined, r"href=[\"'][^\"']+\.(?:zip|pdf|epub)")
 
+    def test_hidden_controls_are_not_forced_visible_by_button_styles(self) -> None:
+        css = (ROOT / "public" / "assets" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn("[hidden]", css)
+        self.assertIn("display: none", css)
+
+    def test_homepage_feature_prefers_clean_titles(self) -> None:
+        self.assertFalse(GENERATOR.good_homepage_feature({"clean_title": "003cc0701 合神心意的敬拜"}))
+        self.assertFalse(GENERATOR.good_homepage_feature({"clean_title": "10丁道尔"}))
+        self.assertTrue(GENERATOR.good_homepage_feature({"clean_title": "个人的属灵生活"}))
+
     def test_generated_links_work_under_github_project_path(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = create_sample_project(Path(directory))
