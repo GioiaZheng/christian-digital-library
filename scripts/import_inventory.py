@@ -25,6 +25,7 @@ BOOK_FIELDS = [
     "tags",
     "description",
     "table_of_contents",
+    "cover_image_url",
     "preview_page_count",
     "preview_base_url",
     "access_required",
@@ -673,6 +674,20 @@ def load_mapping(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def load_asset_manifest(path: Path | None) -> dict[str, dict[str, str]]:
+    if path is None or not path.is_file():
+        return {}
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    result: dict[str, dict[str, str]] = {}
+    for row in rows:
+        book_id = str(row.get("id") or "").strip()
+        if not book_id:
+            continue
+        result[book_id] = {key: str(value or "").strip() for key, value in row.items()}
+    return result
+
+
 def write_csv(path: Path, fields: list[str], rows: list[dict[str, object]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
@@ -681,12 +696,18 @@ def write_csv(path: Path, fields: list[str], rows: list[dict[str, object]]) -> N
         writer.writerows(rows)
 
 
-def import_inventory(inventory_path: Path, mapping_path: Path, output_path: Path) -> int:
+def import_inventory(
+    inventory_path: Path,
+    mapping_path: Path,
+    output_path: Path,
+    assets_path: Path | None = None,
+) -> int:
     objects = json.loads(inventory_path.read_text(encoding="utf-8"))
     if not isinstance(objects, list):
         raise ValueError("清单必须是对象数组")
 
     old_mapping = load_mapping(mapping_path)
+    assets_by_id = load_asset_manifest(assets_path)
     by_key = {row["object_key"]: row for row in old_mapping if row.get("object_key")}
     by_signature: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
     for row in old_mapping:
@@ -729,6 +750,10 @@ def import_inventory(inventory_path: Path, mapping_path: Path, output_path: Path
             title = previous.get("clean_title", title) or title
             author = previous.get("author", author)
             category = previous.get("category", category) or category
+        assets = assets_by_id.get(book_id, {})
+        preview_page_count = assets.get("preview_page_count") or "5"
+        if not re.fullmatch(r"\d{1,2}", preview_page_count):
+            preview_page_count = "5"
 
         mapping_rows.append(
             {
@@ -754,8 +779,9 @@ def import_inventory(inventory_path: Path, mapping_path: Path, output_path: Path
                 "tags": ";".join(tags),
                 "description": "",
                 "table_of_contents": "",
-                "preview_page_count": "5",
-                "preview_base_url": "",
+                "cover_image_url": assets.get("cover_image_url", ""),
+                "preview_page_count": preview_page_count,
+                "preview_base_url": assets.get("preview_base_url", ""),
                 "access_required": "true",
                 "access_url": "",
                 "copyright_status": "待核实",
@@ -774,6 +800,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--inventory", type=Path, required=True, help="私有对象清单 JSON")
     parser.add_argument("--mapping", type=Path, required=True, help="本机私有编号映射 CSV")
     parser.add_argument("--output", type=Path, default=ROOT / "data" / "books.csv")
+    parser.add_argument("--assets", type=Path, help="可选：封面和预览图片公开地址清单 CSV")
     return parser.parse_args()
 
 
@@ -782,7 +809,7 @@ def main() -> int:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     args = parse_args()
     try:
-        count = import_inventory(args.inventory, args.mapping, args.output)
+        count = import_inventory(args.inventory, args.mapping, args.output, args.assets)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"导入失败：{exc}")
         return 1

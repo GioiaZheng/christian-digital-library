@@ -47,6 +47,7 @@ def create_sample_project(parent: Path) -> Path:
         "tags": "示例;测试",
         "description": "用于自动化测试的虚构书目。",
         "table_of_contents": "第一章|第二章",
+        "cover_image_url": "",
         "preview_page_count": "5",
         "preview_base_url": "",
         "access_required": "true",
@@ -102,6 +103,8 @@ class CatalogGenerationTests(unittest.TestCase):
                 encoding="utf-8"
             )
             self.assertIn("前 5 页预览", detail)
+            self.assertIn("book-cover-card", detail)
+            self.assertIn("封面待生成", detail)
             self.assertIn("下载或阅读全文", detail)
             self.assertIn("需要密码", detail)
 
@@ -122,6 +125,10 @@ class CatalogGenerationTests(unittest.TestCase):
         css = (ROOT / "public" / "assets" / "styles.css").read_text(encoding="utf-8")
         self.assertIn("[hidden]", css)
         self.assertIn("display: none", css)
+
+    def test_header_does_not_overlay_page_content(self) -> None:
+        css = (ROOT / "public" / "assets" / "styles.css").read_text(encoding="utf-8")
+        self.assertNotIn("position: sticky", css)
 
     def test_homepage_feature_prefers_clean_titles(self) -> None:
         self.assertFalse(GENERATOR.good_homepage_feature({"clean_title": "003cc0701 合神心意的敬拜"}))

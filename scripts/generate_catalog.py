@@ -28,6 +28,7 @@ BOOK_FIELDS = [
     "tags",
     "description",
     "table_of_contents",
+    "cover_image_url",
     "preview_page_count",
     "preview_base_url",
     "access_required",
@@ -437,6 +438,34 @@ def render_preview_section(book: dict[str, Any]) -> str:
         </section>"""
 
 
+def cover_image_url(book: dict[str, Any]) -> str:
+    explicit_cover = str(book.get("cover_image_url") or "").strip()
+    if explicit_cover:
+        return explicit_cover
+    base_url = str(book.get("preview_base_url") or "").strip().rstrip("/")
+    if base_url:
+        return f"{base_url}/page-1.jpg"
+    return ""
+
+
+def render_cover_section(book: dict[str, Any]) -> str:
+    cover_url = cover_image_url(book)
+    if cover_url:
+        cover = f"""
+          <img src="{escape(cover_url)}" alt="{escape(book['clean_title'])} 封面" loading="lazy">"""
+    else:
+        cover = f"""
+          <div class="book-cover-placeholder">
+            <span>{escape(book['clean_title'])}</span>
+            <small>封面待生成</small>
+          </div>"""
+
+    return f"""
+        <section class="book-cover-card" aria-label="书籍封面">
+          {cover}
+        </section>"""
+
+
 def render_access_section(book: dict[str, Any]) -> str:
     access_url = str(book.get("access_url") or "").strip()
 
@@ -511,6 +540,7 @@ def render_book_detail(
         <section class="book-section"><h2>主题标签</h2><div class="tags">{tags or '<span class="meta">暂无标签</span>'}</div></section>
       </div>
       <aside class="book-aside">
+        {render_cover_section(book)}
         <section class="book-section"><h2>书目信息</h2><dl class="metadata-list">{metadata}</dl></section>
         {render_access_section(book)}
         <div class="notice"><strong>访问说明</strong><p>{escape(availability)}</p></div>
