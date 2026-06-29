@@ -149,6 +149,37 @@ class InventoryImportTests(unittest.TestCase):
             self.assertNotIn("incoming/", output.read_text(encoding="utf-8"))
             self.assertEqual("bible-study", row["category"])
 
+    def test_asset_manifest_populates_public_preview_urls(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            inventory = root / "inventory.json"
+            mapping = root / "mapping.csv"
+            assets = root / "assets.csv"
+            output = root / "books.csv"
+            inventory.write_text(
+                json.dumps(
+                    [{"key": "incoming/示例书卷.zip", "size": 10, "etag": "sample"}],
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+            mapping.write_text(
+                "id,object_key,size,etag,clean_title,author,category,reviewed\n"
+                "cdl-0001,incoming/示例书卷.zip,10,sample,示例书卷,,bible-study,true\n",
+                encoding="utf-8",
+            )
+            assets.write_text(
+                "id,cover_image_url,preview_base_url,preview_page_count\n"
+                "cdl-0001,https://example.test/covers/cdl-0001.jpg,https://example.test/previews/cdl-0001,5\n",
+                encoding="utf-8",
+            )
+            IMPORTER.import_inventory(inventory, mapping, output, assets)
+            with output.open(encoding="utf-8") as handle:
+                row = next(csv.DictReader(handle))
+            self.assertEqual("https://example.test/covers/cdl-0001.jpg", row["cover_image_url"])
+            self.assertEqual("https://example.test/previews/cdl-0001", row["preview_base_url"])
+            self.assertEqual("5", row["preview_page_count"])
+
 
 if __name__ == "__main__":
     unittest.main()

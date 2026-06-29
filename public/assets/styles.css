@@ -75,9 +75,8 @@ select {
 }
 
 .site-header {
-  position: sticky;
+  position: static;
   z-index: 20;
-  top: 0;
   border-bottom: 1px solid rgba(222, 217, 205, 0.85);
   background: rgba(247, 244, 237, 0.92);
   backdrop-filter: blur(14px);
@@ -504,6 +503,52 @@ h3 {
 .book-main,
 .book-aside {
   min-width: 0;
+}
+
+.book-cover-card {
+  overflow: hidden;
+  margin-bottom: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.book-cover-card img {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  object-fit: cover;
+  object-position: top;
+}
+
+.book-cover-placeholder {
+  display: grid;
+  min-height: 360px;
+  place-items: center;
+  padding: 32px;
+  background:
+    linear-gradient(135deg, rgba(23, 63, 53, 0.96), rgba(39, 100, 83, 0.9)),
+    var(--green);
+  color: #fff8e9;
+  text-align: center;
+}
+
+.book-cover-placeholder span,
+.book-cover-placeholder small {
+  display: block;
+}
+
+.book-cover-placeholder span {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.book-cover-placeholder small {
+  margin-top: 18px;
+  color: rgba(255, 248, 233, 0.78);
+  font-family: "Microsoft YaHei", sans-serif;
 }
 
 .book-section {
