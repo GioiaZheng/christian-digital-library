@@ -47,6 +47,7 @@ def create_sample_project(parent: Path) -> Path:
         "tags": "示例;测试",
         "description": "用于自动化测试的虚构书目。",
         "table_of_contents": "第一章|第二章",
+        "cover_image_url": "",
         "preview_page_count": "5",
         "preview_base_url": "",
         "access_required": "true",
@@ -102,6 +103,8 @@ class CatalogGenerationTests(unittest.TestCase):
                 encoding="utf-8"
             )
             self.assertIn("前 5 页预览", detail)
+            self.assertIn("book-cover-card", detail)
+            self.assertIn("封面待生成", detail)
             self.assertIn("下载或阅读全文", detail)
             self.assertIn("需要密码", detail)
 
@@ -123,10 +126,24 @@ class CatalogGenerationTests(unittest.TestCase):
         self.assertIn("[hidden]", css)
         self.assertIn("display: none", css)
 
+    def test_header_does_not_overlay_page_content(self) -> None:
+        css = (ROOT / "public" / "assets" / "styles.css").read_text(encoding="utf-8")
+        self.assertNotIn("position: sticky", css)
+
     def test_homepage_feature_prefers_clean_titles(self) -> None:
         self.assertFalse(GENERATOR.good_homepage_feature({"clean_title": "003cc0701 合神心意的敬拜"}))
         self.assertFalse(GENERATOR.good_homepage_feature({"clean_title": "10丁道尔"}))
         self.assertTrue(GENERATOR.good_homepage_feature({"clean_title": "个人的属灵生活"}))
+
+    def test_book_sort_key_pushes_numbered_titles_back(self) -> None:
+        books = [
+            {"id": "b", "clean_title": "100名画旧约"},
+            {"id": "a", "clean_title": "个人的属灵生活"},
+            {"id": "c", "clean_title": "09 10圣经信息系列 撒母耳记上下"},
+        ]
+        titles = [book["clean_title"] for book in sorted(books, key=GENERATOR.book_sort_key)]
+        self.assertEqual("个人的属灵生活", titles[0])
+        self.assertCountEqual(["100名画旧约", "09 10圣经信息系列 撒母耳记上下"], titles[1:])
 
     def test_generated_links_work_under_github_project_path(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

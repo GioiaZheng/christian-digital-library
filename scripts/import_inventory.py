@@ -25,6 +25,7 @@ BOOK_FIELDS = [
     "tags",
     "description",
     "table_of_contents",
+    "cover_image_url",
     "preview_page_count",
     "preview_base_url",
     "access_required",
@@ -51,6 +52,7 @@ UNKNOWN_AUTHOR_WORDS = {
     "好书",
     "完整版",
     "非完整版",
+    "repaired",
 }
 NON_AUTHOR_WORDS = (
     "圣经",
@@ -119,6 +121,103 @@ NON_AUTHOR_WORDS = (
     "詩篇",
     "讲章",
     "講章",
+)
+
+BIBLE_TITLE_PREFIX_WORDS = (
+    "圣经信息系列",
+    "聖經信息系列",
+    "天道",
+    "丁道尔",
+    "丁道爾",
+    "创世记",
+    "創世記",
+    "出埃及记",
+    "出埃及記",
+    "利未记",
+    "利未記",
+    "民数记",
+    "民數記",
+    "申命记",
+    "申命記",
+    "约书亚",
+    "約書亞",
+    "士师记",
+    "士師記",
+    "路得记",
+    "路得記",
+    "撒母耳",
+    "列王纪",
+    "列王記",
+    "列王记",
+    "历代志",
+    "歷代志",
+    "以斯拉",
+    "尼希米",
+    "以斯帖",
+    "约伯",
+    "約伯",
+    "诗篇",
+    "詩篇",
+    "箴言",
+    "传道书",
+    "傳道書",
+    "雅歌",
+    "以赛亚",
+    "以賽亞",
+    "耶利米",
+    "以西结",
+    "以西結",
+    "但以理",
+    "何西阿",
+    "约珥",
+    "約珥",
+    "阿摩司",
+    "俄巴底亚",
+    "俄巴底亞",
+    "约拿",
+    "約拿",
+    "弥迦",
+    "彌迦",
+    "那鸿",
+    "那鴻",
+    "哈巴谷",
+    "西番雅",
+    "哈该",
+    "哈該",
+    "撒迦利亚",
+    "撒迦利亞",
+    "玛拉基",
+    "瑪拉基",
+    "马太",
+    "馬太",
+    "马可",
+    "馬可",
+    "路加",
+    "约翰",
+    "約翰",
+    "使徒",
+    "罗马书",
+    "羅馬書",
+    "哥林多",
+    "加拉太",
+    "以弗所",
+    "腓立比",
+    "歌罗西",
+    "歌羅西",
+    "帖撒罗尼迦",
+    "帖撒羅尼迦",
+    "提摩太",
+    "提多",
+    "腓利门",
+    "腓利門",
+    "希伯来",
+    "希伯來",
+    "雅各",
+    "彼得",
+    "犹大",
+    "猶大",
+    "启示录",
+    "啟示錄",
 )
 
 CATEGORY_RULES = [
@@ -411,28 +510,67 @@ def clean_title(value: str) -> str:
     value = re.sub(r"\.(?:pdf|rar|epub|mobi)$", "", value, flags=re.IGNORECASE)
     value = re.sub(r"~?微信[:：]?[A-Za-z0-9_-]+.*$", "", value, flags=re.IGNORECASE)
     value = remove_copy_markers(value)
+    value = re.sub(r"\s*[-_ ]?repaired\s*$", "", value, flags=re.IGNORECASE)
     value = re.sub(r"^喜乐出版社[-—_:： ]+", "", value)
     value = re.sub(r"^[（(]\d+[）)]\s*", "", value)
     value = re.sub(r"^[（(](?:华神|麦种|天道)[）)]\s*", "", value)
+    value = re.sub(r"^[◆◇●○■□▲△★☆※·•]+", "", value)
     value = re.sub(r"(?:_|\s+)(?:\d{7,})$", "", value)
     value = re.sub(r"\s*(?:完整版|非完整版|扫描版|掃描版)$", "", value)
     value = re.sub(r"\s+(?:pdf|rar|SD)$", "", value, flags=re.IGNORECASE)
     value = re.sub(r"【[^】]*(?:页|\d{4}[.年])[^】]*】", "", value)
+    value = re.sub(r"^[【〖](?P<inner>[^】〗]{2,80})[】〗]$", r"\g<inner>", value)
+    value = re.sub(r"^[【〖][^】〗]{2,40}[】〗]\s*(?=.+[\u3400-\u9fffA-Za-z])", "", value)
     value = value.strip("《》〈〉 ")
     value = re.sub(r"^\d{1,3}[：:]\s*", "", value)
     value = re.sub(r"[“”‘’]", "", value)
     value = re.sub(r"^\d{2,4}[A-Za-z]{1,6}\d{2,8}\s*", "", value)
     value = re.sub(r"^0\d{1,3}(?=[\u3400-\u9fff])", "", value)
     value = re.sub(r"(?<=\d)[：:](?=\d)", "-", value)
+    bible_prefix_pattern = "|".join(map(re.escape, BIBLE_TITLE_PREFIX_WORDS))
+    value = re.sub(r"^\d{1,4}[、.．]\s*", "", value)
+    value = re.sub(
+        rf"^(?:\d{{1,2}}\s+){{1,3}}\d{{1,2}}(?=(?:{bible_prefix_pattern}))",
+        "",
+        value,
+    )
+    value = re.sub(rf"^(?:\d{{1,2}}\s+){{1,3}}(?=(?:{bible_prefix_pattern}))", "", value)
+    value = re.sub(
+        rf"^\d{{1,2}}(?=(?:{bible_prefix_pattern}|一个|丁道尔|丁道爾))",
+        "",
+        value,
+    )
+    value = re.sub(r"^\d{7,}[：:]\s*", "", value)
+    value = re.sub(r"[:：]?fenleiID\s*[A-Za-z0-9]+", "", value, flags=re.IGNORECASE)
+    value = re.sub(r"[:：]?\s*(?:p|pg)\s*\d+\s*$", "", value, flags=re.IGNORECASE)
     value = re.sub(r"^(?:0[1-9]|1[0-3])(?=巴克莱圣经注释)", "", value)
     value = value.replace("_", " ")
+    value = re.sub(r"^\d{7,}\s+", "", value)
+    value = re.sub(r"[:：]?\s*fenleiID\s*[A-Za-z0-9]+", "", value, flags=re.IGNORECASE)
+    value = re.sub(r"[:：]?\s*(?:p|pg)\s*\d+\s*$", "", value, flags=re.IGNORECASE)
     value = re.sub(r"\s*(?:--+|——+)\s*", "：", value)
     value = re.sub(r"[-—_ ]+[\u3400-\u9fff]{2,20}出版社.*$", "", value)
     value = re.sub(r"[<>|\\/*?\"`~]+", " ", value)
     value = re.sub(r"(?<=[\u3400-\u9fffA-Za-z0-9]):(?=[\u3400-\u9fff])", "：", value)
     value = re.sub(r"(?<=[\u3400-\u9fff]),(?=[\u3400-\u9fff])", "，", value)
-    value = re.sub(r"\s+", " ", value).strip(" ._-：")
+    value = re.sub(r"\s+", " ", value).strip(" ._-：:")
+    if re.fullmatch(r"\d+", value):
+        return "书名待核"
     return value or "书名待核"
+
+
+def sort_title(value: str) -> str:
+    title = normalize(value)
+    title = re.sub(r"^\d{7,}[：:\s]+", "", title)
+    title = re.sub(r"^(?:\d{1,4}[\s、.．：:-]+)+", "", title)
+    title = re.sub(r"^\d{1,3}(?=[\u3400-\u9fff])", "", title)
+    return title or normalize(value)
+
+
+def public_row_sort_key(row: dict[str, object]) -> tuple[int, str, str]:
+    title = str(row.get("clean_title") or "").strip()
+    noisy_prefix = 1 if re.match(r"^[0-9A-Za-z]", title) else 0
+    return (noisy_prefix, sort_title(title).casefold(), str(row.get("id") or ""))
 
 
 def split_title_author(object_key: str) -> tuple[str, str]:
@@ -536,6 +674,20 @@ def load_mapping(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def load_asset_manifest(path: Path | None) -> dict[str, dict[str, str]]:
+    if path is None or not path.is_file():
+        return {}
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    result: dict[str, dict[str, str]] = {}
+    for row in rows:
+        book_id = str(row.get("id") or "").strip()
+        if not book_id:
+            continue
+        result[book_id] = {key: str(value or "").strip() for key, value in row.items()}
+    return result
+
+
 def write_csv(path: Path, fields: list[str], rows: list[dict[str, object]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
@@ -544,12 +696,18 @@ def write_csv(path: Path, fields: list[str], rows: list[dict[str, object]]) -> N
         writer.writerows(rows)
 
 
-def import_inventory(inventory_path: Path, mapping_path: Path, output_path: Path) -> int:
+def import_inventory(
+    inventory_path: Path,
+    mapping_path: Path,
+    output_path: Path,
+    assets_path: Path | None = None,
+) -> int:
     objects = json.loads(inventory_path.read_text(encoding="utf-8"))
     if not isinstance(objects, list):
         raise ValueError("清单必须是对象数组")
 
     old_mapping = load_mapping(mapping_path)
+    assets_by_id = load_asset_manifest(assets_path)
     by_key = {row["object_key"]: row for row in old_mapping if row.get("object_key")}
     by_signature: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
     for row in old_mapping:
@@ -592,6 +750,10 @@ def import_inventory(inventory_path: Path, mapping_path: Path, output_path: Path
             title = previous.get("clean_title", title) or title
             author = previous.get("author", author)
             category = previous.get("category", category) or category
+        assets = assets_by_id.get(book_id, {})
+        preview_page_count = assets.get("preview_page_count") or "5"
+        if not re.fullmatch(r"\d{1,2}", preview_page_count):
+            preview_page_count = "5"
 
         mapping_rows.append(
             {
@@ -617,8 +779,9 @@ def import_inventory(inventory_path: Path, mapping_path: Path, output_path: Path
                 "tags": ";".join(tags),
                 "description": "",
                 "table_of_contents": "",
-                "preview_page_count": "5",
-                "preview_base_url": "",
+                "cover_image_url": assets.get("cover_image_url", ""),
+                "preview_page_count": preview_page_count,
+                "preview_base_url": assets.get("preview_base_url", ""),
                 "access_required": "true",
                 "access_url": "",
                 "copyright_status": "待核实",
@@ -626,7 +789,7 @@ def import_inventory(inventory_path: Path, mapping_path: Path, output_path: Path
             }
         )
 
-    public_rows.sort(key=lambda row: (normalize(str(row["clean_title"])).casefold(), str(row["id"])))
+    public_rows.sort(key=public_row_sort_key)
     write_csv(mapping_path, MAPPING_FIELDS, mapping_rows)
     write_csv(output_path, BOOK_FIELDS, public_rows)
     return len(public_rows)
@@ -637,6 +800,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--inventory", type=Path, required=True, help="私有对象清单 JSON")
     parser.add_argument("--mapping", type=Path, required=True, help="本机私有编号映射 CSV")
     parser.add_argument("--output", type=Path, default=ROOT / "data" / "books.csv")
+    parser.add_argument("--assets", type=Path, help="可选：封面和预览图片公开地址清单 CSV")
     return parser.parse_args()
 
 
@@ -645,7 +809,7 @@ def main() -> int:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     args = parse_args()
     try:
-        count = import_inventory(args.inventory, args.mapping, args.output)
+        count = import_inventory(args.inventory, args.mapping, args.output, args.assets)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"导入失败：{exc}")
         return 1
