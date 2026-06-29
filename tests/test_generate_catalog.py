@@ -108,6 +108,20 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("下载或阅读全文", detail)
             self.assertIn("需要密码", detail)
 
+    def test_about_page_contains_upload_request_form(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = create_sample_project(Path(directory))
+            output = project / "site"
+            GENERATOR.build_site(project, output)
+            about = (output / "about.html").read_text(encoding="utf-8")
+
+            self.assertIn("提交书籍资料", about)
+            self.assertIn('name="title"', about)
+            self.assertIn('name="author"', about)
+            self.assertIn('name="file"', about)
+            self.assertIn("上传入口正在接入中", about)
+            self.assertIn("assets/upload.js", about)
+
     def test_generated_site_has_no_download_links(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = create_sample_project(Path(directory))

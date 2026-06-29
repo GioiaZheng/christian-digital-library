@@ -6,6 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKER = ROOT / "workers" / "preview-assets.js"
+UPLOAD_WORKER = ROOT / "workers" / "upload-request.js"
 
 
 class WorkerPolicyTests(unittest.TestCase):
@@ -26,6 +27,22 @@ class WorkerPolicyTests(unittest.TestCase):
         source = WORKER.read_text(encoding="utf-8")
         self.assertNotIn("raw/", source)
         self.assertNotIn(".zip", source)
+
+    def test_upload_worker_writes_only_pending_objects(self) -> None:
+        source = UPLOAD_WORKER.read_text(encoding="utf-8")
+        self.assertIn("pending/uploads/", source)
+        self.assertIn("pending/metadata/", source)
+        self.assertIn("status: \"pending\"", source)
+        self.assertIn("env.BOOK_UPLOADS.put", source)
+        self.assertNotIn(".delete(", source)
+        self.assertNotIn(".list(", source)
+
+    def test_upload_worker_does_not_publish_catalog_or_raw_paths(self) -> None:
+        source = UPLOAD_WORKER.read_text(encoding="utf-8")
+        self.assertNotIn("data/books.csv", source)
+        self.assertNotIn("raw/", source)
+        self.assertNotIn("covers/", source)
+        self.assertNotIn("previews/", source)
 
 
 if __name__ == "__main__":
