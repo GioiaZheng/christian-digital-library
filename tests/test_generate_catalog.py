@@ -109,7 +109,9 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertLess(detail.index("book-hero-cover"), detail.index("book-layout"))
             self.assertIn("封面待生成", detail)
             self.assertIn("下载或阅读全文", detail)
-            self.assertIn("需要密码", detail)
+            self.assertIn("访问码", detail)
+            self.assertIn('data-access-form', detail)
+            self.assertIn("../assets/access.js", detail)
 
     def test_preview_heading_uses_actual_page_count(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

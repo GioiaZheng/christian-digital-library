@@ -495,8 +495,6 @@ def render_cover_section(book: dict[str, Any]) -> str:
 
 
 def render_access_section(book: dict[str, Any]) -> str:
-    access_url = str(book.get("access_url") or "").strip()
-
     if not book.get("access_required"):
         return """
         <section class="access-panel">
@@ -504,27 +502,20 @@ def render_access_section(book: dict[str, Any]) -> str:
           <p>此书目当前不需要访问密码。</p>
         </section>"""
 
-    if access_url:
-        return f"""
+    return f"""
         <section class="access-panel">
           <h2>下载或阅读全文</h2>
           <p>下载文件或查看完整内容需要访问密码。</p>
-          <form class="access-form" action="{escape(access_url)}" method="post">
+          <form class="access-form" data-access-form>
             <input type="hidden" name="book_id" value="{escape(book['id'])}">
-            <label for="access-password-{escape(book['id'])}">访问密码</label>
+            <label for="access-password-{escape(book['id'])}">访问码</label>
             <div class="access-form-row">
-              <input id="access-password-{escape(book['id'])}" name="password" type="password" autocomplete="current-password" required>
-              <button class="button" type="submit">解锁访问</button>
+              <input id="access-password-{escape(book['id'])}" name="access_code" type="password" autocomplete="current-password" required>
+              <button class="button" type="submit">下载文件</button>
             </div>
+            <p class="meta" data-access-status>访问入口正在接入中。</p>
           </form>
-          <p class="meta">密码由访问服务验证，网页不保存密码。</p>
-        </section>"""
-
-    return """
-        <section class="access-panel">
-          <h2>下载或阅读全文</h2>
-          <p>下载文件或查看完整内容需要访问密码。访问入口正在接入中。</p>
-          <button class="button" type="button" disabled>需要密码</button>
+          <p class="meta">访问码由服务端验证，网页不保存访问码。</p>
         </section>"""
 
 
@@ -577,7 +568,9 @@ def render_book_detail(
         {render_access_section(book)}
         <div class="notice"><strong>访问说明</strong><p>{escape(availability)}</p></div>
       </aside>
-    </div></section>"""
+    </div></section>
+    <script src="../assets/access-config.js" defer></script>
+    <script src="../assets/access.js" defer></script>"""
     return render_layout(
         template,
         title=f"{book['clean_title']}｜基督教数字图书馆",
