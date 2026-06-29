@@ -36,6 +36,30 @@ metadata 记录：
 - 上传后不生成下载链接。
 - 管理员审核后，再决定是否整理进入公开书目。
 
+## 本地审核脚本
+
+管理员可以在本机使用脚本查看待审核记录。脚本只读取本地环境变量或本地 `.env`，不会把密钥写入仓库。
+
+列出待审核上传：
+
+```powershell
+python scripts\review_uploads.py --env-file C:\path\to\.env list
+```
+
+查看某条记录：
+
+```powershell
+python scripts\review_uploads.py --env-file C:\path\to\.env show <提交 ID>
+```
+
+删除测试或无效提交：
+
+```powershell
+python scripts\review_uploads.py --env-file C:\path\to\.env delete <提交 ID> --yes
+```
+
+当前脚本只处理 `pending/` 区。正式入库仍需要人工核对书名、作者、版本、版权状态和分类后，再整理到书目数据中。
+
 ## 部署上传 Worker
 
 1. 复制配置示例：
