@@ -1,0 +1,1 @@
+window.CDL_UPLOAD_ENDPOINT = "";
