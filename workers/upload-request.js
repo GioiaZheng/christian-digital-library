@@ -63,15 +63,10 @@ export default {
     const form = await request.formData();
     const title = cleanText(form.get("title"), 160);
     const author = cleanText(form.get("author"), 120);
-    const uploadCode = String(form.get("upload_code") || "");
     const file = form.get("file");
 
     if (!title || !author || !(file instanceof File)) {
       return jsonResponse(request, env, 400, { message: "请填写书名、作者并选择文件。" });
-    }
-
-    if (!env.UPLOAD_CODE || uploadCode !== env.UPLOAD_CODE) {
-      return jsonResponse(request, env, 403, { message: "上传码不正确。" });
     }
 
     const filename = safeFilename(file.name);

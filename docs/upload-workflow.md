@@ -48,22 +48,14 @@ cd workers
 wrangler deploy --config wrangler.upload.toml
 ```
 
-3. 设置上传码。上传码使用 Worker Secret，不写入仓库：
-
-```powershell
-wrangler secret put UPLOAD_CODE --config wrangler.upload.toml
-```
-
-4. 将 Worker 地址写入 `public/assets/upload-config.js`：
+3. 将 Worker 地址写入 `public/assets/upload-config.js`：
 
 ```js
 window.CDL_UPLOAD_ENDPOINT = "https://christian-digital-library-upload.<your-subdomain>.workers.dev";
 ```
 
-5. 重新生成网站并提交。
+4. 重新生成网站并提交。
 
 ## 注意
 
 当前上传入口适合先做小规模提交。大型文件、断点续传、用户登录和后台审核界面后续再做。
-
-不要把上传码写入 `upload-config.js` 或任何公开文件。
