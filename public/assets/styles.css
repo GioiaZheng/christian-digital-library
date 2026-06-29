@@ -424,6 +424,36 @@ h3 {
   font-size: clamp(2.2rem, 5vw, 4rem);
 }
 
+.book-detail-hero {
+  padding-bottom: 58px;
+}
+
+.book-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+  gap: clamp(32px, 6vw, 76px);
+  align-items: center;
+}
+
+.book-hero-copy,
+.book-hero-cover {
+  min-width: 0;
+}
+
+.book-hero-cover {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.book-hero-cover .book-cover-card {
+  width: min(100%, 380px);
+  margin-bottom: 0;
+}
+
+.book-hero-cover .book-cover-card img {
+  max-height: 440px;
+}
+
 .breadcrumbs {
   margin-bottom: 22px;
   color: var(--muted);
@@ -780,10 +810,15 @@ h3 {
 
 @media (max-width: 820px) {
   .hero-grid,
+  .book-hero-grid,
   .book-layout,
   .upload-panel {
     grid-template-columns: 1fr;
     gap: 30px;
+  }
+
+  .book-hero-cover {
+    justify-content: flex-start;
   }
 
   .grid {
@@ -843,6 +878,10 @@ h3 {
 
   .metadata-row {
     grid-template-columns: 72px 1fr;
+  }
+
+  .book-hero-cover .book-cover-card {
+    width: 100%;
   }
 }
 

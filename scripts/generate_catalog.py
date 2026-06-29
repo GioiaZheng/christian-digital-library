@@ -526,11 +526,16 @@ def render_book_detail(
     )
     availability = "当前书目用于馆藏查询，文件访问按实际授权情况提供。"
     content = f"""
-    <header class="page-hero"><div class="shell">
-      <nav class="breadcrumbs" aria-label="面包屑"><a href="../categories.html">馆藏分类</a> / <a href="../categories/{escape(category['id'])}.html">{escape(category['name'])}</a> / 当前书目</nav>
-      <p class="eyebrow">书目编号 · {escape(book['id'])}</p>
-      <h1>{escape(book['clean_title'])}</h1>
-      <p class="lead">{escape(book['author'] or '作者信息待核实')}</p>
+    <header class="page-hero book-detail-hero"><div class="shell book-hero-grid">
+      <div class="book-hero-copy">
+        <nav class="breadcrumbs" aria-label="面包屑"><a href="../categories.html">馆藏分类</a> / <a href="../categories/{escape(category['id'])}.html">{escape(category['name'])}</a> / 当前书目</nav>
+        <p class="eyebrow">书目编号 · {escape(book['id'])}</p>
+        <h1>{escape(book['clean_title'])}</h1>
+        <p class="lead">{escape(book['author'] or '作者信息待核实')}</p>
+      </div>
+      <div class="book-hero-cover">
+        {render_cover_section(book)}
+      </div>
     </div></header>
     <section class="section"><div class="shell book-layout">
       <div class="book-main">
@@ -540,7 +545,6 @@ def render_book_detail(
         <section class="book-section"><h2>主题标签</h2><div class="tags">{tags or '<span class="meta">暂无标签</span>'}</div></section>
       </div>
       <aside class="book-aside">
-        {render_cover_section(book)}
         <section class="book-section"><h2>书目信息</h2><dl class="metadata-list">{metadata}</dl></section>
         {render_access_section(book)}
         <div class="notice"><strong>访问说明</strong><p>{escape(availability)}</p></div>

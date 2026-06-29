@@ -24,6 +24,7 @@ books/
 .env
 .env.*
 !.env.example
+workers/.wrangler/
 
 # 静态网站由部署流程生成
 site/
