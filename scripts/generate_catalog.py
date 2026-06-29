@@ -511,7 +511,8 @@ def render_access_section(book: dict[str, Any]) -> str:
             <label for="access-password-{escape(book['id'])}">访问码</label>
             <div class="access-form-row">
               <input id="access-password-{escape(book['id'])}" name="access_code" type="password" autocomplete="current-password" required>
-              <button class="button" type="submit">下载文件</button>
+              <button class="button" type="submit" name="access_action" value="read">在线阅读</button>
+              <button class="button secondary" type="submit" name="access_action" value="download">下载文件</button>
             </div>
             <p class="meta" data-access-status>访问入口正在接入中。</p>
           </form>
