@@ -497,6 +497,14 @@ h3 {
   color: var(--ink);
 }
 
+.field-hint {
+  margin-top: 6px;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 0.82rem;
+}
+
 .category-filter-panel {
   grid-template-columns: 1fr;
 }

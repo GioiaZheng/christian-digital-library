@@ -122,8 +122,9 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn('name="title"', about)
             self.assertIn('name="author"', about)
             self.assertIn('name="file"', about)
-            self.assertNotIn('name="upload_code"', about)
-            self.assertNotIn('id="upload-code"', about)
+            self.assertIn('name="upload_code"', about)
+            self.assertIn('id="upload-code"', about)
+            self.assertIn("提交码由管理员提供", about)
             self.assertIn("上传入口正在接入中", about)
             self.assertIn("assets/upload.js", about)
 

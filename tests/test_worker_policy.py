@@ -37,15 +37,17 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertNotIn(".delete(", source)
         self.assertNotIn(".list(", source)
 
-    def test_upload_worker_does_not_require_upload_code_secret(self) -> None:
+    def test_upload_worker_requires_upload_code_secret(self) -> None:
         source = UPLOAD_WORKER.read_text(encoding="utf-8")
-        self.assertNotIn("upload_code", source)
-        self.assertNotIn("env.UPLOAD_CODE", source)
-        self.assertNotIn("上传码不正确", source)
+        self.assertIn("upload_code", source)
+        self.assertIn("env.UPLOAD_CODE", source)
+        self.assertIn("提交码不正确", source)
+        self.assertIn("上传入口尚未配置提交码", source)
         public_config = (ROOT / "public" / "assets" / "upload-config.js").read_text(
             encoding="utf-8"
         )
         self.assertNotIn("UPLOAD_CODE", public_config)
+        self.assertNotIn("upload_code", public_config)
 
     def test_upload_worker_does_not_publish_catalog_or_raw_paths(self) -> None:
         source = UPLOAD_WORKER.read_text(encoding="utf-8")
