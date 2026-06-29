@@ -128,6 +128,16 @@ class CatalogGenerationTests(unittest.TestCase):
         self.assertFalse(GENERATOR.good_homepage_feature({"clean_title": "10丁道尔"}))
         self.assertTrue(GENERATOR.good_homepage_feature({"clean_title": "个人的属灵生活"}))
 
+    def test_book_sort_key_pushes_numbered_titles_back(self) -> None:
+        books = [
+            {"id": "b", "clean_title": "100名画旧约"},
+            {"id": "a", "clean_title": "个人的属灵生活"},
+            {"id": "c", "clean_title": "09 10圣经信息系列 撒母耳记上下"},
+        ]
+        titles = [book["clean_title"] for book in sorted(books, key=GENERATOR.book_sort_key)]
+        self.assertEqual("个人的属灵生活", titles[0])
+        self.assertCountEqual(["100名画旧约", "09 10圣经信息系列 撒母耳记上下"], titles[1:])
+
     def test_generated_links_work_under_github_project_path(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = create_sample_project(Path(directory))
