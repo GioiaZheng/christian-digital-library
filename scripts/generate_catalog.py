@@ -620,6 +620,11 @@ def render_about(template: Template) -> str:
             <label for="upload-file">文件</label>
             <input id="upload-file" name="file" type="file" accept=".zip,.pdf,.epub,.mobi" required>
           </div>
+          <div class="field">
+            <label for="upload-code">提交码</label>
+            <input id="upload-code" name="upload_code" type="password" autocomplete="off" required>
+            <p class="field-hint">提交码由管理员提供，不会写入公开网页。</p>
+          </div>
           <button class="button" type="submit">提交审核</button>
           <p id="upload-request-status" class="form-status" aria-live="polite">上传入口正在接入中。</p>
         </form>

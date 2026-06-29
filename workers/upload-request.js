@@ -46,6 +46,18 @@ function allowedOrigin(request, env) {
   return !origin || origin === (env.ALLOWED_ORIGIN || DEFAULT_ALLOWED_ORIGIN);
 }
 
+function validUploadCode(form, env) {
+  const expected = String(env.UPLOAD_CODE || "").trim();
+  const actual = cleanText(form.get("upload_code"), 120);
+  if (!expected) {
+    return { ok: false, status: 503, message: "上传入口尚未配置提交码。" };
+  }
+  if (actual !== expected) {
+    return { ok: false, status: 403, message: "提交码不正确。" };
+  }
+  return { ok: true };
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === "OPTIONS") {
@@ -64,6 +76,11 @@ export default {
     const title = cleanText(form.get("title"), 160);
     const author = cleanText(form.get("author"), 120);
     const file = form.get("file");
+    const codeCheck = validUploadCode(form, env);
+
+    if (!codeCheck.ok) {
+      return jsonResponse(request, env, codeCheck.status, { message: codeCheck.message });
+    }
 
     if (!title || !author || !(file instanceof File)) {
       return jsonResponse(request, env, 400, { message: "请填写书名、作者并选择文件。" });
