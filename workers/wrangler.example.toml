@@ -1,0 +1,7 @@
+name = "christian-digital-library-assets"
+main = "preview-assets.js"
+compatibility_date = "2026-06-29"
+
+[[r2_buckets]]
+binding = "BOOK_ASSETS"
+bucket_name = "christian-digital-library"
