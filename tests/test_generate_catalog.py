@@ -111,6 +111,28 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("下载或阅读全文", detail)
             self.assertIn("需要密码", detail)
 
+    def test_preview_heading_uses_actual_page_count(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = create_sample_project(Path(directory))
+            csv_path = project / "data" / "books.csv"
+            with csv_path.open(encoding="utf-8") as source:
+                rows = list(csv.DictReader(source))
+            rows[0]["preview_page_count"] = "1"
+            rows[0]["preview_base_url"] = "https://example.test/previews/sample-book"
+            with csv_path.open("w", encoding="utf-8", newline="") as target:
+                writer = csv.DictWriter(target, fieldnames=GENERATOR.BOOK_FIELDS)
+                writer.writeheader()
+                writer.writerows(rows)
+
+            output = project / "site"
+            GENERATOR.build_site(project, output)
+            detail = (output / "books" / "sample-book.html").read_text(
+                encoding="utf-8"
+            )
+
+            self.assertIn("第 1 页预览", detail)
+            self.assertNotIn("前 1 页预览", detail)
+
     def test_about_page_contains_upload_request_form(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = create_sample_project(Path(directory))
