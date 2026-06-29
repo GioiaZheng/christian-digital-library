@@ -455,10 +455,11 @@ def render_preview_section(book: dict[str, Any]) -> str:
             for index in range(1, page_count + 1)
         )
 
+    preview_title = f"前 {page_count} 页预览" if page_count > 1 else "第 1 页预览"
     return f"""
         <section class="book-section">
           <div class="section-heading compact">
-            <div><h2>前 {page_count} 页预览</h2></div>
+            <div><h2>{escape(preview_title)}</h2></div>
             <span class="badge">公开预览</span>
           </div>
           <div class="preview-grid">{pages}</div>
