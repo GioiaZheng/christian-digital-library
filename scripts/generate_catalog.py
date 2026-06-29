@@ -47,6 +47,23 @@ def escape(value: Any) -> str:
     return html.escape(str(value or ""), quote=True)
 
 
+def book_filter_text(book: dict[str, Any], category: dict[str, str]) -> str:
+    return " ".join(
+        str(part or "")
+        for part in (
+            book["clean_title"],
+            book["author"],
+            book["publisher"],
+            book["year"],
+            book["language"],
+            category["name"],
+            book["description"],
+            " ".join(book["tags"]),
+        )
+        if part
+    )
+
+
 def load_categories(path: Path) -> list[dict[str, str]]:
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
@@ -182,8 +199,9 @@ def render_book_card(
         else ""
     )
     category = categories[book["category"]]
+    filter_text = book_filter_text(book, category)
     return f"""
-        <article class="card">
+        <article class="card" data-filter-text="{escape(filter_text)}">
           <h3><a href="{link_prefix}books/{escape(book['id'])}.html">{escape(book['clean_title'])}</a></h3>
           <p class="meta">{escape(byline)}</p>
           {description}
@@ -386,8 +404,17 @@ def render_category_detail(
       <p class="lead">{escape(category['description'])}</p>
     </div></header>
     <section class="section"><div class="shell">
-      <p class="result-summary">共 {len(books)} 条书目</p><div class="grid">{cards}</div>
-    </div></section>"""
+      <div class="search-panel category-filter-panel" role="search">
+        <div class="field">
+          <label for="category-search-input">在本分类中筛选</label>
+          <input id="category-search-input" type="search" placeholder="输入书名、作者、标签或关键词" autocomplete="off">
+        </div>
+      </div>
+      <p id="category-result-summary" class="result-summary" aria-live="polite">共 {len(books)} 条书目</p>
+      <div id="category-results" class="grid" data-category-total="{len(books)}">{cards}</div>
+      <div id="category-empty-state" class="empty-state" hidden>没有找到匹配的书目，请尝试缩短关键词。</div>
+    </div></section>
+    <script src="../assets/category-filter.js" defer></script>"""
     return render_layout(
         template,
         title=f"{category['name']}｜基督教数字图书馆",

@@ -127,6 +127,22 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("上传入口正在接入中", about)
             self.assertIn("assets/upload.js", about)
 
+    def test_category_detail_page_contains_filter_controls(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = create_sample_project(Path(directory))
+            output = project / "site"
+            GENERATOR.build_site(project, output)
+            category = (output / "categories" / "theology.html").read_text(
+                encoding="utf-8"
+            )
+
+            self.assertIn('id="category-search-input"', category)
+            self.assertIn('id="category-result-summary"', category)
+            self.assertIn('id="category-results"', category)
+            self.assertIn('id="category-empty-state"', category)
+            self.assertIn('data-filter-text=', category)
+            self.assertIn('../assets/category-filter.js', category)
+
     def test_generated_site_has_no_download_links(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = create_sample_project(Path(directory))
