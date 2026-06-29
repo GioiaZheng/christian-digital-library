@@ -111,6 +111,8 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("下载或阅读全文", detail)
             self.assertIn("访问码", detail)
             self.assertIn('data-access-form', detail)
+            self.assertIn('value="read">在线阅读', detail)
+            self.assertIn('value="download">下载文件', detail)
             self.assertIn("../assets/access.js", detail)
 
     def test_preview_heading_uses_actual_page_count(self) -> None:

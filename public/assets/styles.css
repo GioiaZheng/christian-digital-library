@@ -709,6 +709,16 @@ h3 {
   color: var(--green);
 }
 
+.access-panel .button.secondary {
+  border-color: rgba(255, 248, 233, 0.72);
+  background: transparent;
+  color: #fff8e9;
+}
+
+.access-panel .button.secondary:hover {
+  background: rgba(255, 248, 233, 0.12);
+}
+
 .access-panel .button:disabled {
   cursor: not-allowed;
   opacity: 0.68;
@@ -724,7 +734,7 @@ h3 {
 
 .access-form-row {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 8px;
 }
 

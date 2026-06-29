@@ -62,10 +62,21 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("env.ACCESS_CODE", source)
         self.assertIn("metadata/access-map.json", source)
         self.assertIn("env.BOOK_FILES.get", source)
+        self.assertIn("access_action", source)
+        self.assertIn("X-CDL-File-Extension", source)
         self.assertIn("访问码不正确", source)
         self.assertNotIn(".put(", source)
         self.assertNotIn(".delete(", source)
         self.assertNotIn(".list(", source)
+
+    def test_access_js_supports_download_and_online_reading(self) -> None:
+        source = (ROOT / "public" / "assets" / "access.js").read_text(encoding="utf-8")
+        self.assertIn('value === "read"', source)
+        self.assertIn("DecompressionStream", source)
+        self.assertIn("parseZipEntries", source)
+        self.assertIn("downloadBlob", source)
+        self.assertNotIn("ACCESS_CODE", source)
+        self.assertNotIn("raw/", source)
 
     def test_public_access_config_has_no_secret_or_raw_path(self) -> None:
         public_config = (ROOT / "public" / "assets" / "access-config.js").read_text(

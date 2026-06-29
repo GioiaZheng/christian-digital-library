@@ -2,6 +2,7 @@ const DEFAULT_ALLOWED_ORIGIN = "https://gioiazheng.github.io";
 const DEFAULT_ACCESS_MAP_KEY = "metadata/access-map.json";
 const BOOK_ID_PATTERN = /^cdl-\d{6}$/;
 const ALLOWED_FILE_EXTENSIONS = new Set(["zip", "pdf", "epub", "mobi"]);
+const ALLOWED_ACCESS_ACTIONS = new Set(["download", "read"]);
 
 function corsHeaders(request, env) {
   const origin = request.headers.get("Origin") || "";
@@ -10,7 +11,7 @@ function corsHeaders(request, env) {
     "Access-Control-Allow-Origin": origin === allowedOrigin ? origin : allowedOrigin,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Expose-Headers": "Content-Disposition",
+    "Access-Control-Expose-Headers": "Content-Disposition, X-CDL-File-Extension",
     "X-Content-Type-Options": "nosniff",
   };
 }
@@ -48,7 +49,7 @@ function safeDownloadName(value, fallback) {
   return cleaned || fallback || "book";
 }
 
-function encodedDispositionFilename(filename, fallbackName) {
+function encodedDispositionFilename(filename, fallbackName, disposition = "attachment") {
   const extension = extensionOf(filename);
   const fallbackBase = String(fallbackName || "book")
     .replace(/[^\x20-\x7e]+/g, "_")
@@ -60,7 +61,7 @@ function encodedDispositionFilename(filename, fallbackName) {
   const encoded = encodeURIComponent(filename).replace(/[!'()*]/g, (character) =>
     `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
   );
-  return `attachment; filename="${fallback}"; filename*=UTF-8''${encoded}`;
+  return `${disposition}; filename="${fallback}"; filename*=UTF-8''${encoded}`;
 }
 
 function validAccessCode(form, env) {
@@ -73,6 +74,11 @@ function validAccessCode(form, env) {
     return { ok: false, status: 403, message: "访问码不正确。" };
   }
   return { ok: true };
+}
+
+function accessAction(form) {
+  const action = cleanText(form.get("access_action"), 20) || "download";
+  return ALLOWED_ACCESS_ACTIONS.has(action) ? action : "";
 }
 
 async function loadAccessMap(env) {
@@ -113,10 +119,14 @@ export default {
 
     const form = await request.formData();
     const bookId = cleanText(form.get("book_id"), 32);
+    const action = accessAction(form);
     const codeCheck = validAccessCode(form, env);
 
     if (!BOOK_ID_PATTERN.test(bookId)) {
       return jsonResponse(request, env, 400, { message: "书目编号不正确。" });
+    }
+    if (!action) {
+      return jsonResponse(request, env, 400, { message: "访问动作不正确。" });
     }
     if (!codeCheck.ok) {
       return jsonResponse(request, env, codeCheck.status, { message: codeCheck.message });
@@ -141,10 +151,12 @@ export default {
 
     const extension = extensionOf(record.key) || "zip";
     const filename = `${safeDownloadName(record.title, bookId)}.${extension}`;
+    const disposition = action === "read" && extension !== "zip" ? "inline" : "attachment";
     const headers = new Headers(corsHeaders(request, env));
     headers.set("Cache-Control", "private, max-age=0, no-store");
-    headers.set("Content-Disposition", encodedDispositionFilename(filename, bookId));
+    headers.set("Content-Disposition", encodedDispositionFilename(filename, bookId, disposition));
     headers.set("Content-Type", object.httpMetadata?.contentType || "application/octet-stream");
+    headers.set("X-CDL-File-Extension", extension);
     if (object.size) {
       headers.set("Content-Length", String(object.size));
     }
