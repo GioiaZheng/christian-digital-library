@@ -497,6 +497,10 @@ h3 {
   color: var(--ink);
 }
 
+.category-filter-panel {
+  grid-template-columns: 1fr;
+}
+
 .field input:focus,
 .field select:focus {
   border-color: var(--green-2);
