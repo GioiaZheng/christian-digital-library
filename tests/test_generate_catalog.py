@@ -103,7 +103,10 @@ class CatalogGenerationTests(unittest.TestCase):
                 encoding="utf-8"
             )
             self.assertIn("前 5 页预览", detail)
+            self.assertIn("book-hero-grid", detail)
+            self.assertIn("book-hero-cover", detail)
             self.assertIn("book-cover-card", detail)
+            self.assertLess(detail.index("book-hero-cover"), detail.index("book-layout"))
             self.assertIn("封面待生成", detail)
             self.assertIn("下载或阅读全文", detail)
             self.assertIn("需要密码", detail)
