@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORKER = ROOT / "workers" / "preview-assets.js"
 UPLOAD_WORKER = ROOT / "workers" / "upload-request.js"
+ACCESS_WORKER = ROOT / "workers" / "access-request.js"
 
 
 class WorkerPolicyTests(unittest.TestCase):
@@ -55,6 +56,24 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertNotIn("raw/", source)
         self.assertNotIn("covers/", source)
         self.assertNotIn("previews/", source)
+
+    def test_access_worker_requires_secret_and_private_map(self) -> None:
+        source = ACCESS_WORKER.read_text(encoding="utf-8")
+        self.assertIn("env.ACCESS_CODE", source)
+        self.assertIn("metadata/access-map.json", source)
+        self.assertIn("env.BOOK_FILES.get", source)
+        self.assertIn("访问码不正确", source)
+        self.assertNotIn(".put(", source)
+        self.assertNotIn(".delete(", source)
+        self.assertNotIn(".list(", source)
+
+    def test_public_access_config_has_no_secret_or_raw_path(self) -> None:
+        public_config = (ROOT / "public" / "assets" / "access-config.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("ACCESS_CODE", public_config)
+        self.assertNotIn("access_code", public_config)
+        self.assertNotIn("raw/", public_config)
 
 
 if __name__ == "__main__":

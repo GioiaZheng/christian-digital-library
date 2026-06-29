@@ -1,0 +1,9 @@
+name = "christian-digital-library-access"
+main = "access-request.js"
+compatibility_date = "2026-06-29"
+workers_dev = true
+preview_urls = false
+
+[[r2_buckets]]
+binding = "BOOK_FILES"
+bucket_name = "christian-digital-library"
