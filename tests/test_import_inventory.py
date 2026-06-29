@@ -64,6 +64,31 @@ class InventoryImportTests(unittest.TestCase):
         self.assertEqual("出埃及记卷上：赖建国：天道注释", title)
         self.assertEqual("", author)
 
+    def test_multi_number_bible_prefix_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/09 10圣经信息系列 撒母耳记上下.zip")
+        self.assertEqual("圣经信息系列 撒母耳记上下", title)
+        self.assertEqual("", author)
+
+    def test_long_catalog_number_and_page_marker_are_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/10156162_新约的传说_p258.zip")
+        self.assertEqual("新约的传说", title)
+        self.assertEqual("", author)
+
+    def test_leading_decorative_marker_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/◆约翰福音注释 马太亨利.zip")
+        self.assertEqual("约翰福音注释 马太亨利", title)
+        self.assertEqual("", author)
+
+    def test_leading_collection_label_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/【圣经注释】解经讲道注释丛书01：創世记.zip")
+        self.assertEqual("解经讲道注释丛书01：創世记", title)
+        self.assertEqual("", author)
+
+    def test_repaired_suffix_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/【剑桥文学指南】圣经诠释-repaired.zip")
+        self.assertEqual("圣经诠释", title)
+        self.assertEqual("", author)
+
     def test_real_title_number_is_kept(self) -> None:
         title, author = IMPORTER.split_title_author("incoming/21世纪基督教灵修学导论.zip")
         self.assertEqual("21世纪基督教灵修学导论", title)

@@ -204,6 +204,20 @@ def good_homepage_feature(book: dict[str, Any]) -> bool:
     return True
 
 
+def sort_title(value: str) -> str:
+    title = str(value or "").strip()
+    title = re.sub(r"^\d{7,}[：:\s]+", "", title)
+    title = re.sub(r"^(?:\d{1,4}[\s、.．：:-]+)+", "", title)
+    title = re.sub(r"^\d{1,3}(?=[\u3400-\u9fff])", "", title)
+    return title or str(value or "").strip()
+
+
+def book_sort_key(book: dict[str, Any]) -> tuple[int, str, str]:
+    title = str(book.get("clean_title") or "").strip()
+    noisy_prefix = 1 if re.match(r"^[0-9A-Za-z]", title) else 0
+    return (noisy_prefix, sort_title(title).casefold(), str(book.get("id") or ""))
+
+
 def render_home(
     template: Template,
     books: list[dict[str, Any]],
@@ -560,7 +574,7 @@ def build_site(root: Path = ROOT, output: Path | None = None) -> dict[str, int]:
 
     categories = load_categories(root / "data" / "categories.json")
     category_map = {category["id"]: category for category in categories}
-    books = load_books(root / "data" / "books.csv", set(category_map))
+    books = sorted(load_books(root / "data" / "books.csv", set(category_map)), key=book_sort_key)
     template = Template((root / "src" / "templates" / "base.html").read_text(encoding="utf-8"))
 
     if output.exists():

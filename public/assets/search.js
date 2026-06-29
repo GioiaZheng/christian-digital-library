@@ -11,6 +11,21 @@
   let visibleCount = pageSize;
 
   const normalize = (value) => String(value || "").trim().toLocaleLowerCase("zh-CN");
+  const sortTitle = (value) =>
+    String(value || "")
+      .trim()
+      .replace(/^\d{7,}[：:\s]+/, "")
+      .replace(/^(?:\d{1,4}[\s、.．：:\-]+)+/, "")
+      .replace(/^\d{1,3}(?=[\u3400-\u9fff])/, "");
+
+  const compareBooks = (a, b) => {
+    const aTitle = String(a.clean_title || "").trim();
+    const bTitle = String(b.clean_title || "").trim();
+    const aNoisy = /^[0-9A-Za-z]/.test(aTitle) ? 1 : 0;
+    const bNoisy = /^[0-9A-Za-z]/.test(bTitle) ? 1 : 0;
+    if (aNoisy !== bNoisy) return aNoisy - bNoisy;
+    return (sortTitle(aTitle) || aTitle).localeCompare(sortTitle(bTitle) || bTitle, "zh-CN");
+  };
 
   const createText = (tag, className, text) => {
     const element = document.createElement(tag);
@@ -79,7 +94,7 @@
             ].join(" "));
             return query.split(/\s+/).every((word) => haystack.includes(word));
           })
-          .sort((a, b) => a.clean_title.localeCompare(b.clean_title, "zh-CN"));
+          .sort(compareBooks);
 
         const visibleBooks = filtered.slice(0, visibleCount);
         results.replaceChildren();
