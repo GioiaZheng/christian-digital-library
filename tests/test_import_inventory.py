@@ -94,6 +94,11 @@ class InventoryImportTests(unittest.TestCase):
         self.assertEqual("21世纪基督教灵修学导论", title)
         self.assertEqual("", author)
 
+    def test_trailing_form_noise_after_book_title_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/一步一步学〈诗篇:〉表格.zip")
+        self.assertEqual("一步一步学〈诗篇〉", title)
+        self.assertEqual("", author)
+
     def test_ids_survive_object_rename_with_same_signature(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

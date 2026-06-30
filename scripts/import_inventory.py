@@ -551,6 +551,8 @@ def clean_title(value: str) -> str:
     value = re.sub(r"\s*(?:--+|——+)\s*", "：", value)
     value = re.sub(r"[-—_ ]+[\u3400-\u9fff]{2,20}出版社.*$", "", value)
     value = re.sub(r"[<>|\\/*?\"`~]+", " ", value)
+    value = re.sub(r"[:：]\s*(?=[〉》])", "", value)
+    value = re.sub(r"(?<=[〉》）\]\)])\s*表格$", "", value)
     value = re.sub(r"(?<=[\u3400-\u9fffA-Za-z0-9]):(?=[\u3400-\u9fff])", "：", value)
     value = re.sub(r"(?<=[\u3400-\u9fff]),(?=[\u3400-\u9fff])", "，", value)
     value = re.sub(r"\s+", " ", value).strip(" ._-：:")
