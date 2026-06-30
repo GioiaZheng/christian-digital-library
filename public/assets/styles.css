@@ -1003,6 +1003,64 @@ h3 {
   font-size: clamp(1.8rem, 4vw, 3rem);
 }
 
+.reader-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 22px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 252, 246, 0.82);
+  box-shadow: 0 14px 38px rgba(48, 42, 31, 0.08);
+}
+
+.reader-toolbar[hidden] {
+  display: none;
+}
+
+.reader-toolbar-links,
+.reader-page-jump {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.reader-text-button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-family: "Microsoft YaHei", sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.reader-page-jump {
+  color: var(--muted);
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 0.92rem;
+}
+
+.reader-page-jump input {
+  width: 86px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.reader-page-jump .button {
+  padding: 9px 16px;
+}
+
 .reader-pages {
   display: grid;
   gap: 26px;
@@ -1104,6 +1162,21 @@ h3 {
   .grid,
   .access-form-row {
     grid-template-columns: 1fr;
+  }
+
+  .reader-toolbar,
+  .reader-page-jump {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reader-toolbar-links {
+    justify-content: space-between;
+  }
+
+  .reader-page-jump input,
+  .reader-page-jump .button {
+    width: 100%;
   }
 
   .preview-grid {

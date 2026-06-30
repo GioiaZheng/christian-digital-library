@@ -7,12 +7,20 @@
   const title = document.querySelector("[data-reader-title]");
   const status = document.querySelector("[data-reader-status]");
   const pages = document.querySelector("[data-reader-pages]");
+  const toolbar = document.querySelector("[data-reader-toolbar]");
+  const detailLink = document.querySelector("[data-reader-detail]");
+  const backButton = document.querySelector("[data-reader-back]");
+  const jumpForm = document.querySelector("[data-reader-jump]");
+  const pageInput = document.querySelector("[data-reader-page-input]");
+  const pageTotal = document.querySelector("[data-reader-page-total]");
 
   const setStatus = (message) => {
     if (status) status.textContent = message;
   };
 
   const paddedPage = (index) => String(index).padStart(4, "0");
+
+  const pageId = (index) => `page-${index}`;
 
   const readerUrl = (filename) => {
     const url = new URL(`${endpoint.replace(/\/+$/, "")}/reader/${bookId}/${filename}`);
@@ -21,6 +29,51 @@
   };
 
   const validBookId = /^cdl-\d{6}$/.test(bookId);
+
+  if (detailLink && validBookId) {
+    detailLink.href = `books/${bookId}.html`;
+  }
+
+  if (backButton) {
+    backButton.addEventListener("click", () => {
+      if (window.history.length > 1) {
+        window.history.back();
+        return;
+      }
+      window.location.href = validBookId ? `books/${bookId}.html` : "index.html";
+    });
+  }
+
+  const scrollToPage = (pageNumber, pageCount) => {
+    const safePage = Math.min(Math.max(Number(pageNumber) || 1, 1), pageCount);
+    const target = document.getElementById(pageId(safePage));
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (pageInput) pageInput.value = String(safePage);
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${window.location.search}#${pageId(safePage)}`,
+    );
+  };
+
+  const watchCurrentPage = () => {
+    if (!pageInput || !("IntersectionObserver" in window)) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        const pageNumber = visible?.target?.dataset?.page;
+        if (pageNumber) pageInput.value = pageNumber;
+      },
+      {
+        rootMargin: "-38% 0px -52% 0px",
+        threshold: [0, 0.1, 0.25],
+      },
+    );
+    pages.querySelectorAll(".reader-page").forEach((page) => observer.observe(page));
+  };
 
   if (!endpoint || !validBookId || !token) {
     setStatus("阅读链接不完整，请回到书目页重新输入访问码。");
@@ -38,11 +91,25 @@
       return;
     }
 
+    if (toolbar) toolbar.hidden = false;
+    if (pageInput) {
+      pageInput.max = String(pageCount);
+      pageInput.value = "1";
+    }
+    if (pageTotal) pageTotal.textContent = `共 ${pageCount} 页`;
+    if (jumpForm) {
+      jumpForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        scrollToPage(pageInput?.value, pageCount);
+      });
+    }
+
     const fragment = document.createDocumentFragment();
     for (let index = 1; index <= pageCount; index += 1) {
       const figure = document.createElement("figure");
       figure.className = "reader-page";
-      figure.id = `page-${index}`;
+      figure.id = pageId(index);
+      figure.dataset.page = String(index);
 
       const imageUrl = readerUrl(`page-${paddedPage(index)}.${extension}`);
       const image = document.createElement("img");
@@ -97,6 +164,12 @@
 
     pages.replaceChildren(fragment);
     setStatus(`共 ${pageCount} 页。向下滑动阅读。`);
+    watchCurrentPage();
+
+    const hashPage = /^#page-(\d+)$/.exec(window.location.hash || "");
+    if (hashPage) {
+      window.setTimeout(() => scrollToPage(hashPage[1], pageCount), 0);
+    }
   };
 
   const loadManifest = async () => {

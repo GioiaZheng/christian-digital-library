@@ -18,6 +18,18 @@
       <p class="eyebrow">在线阅读</p>
       <h1 data-reader-title>正在载入书目……</h1>
       <p data-reader-status>正在验证阅读权限并加载页面。</p>
+      <div class="reader-toolbar" data-reader-toolbar hidden>
+        <div class="reader-toolbar-links">
+          <button class="reader-text-button" type="button" data-reader-back>返回上一页</button>
+          <a class="reader-text-button" href="index.html" data-reader-detail>书目详情</a>
+        </div>
+        <form class="reader-page-jump" data-reader-jump>
+          <label for="reader-page-number">跳转到</label>
+          <input id="reader-page-number" name="page" type="number" min="1" inputmode="numeric" data-reader-page-input>
+          <span data-reader-page-total>共 0 页</span>
+          <button class="button secondary" type="submit">前往</button>
+        </form>
+      </div>
     </section>
     <section class="reader-pages" data-reader-pages aria-label="阅读页面"></section>
   </main>
