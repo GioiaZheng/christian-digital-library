@@ -861,11 +861,12 @@ h3 {
 
 .access-form-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .access-form input[type="password"] {
+  grid-column: 1 / -1;
   min-width: 0;
   min-height: 46px;
   padding: 9px 12px;
@@ -873,6 +874,12 @@ h3 {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.95);
   color: var(--ink);
+}
+
+.access-form-row .button {
+  width: 100%;
+  padding-inline: 14px;
+  white-space: nowrap;
 }
 
 .toc {

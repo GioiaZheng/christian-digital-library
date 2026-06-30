@@ -198,6 +198,12 @@ class CatalogGenerationTests(unittest.TestCase):
         self.assertIn("position: sticky", css)
         self.assertNotIn(".site-header {\n  position: fixed", css)
 
+    def test_access_card_keeps_desktop_actions_uncluttered(self) -> None:
+        css = (ROOT / "public" / "assets" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn("grid-template-columns: repeat(2, minmax(0, 1fr));", css)
+        self.assertIn(".access-form input[type=\"password\"] {\n  grid-column: 1 / -1;", css)
+        self.assertIn(".access-form-row .button {\n  width: 100%;", css)
+
     def test_homepage_feature_prefers_clean_titles(self) -> None:
         self.assertFalse(GENERATOR.good_homepage_feature({"clean_title": "003cc0701 合神心意的敬拜"}))
         self.assertFalse(GENERATOR.good_homepage_feature({"clean_title": "10丁道尔"}))
