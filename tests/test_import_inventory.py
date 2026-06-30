@@ -340,6 +340,40 @@ class InventoryImportTests(unittest.TestCase):
         self.assertEqual("NIVAC国际释经应用系列：出埃及記上", title)
         self.assertEqual("", author)
 
+    def test_international_application_series_catalog_number_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/国际释经应用系列545556--提摩太前书，提摩太后书，提多书.zip"
+        )
+        self.assertEqual("国际释经应用系列：提摩太前书，提摩太后书，提多书", title)
+        self.assertEqual("", author)
+
+    def test_international_application_series_number_without_separator_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/国际释经应用系列626364约翰一，二，三书.zip")
+        self.assertEqual("国际释经应用系列：约翰一，二，三书", title)
+        self.assertEqual("", author)
+
+    def test_living_spring_bible_abbreviations_are_expanded(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/活泉01--太、可.zip")
+        self.assertEqual("活泉：马太福音、马可福音", title)
+        self.assertEqual("", author)
+
+    def test_living_spring_epistle_abbreviations_are_expanded(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/活泉09--来、雅、彼前后、约一、约二、约三、犹、.zip")
+        self.assertEqual("活泉：希伯来书、雅各书、彼得前后书、约翰一书、约翰二书、约翰三书、犹大书", title)
+        self.assertEqual("", author)
+
+    def test_living_spring_series_number_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/活泉丛书35--神就是福音.zip")
+        self.assertEqual("活泉丛书：神就是福音", title)
+        self.assertEqual("", author)
+
+    def test_theology_course_english_tail_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/建立你的神学_课程文本_Building_Your_Theology_TEXT_2.zip"
+        )
+        self.assertEqual("建立你的神学：课程文本", title)
+        self.assertEqual("", author)
+
     def test_known_series_parts_without_catalog_prefix_are_normalized(self) -> None:
         title, author = IMPORTER.split_title_author(
             "incoming/出埃及记-莫德-圣经信息系列-台北:校园出版社，2012(1).zip"
