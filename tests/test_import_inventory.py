@@ -183,6 +183,109 @@ class InventoryImportTests(unittest.TestCase):
         self.assertEqual("新约神学", title)
         self.assertEqual("马歇尔", author)
 
+    def test_catalog_m_code_prefix_and_english_author_are_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/M6158 旧约神学 当代争论的基本议题 Gerhard Hasel.zip"
+        )
+        self.assertEqual("旧约神学：当代争论的基本议题", title)
+        self.assertEqual("Gerhard Hasel", author)
+
+    def test_catalog_m_code_prefix_and_chinese_author_are_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/M6164 圣经结构式注释 以弗所书 李保罗博士.zip"
+        )
+        self.assertEqual("圣经结构式注释：以弗所书", title)
+        self.assertEqual("李保罗", author)
+
+    def test_catalog_m_code_prefix_with_subtitle_and_author_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/M6215 圣灵降临-由新约看圣灵的恩赐 葛富恩（Richard B. Gaffin,Jr.）.zip"
+        )
+        self.assertEqual("圣灵降临：由新约看圣灵的恩赐", title)
+        self.assertEqual("葛富恩 Richard B Gaffin Jr", author)
+
+    def test_single_letter_catalog_prefix_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/R認識聖經文學--郭秀娟.zip")
+        self.assertEqual("認識聖經文學", title)
+        self.assertEqual("郭秀娟", author)
+
+    def test_lowercase_catalog_prefix_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/x06罗马书释经讲道-刘道顺.zip")
+        self.assertEqual("罗马书释经讲道", title)
+        self.assertEqual("刘道顺", author)
+
+    def test_catalog_prefix_with_bible_series_is_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/19校园_威尔克-诗篇下 圣经信息系列.zip"
+        )
+        self.assertEqual("圣经信息系列：诗篇下", title)
+        self.assertEqual("威尔克", author)
+
+    def test_tiandao_commentary_parts_are_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/51教牧书信--张永信--天道注释.zip")
+        self.assertEqual("天道注释：教牧书信", title)
+        self.assertEqual("张永信", author)
+
+    def test_tiandao_commentary_with_letter_prefix_is_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/Y雅歌@---黄朱伦---天道圣经注释.zip")
+        self.assertEqual("天道圣经注释：雅歌", title)
+        self.assertEqual("黄朱伦", author)
+
+    def test_tiandao_commentary_with_mixed_traditional_suffix_is_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/Y雅歌@---黃朱倫---天道聖經注釋.zip")
+        self.assertEqual("天道聖經注釋：雅歌", title)
+        self.assertEqual("黃朱倫", author)
+
+    def test_numeric_catalog_prefix_before_old_testament_title_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/2旧约历史书导论-David M.Howard Jr.zip")
+        self.assertEqual("旧约历史书导论", title)
+        self.assertEqual("David M Howard Jr", author)
+
+    def test_nested_numeric_catalog_prefix_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/3-2随时候命 士师记.zip")
+        self.assertEqual("随时候命：士师记", title)
+        self.assertEqual("", author)
+
+    def test_ancient_christian_commentary_prefix_and_page_marker_are_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/66古代基督信仰圣经注释（新约-XIII-启）【748 P】.zip"
+        )
+        self.assertEqual("古代基督信仰圣经注释：新约：XIII：启", title)
+        self.assertEqual("", author)
+
+    def test_ancient_christian_commentary_space_format_is_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/28-39 古代基督信仰圣经注释 旧约-XIV-12先知书.zip"
+        )
+        self.assertEqual("古代基督信仰圣经注释：旧约：XIV：12先知书", title)
+        self.assertEqual("", author)
+
+    def test_ancient_christian_commentary_multi_number_prefix_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/6 7 8 9 10 古代基督信仰圣经注释(旧约:IV：书士得撒上下).zip"
+        )
+        self.assertEqual("古代基督信仰圣经注释：旧约：IV：书士得撒上下", title)
+        self.assertEqual("", author)
+
+    def test_ancient_christian_commentary_multi_number_prefix_without_last_space_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/6 7 8 9古代基督信仰圣经注释(旧约:IV：书士得撒上下).zip"
+        )
+        self.assertEqual("古代基督信仰圣经注释：旧约：IV：书士得撒上下", title)
+        self.assertEqual("", author)
+
+    def test_cambridge_church_history_duplicate_volume_prefix_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/3剑桥基督教史第三卷.zip")
+        self.assertEqual("剑桥基督教史第三卷", title)
+        self.assertEqual("", author)
+
+    def test_leading_volume_word_after_number_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/《君王的使者——11篇以基督为中心的释经讲章》编著：陈若愚.zip"
+        )
+        self.assertEqual("以基督为中心的释经讲章", title)
+        self.assertEqual("君王的使者", author)
+
     def test_ids_survive_object_rename_with_same_signature(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -50,6 +50,8 @@ UNKNOWN_AUTHOR_WORDS = {
     "麦种彩色版",
     "麦种传道会",
     "美国麦种传道会",
+    "环球新本",
+    "校园",
     "华神",
     "天道",
     "好书",
@@ -66,6 +68,31 @@ MAIZHONG_SOURCE_LABELS = {
     "麦种传道会",
     "美国麦种传道会",
 }
+CATALOG_PREFIX_TOPICS = (
+    "校园",
+    "旧约",
+    "舊約",
+    "新约",
+    "新約",
+    "新旧约",
+    "新舊約",
+    "创世纪",
+    "創世紀",
+    "创世记",
+    "創世記",
+    "教牧",
+    "古代基督",
+    "圣经",
+    "聖經",
+    "漂亮",
+    "随时候命",
+    "隨時候命",
+    "篇以",
+    "歌林多",
+    "哥林多",
+    "剑桥基督教史",
+)
+TIANDAO_COMMENTARY_PATTERN = r"天道(?:圣经|聖經)?(?:注|註)(?:释|釋)"
 NON_AUTHOR_WORDS = (
     "圣经",
     "聖經",
@@ -112,6 +139,8 @@ NON_AUTHOR_WORDS = (
     "藝術",
     "灵魂",
     "靈魂",
+    "圣灵",
+    "聖靈",
     "异象",
     "異象",
     "呼召",
@@ -500,7 +529,7 @@ def clean_person(value: str) -> str:
     for word in UNKNOWN_AUTHOR_WORDS:
         value = re.sub(rf"(?:[\s_\-—]*{re.escape(word)})+$", "", value)
     value = re.sub(r"[《》【】\[\]()（）'\"`]+", " ", value)
-    value = re.sub(r"[.:：·•—–_、-]+", " ", value)
+    value = re.sub(r"[.,，:：·•—–_、-]+", " ", value)
     return re.sub(r"\s+", " ", value).strip()
 
 
@@ -518,6 +547,122 @@ def is_maizhong_source(value: str) -> bool:
 
 def looks_like_maizhong_author(value: str) -> bool:
     return looks_like_person(value) or clean_person(value) in {"唐书礼"}
+
+
+def strip_catalog_code_prefix(value: str) -> str:
+    value = normalize(value)
+    topic_pattern = "|".join(map(re.escape, CATALOG_PREFIX_TOPICS))
+    value = re.sub(r"^[Mm]\d{3,5}\s+", "", value)
+    value = re.sub(r"^[RSYZ](?=[\u3400-\u9fff])", "", value)
+    value = re.sub(r"^[xX]\d{1,3}(?=[\u3400-\u9fff])", "", value)
+    value = re.sub(r"^(?:\d{1,3}\s*){2,}(?=古代基督)", "", value)
+    value = re.sub(rf"^(?:\d{{1,3}}\s*[-_]\s*)?\d{{1,3}}\s*(?=(?:{topic_pattern}))", "", value)
+    value = re.sub(r"^\d{1,3}\s+(?=古代基督)", "", value)
+    return value.strip()
+
+
+def split_filename_parts(value: str) -> list[str]:
+    return [
+        part.strip().strip("@")
+        for part in re.split(r"\s*(?:--+|——+|[-_—:：])\s*", value)
+        if part.strip().strip("@")
+    ]
+
+
+def format_catalog_title(value: str) -> str:
+    value = clean_title(value)
+    if re.search(r"[A-Za-z]", value):
+        return value
+    parts = [part for part in value.split() if part]
+    if 1 < len(parts) <= 3:
+        return "：".join(parts)
+    return value
+
+
+def normalize_bible_series_title(value: str) -> str:
+    value = clean_title(value)
+    match = re.match(r"^(?P<title>.+?)\s+(?P<series>圣经信息系列|聖經信息系列)$", value)
+    if match:
+        return f"{match.group('series')}：{clean_title(match.group('title'))}"
+    return value
+
+
+def split_tail_author_from_catalog_title(value: str) -> tuple[str, str]:
+    value = normalize(value)
+    parenthetical = re.match(
+        r"^(?P<title>.+?)\s+(?P<author>[\u3400-\u9fff·]{2,12})(?:[（(](?P<roman>[^）)]+)[）)])$",
+        value,
+    )
+    if parenthetical:
+        author = clean_person(
+            f"{parenthetical.group('author')} {parenthetical.group('roman')}"
+        )
+        return format_catalog_title(parenthetical.group("title")), author
+
+    english = re.match(r"^(?P<title>.+?)\s+(?P<author>[A-Z][A-Za-z.,'’\s]+)$", value)
+    if english:
+        return format_catalog_title(english.group("title")), clean_person(english.group("author"))
+
+    chinese = re.match(r"^(?P<title>.+?)\s+(?P<author>[\u3400-\u9fff·]{2,12})(?:博士)?$", value)
+    if chinese and looks_like_person(chinese.group("author")):
+        return format_catalog_title(chinese.group("title")), clean_person(chinese.group("author"))
+
+    return format_catalog_title(value), ""
+
+
+def split_tiandao_parts(parts: list[str]) -> tuple[str, str] | None:
+    for index, part in enumerate(parts):
+        if not re.fullmatch(TIANDAO_COMMENTARY_PATTERN, part):
+            continue
+        title_parts = parts[:index]
+        tail_parts = parts[index + 1 :]
+        author = ""
+        if tail_parts and looks_like_person(tail_parts[-1]):
+            author = clean_person(tail_parts[-1])
+        elif len(title_parts) >= 2 and looks_like_person(title_parts[-1]):
+            author = clean_person(title_parts[-1])
+            title_parts = title_parts[:-1]
+        title = clean_title("：".join(title_parts))
+        if title:
+            return clean_title(f"{part}：{title}"), author
+    return None
+
+
+def split_catalog_code_title_author(stem: str) -> tuple[str, str] | None:
+    cleaned = strip_catalog_code_prefix(stem.replace("@", ""))
+    if cleaned == stem:
+        return None
+
+    if re.match(r"^古代基督信仰圣经注释(?:\s*[（(]|\s+)", cleaned):
+        return clean_title(cleaned), ""
+
+    parts = split_filename_parts(cleaned)
+    while parts and source_label(parts[0]) in {"校园"}:
+        parts.pop(0)
+    if not parts:
+        return clean_title(cleaned), ""
+
+    tiandao = split_tiandao_parts(parts)
+    if tiandao:
+        return tiandao
+
+    if len(parts) >= 2 and re.search(r"[\u3400-\u9fff]", parts[-1]):
+        last_title, last_author = split_tail_author_from_catalog_title(parts[-1])
+        if last_author:
+            return normalize_bible_series_title("：".join([*parts[:-1], last_title])), last_author
+
+    if len(parts) >= 2 and looks_like_person(parts[0]):
+        return normalize_bible_series_title(parts[1]), clean_person(parts[0])
+
+    if len(parts) >= 2 and looks_like_person(parts[-1]):
+        author = clean_person(parts[-1])
+        title = normalize_bible_series_title("：".join(parts[:-1]))
+        return title, author
+
+    if len(parts) > 1:
+        return normalize_bible_series_title("：".join(parts)), ""
+
+    return split_tail_author_from_catalog_title(parts[0])
 
 
 def looks_like_person(value: str) -> bool:
@@ -548,11 +693,22 @@ def clean_title(value: str) -> str:
     value = re.sub(r"(?:_|\s+)(?:\d{7,})$", "", value)
     value = re.sub(r"\s*(?:完整版|非完整版|扫描版|掃描版)$", "", value)
     value = re.sub(r"\s+(?:pdf|rar|SD)$", "", value, flags=re.IGNORECASE)
-    value = re.sub(r"【[^】]*(?:页|\d{4}[.年])[^】]*】", "", value)
+    value = re.sub(r"【[^】]*(?:页|P|\d{4}[.年])[^】]*】", "", value, flags=re.IGNORECASE)
+    ancient = re.match(r"^(古代基督信仰圣经注释)\s*[（(]\s*(?P<inner>[^）)]+)\s*[）)]$", value)
+    if ancient:
+        inner = re.sub(r"\s*[-—:：]\s*", "：", ancient.group("inner"))
+        inner = inner.replace(":", "：")
+        value = f"{ancient.group(1)}：{inner}"
+    ancient_space = re.match(r"^(古代基督信仰圣经注释)\s+(?P<inner>.+)$", value)
+    if ancient_space:
+        inner = re.sub(r"\s*[-—:：]\s*", "：", ancient_space.group("inner"))
+        inner = inner.replace(":", "：")
+        value = f"{ancient_space.group(1)}：{inner}"
     value = re.sub(r"^[【〖](?P<inner>[^】〗]{2,80})[】〗]$", r"\g<inner>", value)
     value = re.sub(r"^[【〖][^】〗]{2,40}[】〗]\s*(?=.+[\u3400-\u9fffA-Za-z])", "", value)
     value = value.strip("《》〈〉 ")
     value = re.sub(r"^\d{1,3}[：:]\s*", "", value)
+    value = re.sub(r"^篇(?=以基督)", "", value)
     value = re.sub(r"[“”‘’]", "", value)
     value = re.sub(r"^\d{2,4}[A-Za-z]{1,6}\d{2,8}\s*", "", value)
     value = re.sub(r"^0\d{1,3}(?=[\u3400-\u9fff])", "", value)
@@ -580,6 +736,18 @@ def clean_title(value: str) -> str:
     value = re.sub(r"[:：]?\s*(?:p|pg)\s*\d+\s*$", "", value, flags=re.IGNORECASE)
     value = re.sub(r"^(?:0[1-9]|1[0-3])(?=巴克莱圣经注释)", "", value)
     value = value.replace("_", " ")
+    value = strip_catalog_code_prefix(value)
+    value = re.sub(r"^篇(?=以基督)", "", value)
+    ancient = re.match(r"^(古代基督信仰圣经注释)\s*[（(]\s*(?P<inner>[^）)]+)\s*[）)]$", value)
+    if ancient:
+        inner = re.sub(r"\s*[-—:：]\s*", "：", ancient.group("inner"))
+        inner = inner.replace(":", "：")
+        value = f"{ancient.group(1)}：{inner}"
+    ancient_space = re.match(r"^(古代基督信仰圣经注释)\s+(?P<inner>.+)$", value)
+    if ancient_space:
+        inner = re.sub(r"\s*[-—:：]\s*", "：", ancient_space.group("inner"))
+        inner = inner.replace(":", "：")
+        value = f"{ancient_space.group(1)}：{inner}"
     value = re.sub(r"^\d{7,}\s+", "", value)
     value = re.sub(r"[:：]?\s*fenleiID\s*[A-Za-z0-9]+", "", value, flags=re.IGNORECASE)
     value = re.sub(r"[:：]?\s*(?:p|pg)\s*\d+\s*$", "", value, flags=re.IGNORECASE)
@@ -596,6 +764,8 @@ def clean_title(value: str) -> str:
     value = re.sub(r"(?<=[\u3400-\u9fffA-Za-z0-9]):(?=[\u3400-\u9fff])", "：", value)
     value = re.sub(r"(?<=[\u3400-\u9fff]),(?=[\u3400-\u9fff])", "，", value)
     value = re.sub(r"\s+", " ", value).strip(" ._-：:、，,")
+    if value.startswith("古代基督信仰圣经注释："):
+        value = value.replace(":", "：")
     if re.fullmatch(r"\d+", value):
         return "书名待核"
     return value or "书名待核"
@@ -688,6 +858,10 @@ def split_title_author(object_key: str) -> tuple[str, str]:
         title = "：".join(parts) if parts else stem
         return clean_title(title), author
 
+    catalog_code = split_catalog_code_title_author(stem)
+    if catalog_code:
+        return catalog_code
+
     bibliographic = re.match(
         r"^[（(](?:中|英|美|德|俄|澳|法)[）)](?P<author>[\u3400-\u9fff·.A-Za-z ]{2,24})著[；;].*?[.。]\s*(?P<title>.+?)(?:[.。]\s*(?:北京|上海|香港).*)?$",
         stem,
@@ -731,7 +905,10 @@ def split_title_author(object_key: str) -> tuple[str, str]:
         numeric_tail = len(parts) >= 2 and all(
             re.fullmatch(r"\d+", part) for part in parts[1:]
         )
-        if not author and len(parts) >= 2 and not numeric_tail and looks_like_person(parts[0]):
+        if len(parts) >= 2 and parts[0] == "君王的使者":
+            author = parts[0]
+            title = "：".join(parts[1:])
+        elif not author and len(parts) >= 2 and not numeric_tail and looks_like_person(parts[0]):
             author = clean_person(parts[0])
             title = "：".join(parts[1:])
         elif numeric_tail:
