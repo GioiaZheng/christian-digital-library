@@ -87,12 +87,33 @@ CATALOG_PREFIX_TOPICS = (
     "漂亮",
     "随时候命",
     "隨時候命",
+    "仁者无惧",
+    "仁者無懼",
+    "先知书",
+    "先知書",
+    "回归义路",
+    "回歸義路",
+    "对观福音",
+    "對觀福音",
+    "得胜凯歌",
+    "得勝凱歌",
+    "效忠基督",
+    "拉尼斯",
     "篇以",
     "歌林多",
     "哥林多",
     "剑桥基督教史",
 )
 TIANDAO_COMMENTARY_PATTERN = r"天道(?:圣经|聖經)?(?:注|註)(?:释|釋)"
+BIBLE_SERIES_LABELS = (
+    "圣经信息系列",
+    "聖經信息系列",
+    "生命信息系列",
+    "天道研经",
+    "天道研經",
+    "天道研经导读",
+    "天道研經導讀",
+)
 NON_AUTHOR_WORDS = (
     "圣经",
     "聖經",
@@ -144,6 +165,7 @@ NON_AUTHOR_WORDS = (
     "异象",
     "異象",
     "呼召",
+    "彼犹",
     "赞美",
     "讚美",
     "心语",
@@ -162,6 +184,16 @@ NON_AUTHOR_WORDS = (
     "詩篇",
     "讲章",
     "講章",
+    "仁者无惧",
+    "仁者無懼",
+    "得胜凯歌",
+    "得勝凱歌",
+    "回归义路",
+    "回歸義路",
+    "效忠基督",
+    "路加福音",
+    "启示录",
+    "啟示錄",
 )
 
 BIBLE_TITLE_PREFIX_WORDS = (
@@ -555,7 +587,10 @@ def strip_catalog_code_prefix(value: str) -> str:
     value = re.sub(r"^[Mm]\d{3,5}\s+", "", value)
     value = re.sub(r"^[RSYZ](?=[\u3400-\u9fff])", "", value)
     value = re.sub(r"^[xX]\d{1,3}(?=[\u3400-\u9fff])", "", value)
+    value = re.sub(r"^\d{1,3}(?:\s*[+＋,，、]\s*\d{1,3})+\s*", "", value)
     value = re.sub(r"^(?:\d{1,3}\s*){2,}(?=古代基督)", "", value)
+    value = re.sub(r"^(?:\d{1,3}\s+){2,}\d{1,3}\s*[-—:：]?\s*", "", value)
+    value = re.sub(r"^\d{1,3}\s+(?=[\u3400-\u9fff])", "", value)
     value = re.sub(rf"^(?:\d{{1,3}}\s*[-_]\s*)?\d{{1,3}}\s*(?=(?:{topic_pattern}))", "", value)
     value = re.sub(r"^\d{1,3}\s+(?=古代基督)", "", value)
     return value.strip()
@@ -564,7 +599,7 @@ def strip_catalog_code_prefix(value: str) -> str:
 def split_filename_parts(value: str) -> list[str]:
     return [
         part.strip().strip("@")
-        for part in re.split(r"\s*(?:--+|——+|[-_—:：])\s*", value)
+        for part in re.split(r"\s*(?:--+|——+|[-_—－:：])\s*", value)
         if part.strip().strip("@")
     ]
 
@@ -581,7 +616,11 @@ def format_catalog_title(value: str) -> str:
 
 def normalize_bible_series_title(value: str) -> str:
     value = clean_title(value)
-    match = re.match(r"^(?P<title>.+?)\s+(?P<series>圣经信息系列|聖經信息系列)$", value)
+    series_pattern = "|".join(map(re.escape, BIBLE_SERIES_LABELS))
+    match = re.match(rf"^(?P<title>.+?)[（(](?P<series>{series_pattern})[）)]$", value)
+    if match:
+        return f"{match.group('series')}：{clean_title(match.group('title'))}"
+    match = re.match(rf"^(?P<title>.+?)\s+(?P<series>{series_pattern})$", value)
     if match:
         return f"{match.group('series')}：{clean_title(match.group('title'))}"
     return value
@@ -628,7 +667,58 @@ def split_tiandao_parts(parts: list[str]) -> tuple[str, str] | None:
     return None
 
 
+def normalize_series_parts(parts: list[str]) -> tuple[str, str] | None:
+    if len(parts) < 2:
+        return None
+
+    for index, part in enumerate(parts):
+        series = clean_title(part)
+        if series not in BIBLE_SERIES_LABELS:
+            continue
+
+        author = ""
+        if index == 0:
+            title_parts = parts[1:]
+            if title_parts and looks_like_person(title_parts[-1]):
+                author = clean_person(title_parts[-1])
+                title_parts = title_parts[:-1]
+        else:
+            title_parts = parts[:index]
+            tail_parts = parts[index + 1 :]
+            if tail_parts and looks_like_person(tail_parts[-1]):
+                author = clean_person(tail_parts[-1])
+            elif title_parts and looks_like_person(title_parts[-1]):
+                author = clean_person(title_parts[-1])
+                title_parts = title_parts[:-1]
+
+        title = clean_title("：".join(title_parts))
+        if title:
+            return f"{series}：{title}", author
+
+    return None
+
+
+def split_alpha_volume_code_title_author(stem: str) -> tuple[str, str] | None:
+    book_pattern = "|".join(
+        map(re.escape, sorted(BIBLE_TITLE_PREFIX_WORDS, key=len, reverse=True))
+    )
+    match = re.match(
+        rf"^\d{{1,2}}[A-Za-z]\s+(?P<book>{book_pattern})\s+"
+        r"(?P<volume>上|下|上卷|下卷)\s+(?P<author>.+)$",
+        normalize(stem),
+    )
+    if not match:
+        return None
+    author = clean_person(match.group("author"))
+    title = clean_title(f"{match.group('book')}：{match.group('volume')}")
+    return title, author
+
+
 def split_catalog_code_title_author(stem: str) -> tuple[str, str] | None:
+    alpha_volume = split_alpha_volume_code_title_author(stem)
+    if alpha_volume:
+        return alpha_volume
+
     cleaned = strip_catalog_code_prefix(stem.replace("@", ""))
     if cleaned == stem:
         return None
@@ -646,6 +736,10 @@ def split_catalog_code_title_author(stem: str) -> tuple[str, str] | None:
     if tiandao:
         return tiandao
 
+    series_parts = normalize_series_parts(parts)
+    if series_parts:
+        return series_parts
+
     if len(parts) >= 2 and re.search(r"[\u3400-\u9fff]", parts[-1]):
         last_title, last_author = split_tail_author_from_catalog_title(parts[-1])
         if last_author:
@@ -662,7 +756,8 @@ def split_catalog_code_title_author(stem: str) -> tuple[str, str] | None:
     if len(parts) > 1:
         return normalize_bible_series_title("：".join(parts)), ""
 
-    return split_tail_author_from_catalog_title(parts[0])
+    title, author = split_tail_author_from_catalog_title(parts[0])
+    return normalize_bible_series_title(title), author
 
 
 def looks_like_person(value: str) -> bool:
@@ -711,10 +806,12 @@ def clean_title(value: str) -> str:
     value = re.sub(r"^篇(?=以基督)", "", value)
     value = re.sub(r"[“”‘’]", "", value)
     value = re.sub(r"^\d{2,4}[A-Za-z]{1,6}\d{2,8}\s*", "", value)
+    value = re.sub(r"^\d{7,}(?=[\u3400-\u9fff])", "", value)
+    value = re.sub(r"^\d{1,3}[A-Za-z](?=研[经經])", "", value)
     value = re.sub(r"^0\d{1,3}(?=[\u3400-\u9fff])", "", value)
     value = re.sub(r"(?<=\d)[：:](?=\d)", "-", value)
     bible_prefix_pattern = "|".join(map(re.escape, BIBLE_TITLE_PREFIX_WORDS))
-    value = re.sub(r"^\d{1,4}[、.．]\s*", "", value)
+    value = re.sub(r"^(?:\d{1,4}[、.．]\s*)+", "", value)
     value = re.sub(
         rf"^(?:\d{{1,2}}\s+){{1,3}}\d{{1,2}}(?=(?:{bible_prefix_pattern}))",
         "",
@@ -791,6 +888,7 @@ def split_title_author(object_key: str) -> tuple[str, str]:
     stem = re.sub(r"\.(?:pdf|rar|epub|mobi)$", "", stem, flags=re.IGNORECASE)
     stem = re.sub(r"~?微信[:：]?[A-Za-z0-9_-]+.*$", "", stem, flags=re.IGNORECASE)
     stem = remove_copy_markers(stem)
+    stem = re.sub(r"\s*[-_ ]?repaired\s*$", "", stem, flags=re.IGNORECASE)
     stem = re.sub(r"_(?:\d{7,})$", "", stem)
 
     tyndale = re.match(

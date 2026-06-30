@@ -74,6 +74,11 @@ class InventoryImportTests(unittest.TestCase):
         self.assertEqual("新约的传说", title)
         self.assertEqual("", author)
 
+    def test_long_catalog_number_without_separator_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/13075753今日如何读新约.zip")
+        self.assertEqual("今日如何读新约", title)
+        self.assertEqual("", author)
+
     def test_leading_decorative_marker_is_removed(self) -> None:
         title, author = IMPORTER.split_title_author("incoming/◆约翰福音注释 马太亨利.zip")
         self.assertEqual("约翰福音注释 马太亨利", title)
@@ -92,6 +97,11 @@ class InventoryImportTests(unittest.TestCase):
     def test_real_title_number_is_kept(self) -> None:
         title, author = IMPORTER.split_title_author("incoming/21世纪基督教灵修学导论.zip")
         self.assertEqual("21世纪基督教灵修学导论", title)
+        self.assertEqual("", author)
+
+    def test_real_count_title_number_is_kept(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/100名画旧约.zip")
+        self.assertEqual("100名画旧约", title)
         self.assertEqual("", author)
 
     def test_trailing_form_noise_after_book_title_is_removed(self) -> None:
@@ -221,6 +231,55 @@ class InventoryImportTests(unittest.TestCase):
         self.assertEqual("圣经信息系列：诗篇下", title)
         self.assertEqual("威尔克", author)
 
+    def test_alpha_volume_catalog_prefix_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/1A 创世记 上 约翰 华尔顿.zip")
+        self.assertEqual("创世记：上", title)
+        self.assertEqual("约翰 华尔顿", author)
+
+    def test_alpha_volume_catalog_prefix_for_exodus_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/2B 出埃及记 下 彼得 恩斯.zip")
+        self.assertEqual("出埃及记：下", title)
+        self.assertEqual("彼得 恩斯", author)
+
+    def test_combined_volume_prefix_before_series_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/31+34+36圣经信息系列：俄巴底亚书、那鸿书、西番雅书.zip"
+        )
+        self.assertEqual("圣经信息系列：俄巴底亚书、那鸿书、西番雅书", title)
+        self.assertEqual("", author)
+
+    def test_combined_volume_prefix_with_author_and_trailing_series_is_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/51+57歌罗西书、腓利门书：路卡斯：圣经信息系列.zip"
+        )
+        self.assertEqual("圣经信息系列：歌罗西书、腓利门书", title)
+        self.assertEqual("路卡斯", author)
+
+    def test_combined_comma_volume_prefix_before_series_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/60,61,65天道研经—彼犹.zip")
+        self.assertEqual("天道研经：彼犹", title)
+        self.assertEqual("", author)
+
+    def test_combined_comma_volume_prefix_with_author_after_series_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/60,61,65天道研经—彼犹--冯国泰、李汤马.zip")
+        self.assertEqual("天道研经：彼犹", title)
+        self.assertEqual("冯国泰 李汤马", author)
+
+    def test_parenthetical_series_after_number_prefix_is_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/54+56提摩太前书、提多书(圣经信息系列).zip")
+        self.assertEqual("圣经信息系列：提摩太前书、提多书", title)
+        self.assertEqual("", author)
+
+    def test_fullwidth_dash_series_middle_is_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/62+63+64约翰书信－生命信息系列－杰克曼.zip")
+        self.assertEqual("生命信息系列：约翰书信", title)
+        self.assertEqual("杰克曼", author)
+
+    def test_spaced_lesson_number_prefix_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/42 伟大的教师耶稣.zip")
+        self.assertEqual("伟大的教师耶稣", title)
+        self.assertEqual("", author)
+
     def test_tiandao_commentary_parts_are_normalized(self) -> None:
         title, author = IMPORTER.split_title_author("incoming/51教牧书信--张永信--天道注释.zip")
         self.assertEqual("天道注释：教牧书信", title)
@@ -244,6 +303,36 @@ class InventoryImportTests(unittest.TestCase):
     def test_nested_numeric_catalog_prefix_is_removed(self) -> None:
         title, author = IMPORTER.split_title_author("incoming/3-2随时候命 士师记.zip")
         self.assertEqual("随时候命：士师记", title)
+        self.assertEqual("", author)
+
+    def test_letter_suffix_catalog_prefix_before_study_series_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/3d研經系列.zip")
+        self.assertEqual("研經系列", title)
+        self.assertEqual("", author)
+
+    def test_direct_numeric_prefix_before_fixed_title_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/3仁者无惧:路加福音.zip")
+        self.assertEqual("仁者无惧：路加福音", title)
+        self.assertEqual("", author)
+
+    def test_direct_numeric_prefix_with_tail_author_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/67先知书2--何--注释--唐佑之-repaired.zip")
+        self.assertEqual("先知书2：何：注释", title)
+        self.assertEqual("唐佑之", author)
+
+    def test_repeated_dot_catalog_prefix_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/46.47.哥林多前后書.zip")
+        self.assertEqual("哥林多前后書", title)
+        self.assertEqual("", author)
+
+    def test_direct_numeric_prefix_before_sermon_title_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/16得胜凯歌 启示录.zip")
+        self.assertEqual("得胜凯歌：启示录", title)
+        self.assertEqual("", author)
+
+    def test_direct_numeric_prefix_before_title_phrase_is_not_moved_to_author(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/6回归义路：罗马书.zip")
+        self.assertEqual("回归义路：罗马书", title)
         self.assertEqual("", author)
 
     def test_ancient_christian_commentary_prefix_and_page_marker_are_removed(self) -> None:
