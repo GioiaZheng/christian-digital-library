@@ -30,8 +30,9 @@
   const renderPages = (manifest) => {
     const pageCount = Number(manifest.page_count || 0);
     const extension = String(manifest.page_extension || "webp").replace(/[^A-Za-z0-9]/g, "") || "webp";
+    const bookTitle = manifest.title || bookId;
 
-    if (title) title.textContent = manifest.title || bookId;
+    if (title) title.textContent = bookTitle;
     if (!Number.isFinite(pageCount) || pageCount <= 0) {
       setStatus("阅读页正在生成，请稍后再试。");
       return;
@@ -43,16 +44,54 @@
       figure.className = "reader-page";
       figure.id = `page-${index}`;
 
+      const imageUrl = readerUrl(`page-${paddedPage(index)}.${extension}`);
       const image = document.createElement("img");
       image.loading = index <= 2 ? "eager" : "lazy";
       image.decoding = "async";
-      image.src = readerUrl(`page-${paddedPage(index)}.${extension}`);
-      image.alt = `${manifest.title || bookId} 第 ${index} 页`;
+      image.src = imageUrl;
+      image.alt = `${bookTitle} 第 ${index} 页`;
+
+      const errorBox = document.createElement("div");
+      errorBox.className = "reader-page-error";
+      errorBox.hidden = true;
+
+      const errorText = document.createElement("p");
+      errorText.textContent = `第 ${index} 页加载失败。`;
+
+      const retryButton = document.createElement("button");
+      retryButton.className = "button secondary";
+      retryButton.type = "button";
+      retryButton.textContent = "重试本页";
+
+      retryButton.addEventListener("click", () => {
+        const retryUrl = new URL(imageUrl);
+        retryUrl.searchParams.set("retry", String(Date.now()));
+        figure.classList.remove("is-error");
+        errorBox.hidden = true;
+        image.hidden = false;
+        image.src = retryUrl.toString();
+        setStatus(`正在重新加载第 ${index} 页……`);
+      });
+
+      image.addEventListener("load", () => {
+        figure.classList.remove("is-error");
+        errorBox.hidden = true;
+        image.hidden = false;
+      });
+
+      image.addEventListener("error", () => {
+        figure.classList.add("is-error");
+        image.hidden = true;
+        errorBox.hidden = false;
+        setStatus(`第 ${index} 页加载失败，可以点“重试本页”。`);
+      });
+
+      errorBox.append(errorText, retryButton);
 
       const caption = document.createElement("figcaption");
       caption.textContent = `第 ${index} / ${pageCount} 页`;
 
-      figure.append(image, caption);
+      figure.append(image, errorBox, caption);
       fragment.append(figure);
     }
 

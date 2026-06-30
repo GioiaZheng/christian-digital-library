@@ -1023,6 +1023,28 @@ h3 {
   border-radius: 16px 16px 0 0;
 }
 
+.reader-page-error {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  gap: 14px;
+  padding: 34px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.reader-page-error[hidden] {
+  display: none;
+}
+
+.reader-page-error p {
+  margin: 0;
+}
+
+.reader-page-error .button {
+  width: fit-content;
+}
+
 .reader-page figcaption {
   padding: 8px 14px 10px;
   color: var(--muted);
