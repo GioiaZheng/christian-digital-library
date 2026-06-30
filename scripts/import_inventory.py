@@ -549,13 +549,16 @@ def clean_title(value: str) -> str:
     value = re.sub(r"[:：]?\s*fenleiID\s*[A-Za-z0-9]+", "", value, flags=re.IGNORECASE)
     value = re.sub(r"[:：]?\s*(?:p|pg)\s*\d+\s*$", "", value, flags=re.IGNORECASE)
     value = re.sub(r"\s*(?:--+|——+)\s*", "：", value)
+    value = re.sub(r"^(丁道尔新约(?:圣经)?注释)\s*[-—:：]\s*", r"\1：", value)
+    value = re.sub(r"^(丁道尔新约(?:圣经)?注释)：\s*\d{1,2}\s*[-—:：]\s*", r"\1：", value)
+    value = re.sub(r"(?<=[、，,])\s*\d{1,2}\s*[-—:：]\s*", "", value)
     value = re.sub(r"[-—_ ]+[\u3400-\u9fff]{2,20}出版社.*$", "", value)
     value = re.sub(r"[<>|\\/*?\"`~]+", " ", value)
     value = re.sub(r"[:：]\s*(?=[〉》])", "", value)
     value = re.sub(r"(?<=[〉》）\]\)])\s*表格$", "", value)
     value = re.sub(r"(?<=[\u3400-\u9fffA-Za-z0-9]):(?=[\u3400-\u9fff])", "：", value)
     value = re.sub(r"(?<=[\u3400-\u9fff]),(?=[\u3400-\u9fff])", "，", value)
-    value = re.sub(r"\s+", " ", value).strip(" ._-：:")
+    value = re.sub(r"\s+", " ", value).strip(" ._-：:、，,")
     if re.fullmatch(r"\d+", value):
         return "书名待核"
     return value or "书名待核"
@@ -582,6 +585,13 @@ def split_title_author(object_key: str) -> tuple[str, str]:
     stem = re.sub(r"~?微信[:：]?[A-Za-z0-9_-]+.*$", "", stem, flags=re.IGNORECASE)
     stem = remove_copy_markers(stem)
     stem = re.sub(r"_(?:\d{7,})$", "", stem)
+
+    tyndale = re.match(
+        r"^(丁道尔新约(?:圣经)?注释)\s*(?:--+|[-_—:：])\s*(?:\d{1,2}\s*(?:--+|[-_—:：])\s*)?(?P<title>.+)$",
+        stem,
+    )
+    if tyndale and re.search(r"[\u3400-\u9fff]", tyndale.group("title")):
+        return clean_title(f"{tyndale.group(1)}：{tyndale.group('title')}"), ""
 
     bibliographic = re.match(
         r"^[（(](?:中|英|美|德|俄|澳|法)[）)](?P<author>[\u3400-\u9fff·.A-Za-z ]{2,24})著[；;].*?[.。]\s*(?P<title>.+?)(?:[.。]\s*(?:北京|上海|香港).*)?$",
