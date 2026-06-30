@@ -36,26 +36,35 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("status: \"pending\"", source)
         self.assertIn("env.BOOK_UPLOADS.put", source)
         self.assertNotIn(".delete(", source)
-        self.assertNotIn(".list(", source)
 
-    def test_upload_worker_requires_upload_code_secret(self) -> None:
+    def test_upload_form_no_longer_requires_public_submit_code(self) -> None:
         source = UPLOAD_WORKER.read_text(encoding="utf-8")
-        self.assertIn("upload_code", source)
-        self.assertIn("env.UPLOAD_CODE", source)
-        self.assertIn("提交码不正确", source)
-        self.assertIn("上传入口尚未配置提交码", source)
+        self.assertNotIn("upload_code", source)
+        self.assertNotIn("UPLOAD_CODE", source)
         public_config = (ROOT / "public" / "assets" / "upload-config.js").read_text(
             encoding="utf-8"
         )
         self.assertNotIn("UPLOAD_CODE", public_config)
         self.assertNotIn("upload_code", public_config)
 
-    def test_upload_worker_does_not_publish_catalog_or_raw_paths(self) -> None:
+    def test_admin_worker_requires_separate_admin_secret(self) -> None:
+        source = UPLOAD_WORKER.read_text(encoding="utf-8")
+        self.assertIn("env.ADMIN_CODE", source)
+        self.assertIn("X-CDL-Admin-Code", source)
+        self.assertIn("管理员密码不正确", source)
+        public_config = (ROOT / "public" / "assets" / "admin-config.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("ADMIN_CODE", public_config)
+        self.assertNotIn("ACCESS_CODE", public_config)
+
+    def test_upload_worker_keeps_admin_actions_out_of_public_catalog(self) -> None:
         source = UPLOAD_WORKER.read_text(encoding="utf-8")
         self.assertNotIn("data/books.csv", source)
-        self.assertNotIn("raw/", source)
         self.assertNotIn("covers/", source)
         self.assertNotIn("previews/", source)
+        self.assertIn("metadata/admin-overrides/", source)
+        self.assertIn("raw/admin-approved/", source)
 
     def test_access_worker_requires_secret_and_private_map(self) -> None:
         source = ACCESS_WORKER.read_text(encoding="utf-8")
@@ -89,6 +98,8 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("assets/reader.js", reader_page)
         self.assertIn("page-${paddedPage(index)}", reader_js)
         self.assertIn('image.loading = index <= 2 ? "eager" : "lazy"', reader_js)
+        self.assertIn("data-reader-zoom-in", reader_page)
+        self.assertIn("--reader-zoom", reader_js)
         self.assertNotIn("ACCESS_CODE", reader_js)
         self.assertNotIn("raw/", reader_js)
 
@@ -100,6 +111,8 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("ArrowLeft", source)
         self.assertIn("ArrowRight", source)
         self.assertIn("pointerup", source)
+        self.assertIn("data-image-viewer-zoom-in", source)
+        self.assertIn("event.target === stage", source)
         self.assertNotIn("ACCESS_CODE", source)
         self.assertNotIn("raw/", source)
 

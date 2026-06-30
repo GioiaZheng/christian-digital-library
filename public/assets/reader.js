@@ -15,8 +15,12 @@
   const pageTotal = document.querySelector("[data-reader-page-total]");
   const prevPageButton = document.querySelector("[data-reader-prev]");
   const nextPageButton = document.querySelector("[data-reader-next]");
+  const zoomOutButton = document.querySelector("[data-reader-zoom-out]");
+  const zoomResetButton = document.querySelector("[data-reader-zoom-reset]");
+  const zoomInButton = document.querySelector("[data-reader-zoom-in]");
   let currentPage = 1;
   let currentPageTotal = 0;
+  let readerScale = 1;
 
   const setStatus = (message) => {
     if (status) status.textContent = message;
@@ -33,6 +37,23 @@
   };
 
   const validBookId = /^cdl-\d{6}$/.test(bookId);
+
+  const applyReaderZoom = () => {
+    if (pages) pages.style.setProperty("--reader-zoom", String(readerScale));
+    if (zoomResetButton) zoomResetButton.textContent = `${Math.round(readerScale * 100)}%`;
+    if (zoomOutButton) zoomOutButton.disabled = readerScale <= 0.7;
+    if (zoomInButton) zoomInButton.disabled = readerScale >= 2;
+  };
+
+  const zoomReader = (step) => {
+    readerScale = Math.min(2, Math.max(0.7, Number((readerScale + step).toFixed(2))));
+    applyReaderZoom();
+  };
+
+  const resetReaderZoom = () => {
+    readerScale = 1;
+    applyReaderZoom();
+  };
 
   const updateCurrentPage = (pageNumber, pageCount = currentPageTotal) => {
     const total = Number(pageCount) || 0;
@@ -129,6 +150,10 @@
         scrollToPage(currentPage + 1, pageCount);
       });
     }
+    zoomOutButton?.addEventListener("click", () => zoomReader(-0.15));
+    zoomResetButton?.addEventListener("click", resetReaderZoom);
+    zoomInButton?.addEventListener("click", () => zoomReader(0.15));
+    applyReaderZoom();
 
     const fragment = document.createDocumentFragment();
     for (let index = 1; index <= pageCount; index += 1) {

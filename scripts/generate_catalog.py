@@ -268,7 +268,7 @@ def render_home(
       <div class="shell hero-grid">
         <div>
           <p class="eyebrow">中文基督教数字图书馆</p>
-          <h1>在浩繁馆藏中，找到想读的那一本。</h1>
+          <h1>在浩繁馆藏中，<br>找到想读的那一本。</h1>
           <p class="lead">按书名、作者和主题检索中文基督教书目，快速浏览馆藏内容。</p>
           <div class="actions">
             <a class="button" href="catalog.html">搜索馆藏</a>
@@ -283,6 +283,17 @@ def render_home(
           <strong>目录持续整理</strong>
           <p>书名、作者、版本与分类会在核对后逐步补充和修正。</p>
         </aside>
+      </div>
+    </section>
+    <section class="section">
+      <div class="shell">
+        <div class="section-heading">
+          <div><p class="eyebrow">每日推荐</p><h2>今天可以读这几本</h2></div>
+          <a href="catalog.html">进入完整目录</a>
+        </div>
+        <div id="daily-recommendations" class="grid" aria-live="polite">
+          <div class="empty-state">正在为今天挑选书目……</div>
+        </div>
       </div>
     </section>
     <section class="section tint">
@@ -302,7 +313,8 @@ def render_home(
         </div>
         <div class="grid">{featured}</div>
       </div>
-    </section>"""
+    </section>
+    <script src="assets/daily-recommendations.js" defer></script>"""
     return render_layout(
         template,
         title="基督教数字图书馆｜中文馆藏平台",
@@ -342,7 +354,8 @@ def render_catalog(template: Template, categories: list[dict[str, str]]) -> str:
         </div>
         <p id="result-summary" class="result-summary" aria-live="polite">正在读取书目……</p>
         <div id="search-results" class="grid"></div>
-        <div class="load-more-wrap"><button id="load-more" class="button secondary" type="button" hidden>显示更多</button></div>
+        <div id="catalog-scroll-sentinel" class="scroll-sentinel" aria-hidden="true"></div>
+        <nav id="alphabet-index" class="alphabet-index" aria-label="按字母跳转"></nav>
         <noscript><div class="empty-state">搜索功能需要 JavaScript。你仍可前往“分类”页面浏览全部书目。</div></noscript>
       </div>
     </section>
@@ -620,11 +633,6 @@ def render_about(template: Template) -> str:
             <label for="upload-file">文件</label>
             <input id="upload-file" name="file" type="file" accept=".zip,.pdf,.epub,.mobi" required>
           </div>
-          <div class="field">
-            <label for="upload-code">提交码</label>
-            <input id="upload-code" name="upload_code" type="password" autocomplete="off" required>
-            <p class="field-hint">提交码由管理员提供，不会写入公开网页。</p>
-          </div>
           <button class="button" type="submit">提交审核</button>
           <p id="upload-request-status" class="form-status" aria-live="polite">上传入口正在接入中。</p>
         </form>
@@ -638,6 +646,91 @@ def render_about(template: Template) -> str:
         description="了解基督教数字图书馆的目标、存储原则与内容治理方式。",
         content=content,
         active="about",
+    )
+
+
+def render_admin(template: Template) -> str:
+    content = """
+    <header class="page-hero"><div class="shell">
+      <p class="eyebrow">管理员</p><h1>管理馆藏</h1>
+      <p class="lead">这个页面只给管理员使用。管理员密码与阅读访问码分开配置。</p>
+    </div></header>
+    <section class="section"><div class="shell admin-shell">
+      <form id="admin-login-form" class="admin-login-card">
+        <div>
+          <p class="eyebrow">登录</p>
+          <h2>管理员入口</h2>
+          <p class="description">请输入管理员密码。密码只发给后台 Worker 验证，不写入网页。</p>
+        </div>
+        <div class="field">
+          <label for="admin-code">管理员密码</label>
+          <input id="admin-code" name="admin_code" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="button" type="submit">进入管理</button>
+        <p id="admin-login-status" class="form-status" aria-live="polite"></p>
+      </form>
+
+      <div id="admin-panel" class="admin-panel" hidden>
+        <div class="section-heading">
+          <div><p class="eyebrow">审核</p><h2>待审核上传</h2></div>
+          <button id="admin-refresh-uploads" class="button secondary" type="button">刷新</button>
+        </div>
+        <div id="admin-upload-list" class="admin-list" aria-live="polite"></div>
+
+        <div class="section-heading admin-edit-heading">
+          <div><p class="eyebrow">书目资料</p><h2>修改书目信息</h2></div>
+        </div>
+        <div class="search-panel admin-search-panel" role="search">
+          <div class="field">
+            <label for="admin-book-search">搜索书目</label>
+            <input id="admin-book-search" type="search" placeholder="输入书名、作者或书号" autocomplete="off">
+          </div>
+        </div>
+        <div id="admin-book-results" class="admin-book-results" aria-live="polite"></div>
+        <form id="admin-book-form" class="admin-book-form" hidden>
+          <input id="admin-book-id" name="id" type="hidden">
+          <div class="field">
+            <label for="admin-book-title">书名</label>
+            <input id="admin-book-title" name="clean_title" type="text">
+          </div>
+          <div class="field">
+            <label for="admin-book-author">作者</label>
+            <input id="admin-book-author" name="author" type="text">
+          </div>
+          <div class="field">
+            <label for="admin-book-publisher">出版社</label>
+            <input id="admin-book-publisher" name="publisher" type="text">
+          </div>
+          <div class="field">
+            <label for="admin-book-year">年份</label>
+            <input id="admin-book-year" name="year" type="text">
+          </div>
+          <div class="field">
+            <label for="admin-book-category">分类</label>
+            <input id="admin-book-category" name="category" type="text">
+          </div>
+          <div class="field">
+            <label for="admin-book-tags">标签</label>
+            <input id="admin-book-tags" name="tags" type="text">
+          </div>
+          <div class="field">
+            <label for="admin-book-description">内容简介</label>
+            <textarea id="admin-book-description" name="description" rows="4"></textarea>
+          </div>
+          <button class="button" type="submit">保存修改</button>
+          <p id="admin-book-status" class="form-status" aria-live="polite"></p>
+        </form>
+      </div>
+    </div></section>
+    <script src="assets/upload-config.js" defer></script>
+    <script src="assets/admin-config.js" defer></script>
+    <script src="assets/admin.js" defer></script>"""
+    return render_layout(
+        template,
+        title="管理员｜基督教数字图书馆",
+        description="基督教数字图书馆的管理员入口。",
+        content=content,
+        active="",
     )
 
 
@@ -679,6 +772,7 @@ def build_site(root: Path = ROOT, output: Path | None = None) -> dict[str, int]:
     write_text(output / "catalog.html", render_catalog(template, categories))
     write_text(output / "categories.html", render_categories(template, books, categories))
     write_text(output / "about.html", render_about(template))
+    write_text(output / "admin.html", render_admin(template))
 
     for category in categories:
         category_books = [book for book in books if book["category"] == category["id"]]
