@@ -63,6 +63,9 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("metadata/access-map.json", source)
         self.assertIn("env.BOOK_FILES.get", source)
         self.assertIn("access_action", source)
+        self.assertIn("READER_TOKEN_SECRET", source)
+        self.assertIn("reader/${bookId}/manifest.json", source)
+        self.assertIn("reader_url", source)
         self.assertIn("X-CDL-File-Extension", source)
         self.assertIn("访问码不正确", source)
         self.assertNotIn(".put(", source)
@@ -72,11 +75,22 @@ class WorkerPolicyTests(unittest.TestCase):
     def test_access_js_supports_download_and_online_reading(self) -> None:
         source = (ROOT / "public" / "assets" / "access.js").read_text(encoding="utf-8")
         self.assertIn('value === "read"', source)
-        self.assertIn("DecompressionStream", source)
-        self.assertIn("parseZipEntries", source)
+        self.assertIn("reader_url", source)
+        self.assertIn("window.open", source)
         self.assertIn("downloadBlob", source)
+        self.assertNotIn("DecompressionStream", source)
+        self.assertNotIn("parseZipEntries", source)
         self.assertNotIn("ACCESS_CODE", source)
         self.assertNotIn("raw/", source)
+
+    def test_reader_page_lazy_loads_reader_images(self) -> None:
+        reader_page = (ROOT / "public" / "reader.html").read_text(encoding="utf-8")
+        reader_js = (ROOT / "public" / "assets" / "reader.js").read_text(encoding="utf-8")
+        self.assertIn("assets/reader.js", reader_page)
+        self.assertIn("page-${paddedPage(index)}", reader_js)
+        self.assertIn('image.loading = index <= 2 ? "eager" : "lazy"', reader_js)
+        self.assertNotIn("ACCESS_CODE", reader_js)
+        self.assertNotIn("raw/", reader_js)
 
     def test_image_viewer_supports_preview_navigation(self) -> None:
         source = (ROOT / "public" / "assets" / "image-viewer.js").read_text(
