@@ -9,6 +9,7 @@
     lastFocus: null,
     touchStartX: 0,
     touchStartY: 0,
+    scale: 1,
   };
 
   const getCaption = (trigger) =>
@@ -38,6 +39,11 @@
   viewer.innerHTML = `
     <div class="image-viewer-top">
       <div class="image-viewer-title" data-image-viewer-title></div>
+      <div class="image-viewer-tools" aria-label="图片缩放">
+        <button class="image-viewer-button" type="button" data-image-viewer-zoom-out aria-label="缩小">−</button>
+        <button class="image-viewer-button" type="button" data-image-viewer-zoom-reset aria-label="还原大小">100%</button>
+        <button class="image-viewer-button" type="button" data-image-viewer-zoom-in aria-label="放大">+</button>
+      </div>
       <button class="image-viewer-button" type="button" data-image-viewer-close aria-label="关闭">×</button>
     </div>
     <div class="image-viewer-stage" data-image-viewer-stage>
@@ -58,6 +64,26 @@
   const prevButton = viewer.querySelector("[data-image-viewer-prev]");
   const nextButton = viewer.querySelector("[data-image-viewer-next]");
   const stage = viewer.querySelector("[data-image-viewer-stage]");
+  const zoomOutButton = viewer.querySelector("[data-image-viewer-zoom-out]");
+  const zoomResetButton = viewer.querySelector("[data-image-viewer-zoom-reset]");
+  const zoomInButton = viewer.querySelector("[data-image-viewer-zoom-in]");
+
+  const applyZoom = () => {
+    image.style.transform = `scale(${state.scale})`;
+    if (zoomResetButton) zoomResetButton.textContent = `${Math.round(state.scale * 100)}%`;
+    if (zoomOutButton) zoomOutButton.disabled = state.scale <= 0.6;
+    if (zoomInButton) zoomInButton.disabled = state.scale >= 2.4;
+  };
+
+  const zoom = (step) => {
+    state.scale = Math.min(2.4, Math.max(0.6, Number((state.scale + step).toFixed(2))));
+    applyZoom();
+  };
+
+  const resetZoom = () => {
+    state.scale = 1;
+    applyZoom();
+  };
 
   const update = () => {
     const item = state.items[state.index];
@@ -73,6 +99,7 @@
     counter.textContent = hasMany
       ? `${state.index + 1} / ${state.items.length} · 左右切换`
       : "按 Esc 关闭";
+    resetZoom();
   };
 
   const open = (items, index, trigger) => {
@@ -110,9 +137,12 @@
   closeButton.addEventListener("click", close);
   prevButton.addEventListener("click", () => move(-1));
   nextButton.addEventListener("click", () => move(1));
+  zoomOutButton?.addEventListener("click", () => zoom(-0.2));
+  zoomResetButton?.addEventListener("click", resetZoom);
+  zoomInButton?.addEventListener("click", () => zoom(0.2));
 
   viewer.addEventListener("click", (event) => {
-    if (event.target === viewer) close();
+    if (event.target === viewer || event.target === stage) close();
   });
 
   stage.addEventListener("pointerdown", (event) => {
@@ -132,5 +162,8 @@
     if (event.key === "Escape") close();
     if (event.key === "ArrowLeft") move(-1);
     if (event.key === "ArrowRight") move(1);
+    if (event.key === "+" || event.key === "=") zoom(0.2);
+    if (event.key === "-") zoom(-0.2);
+    if (event.key === "0") resetZoom();
   });
 })();

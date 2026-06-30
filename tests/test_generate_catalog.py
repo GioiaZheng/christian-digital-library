@@ -153,11 +153,48 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn('name="title"', about)
             self.assertIn('name="author"', about)
             self.assertIn('name="file"', about)
-            self.assertIn('name="upload_code"', about)
-            self.assertIn('id="upload-code"', about)
-            self.assertIn("提交码由管理员提供", about)
+            self.assertNotIn('name="upload_code"', about)
+            self.assertNotIn('id="upload-code"', about)
+            self.assertNotIn("提交码", about)
             self.assertIn("上传入口正在接入中", about)
             self.assertIn("assets/upload.js", about)
+
+    def test_admin_page_is_generated_with_separate_login(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = create_sample_project(Path(directory))
+            output = project / "site"
+            GENERATOR.build_site(project, output)
+            admin = (output / "admin.html").read_text(encoding="utf-8")
+
+            self.assertIn("管理馆藏", admin)
+            self.assertIn('name="admin_code"', admin)
+            self.assertIn("assets/admin.js", admin)
+            self.assertNotIn("ACCESS_CODE", admin)
+            self.assertNotIn("ADMIN_CODE", admin)
+
+    def test_catalog_uses_infinite_scroll_and_alphabet_index(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = create_sample_project(Path(directory))
+            output = project / "site"
+            GENERATOR.build_site(project, output)
+            catalog = (output / "catalog.html").read_text(encoding="utf-8")
+
+            self.assertIn('id="catalog-scroll-sentinel"', catalog)
+            self.assertIn('id="alphabet-index"', catalog)
+            self.assertNotIn("显示更多", catalog)
+            self.assertNotIn('id="load-more"', catalog)
+
+    def test_homepage_contains_daily_recommendations(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = create_sample_project(Path(directory))
+            output = project / "site"
+            GENERATOR.build_site(project, output)
+            home = (output / "index.html").read_text(encoding="utf-8")
+
+            self.assertIn("在浩繁馆藏中，<br>找到想读的那一本。", home)
+            self.assertIn("每日推荐", home)
+            self.assertIn('id="daily-recommendations"', home)
+            self.assertIn("assets/daily-recommendations.js", home)
 
     def test_category_detail_page_contains_filter_controls(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

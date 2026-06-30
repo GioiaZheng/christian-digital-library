@@ -7,13 +7,12 @@
 - 书名
 - 作者
 - 文件
-- 提交码
 
 ## Worker 行为
 
 上传 Worker 接收表单后写入 R2：
 
-提交码必须与 Worker Secret `UPLOAD_CODE` 一致，否则不会写入 R2。
+公开上传表单不需要提交码。所有上传只进入待审核区，不会自动进入公开书目。
 
 ```text
 pending/uploads/{requestId}/{filename}
@@ -60,7 +59,7 @@ python scripts\review_uploads.py --env-file C:\path\to\.env delete <提交 ID> -
 
 当前脚本只处理 `pending/` 区。正式入库仍需要人工核对书名、作者、版本、版权状态和分类后，再整理到书目数据中。
 
-## 部署上传 Worker
+## 部署上传和管理员 Worker
 
 1. 复制配置示例：
 
@@ -75,10 +74,10 @@ cd workers
 wrangler deploy --config wrangler.upload.toml
 ```
 
-3. 设置提交码。提交码使用 Worker Secret，不写入仓库：
+3. 设置管理员密码。管理员密码使用 Worker Secret，不写入仓库，也不要与阅读访问码相同：
 
 ```powershell
-wrangler secret put UPLOAD_CODE --config wrangler.upload.toml
+wrangler secret put ADMIN_CODE --config wrangler.upload.toml
 ```
 
 4. 将 Worker 地址写入 `public/assets/upload-config.js`：
@@ -91,6 +90,6 @@ window.CDL_UPLOAD_ENDPOINT = "https://christian-digital-library-upload.<your-sub
 
 ## 注意
 
-当前上传入口适合先做小规模提交。大型文件、断点续传、用户登录和后台审核界面后续再做。
+当前上传入口适合先做小规模提交。大型文件、断点续传和正式用户登录后续再做。
 
-不要把提交码写入 `upload-config.js` 或任何公开文件。
+不要把管理员密码、阅读访问码或任何 Secret 写入 `upload-config.js` 或任何公开文件。
