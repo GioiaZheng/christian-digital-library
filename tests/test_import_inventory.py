@@ -61,8 +61,8 @@ class InventoryImportTests(unittest.TestCase):
 
     def test_short_zero_prefixed_series_number_is_removed(self) -> None:
         title, author = IMPORTER.split_title_author("incoming/02出埃及记卷上--赖建国--天道注释.zip")
-        self.assertEqual("出埃及记卷上：赖建国：天道注释", title)
-        self.assertEqual("", author)
+        self.assertEqual("天道注释：出埃及记卷上", title)
+        self.assertEqual("赖建国", author)
 
     def test_multi_number_bible_prefix_is_removed(self) -> None:
         title, author = IMPORTER.split_title_author("incoming/09 10圣经信息系列 撒母耳记上下.zip")
@@ -265,9 +265,24 @@ class InventoryImportTests(unittest.TestCase):
         self.assertEqual("天道研经：彼犹", title)
         self.assertEqual("冯国泰 李汤马", author)
 
+    def test_spaced_double_number_prefix_before_series_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/12 18 天道研经――歌罗西书、腓利门书_冯国泰.zip")
+        self.assertEqual("天道研经：歌罗西书、腓利门书", title)
+        self.assertEqual("冯国泰", author)
+
+    def test_trailing_duplicate_marker_after_series_author_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/天道研经_帖前后_华约翰_2.zip")
+        self.assertEqual("天道研经：帖前后", title)
+        self.assertEqual("华约翰", author)
+
     def test_parenthetical_series_after_number_prefix_is_normalized(self) -> None:
         title, author = IMPORTER.split_title_author("incoming/54+56提摩太前书、提多书(圣经信息系列).zip")
         self.assertEqual("圣经信息系列：提摩太前书、提多书", title)
+        self.assertEqual("", author)
+
+    def test_malformed_parenthetical_series_after_number_prefix_is_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/31、32俄巴底亚书、约拿书（天道研经导读}.zip")
+        self.assertEqual("天道研经导读：俄巴底亚书、约拿书", title)
         self.assertEqual("", author)
 
     def test_fullwidth_dash_series_middle_is_normalized(self) -> None:
@@ -294,6 +309,48 @@ class InventoryImportTests(unittest.TestCase):
         title, author = IMPORTER.split_title_author("incoming/Y雅歌@---黃朱倫---天道聖經注釋.zip")
         self.assertEqual("天道聖經注釋：雅歌", title)
         self.assertEqual("黃朱倫", author)
+
+    def test_eb_catalog_prefix_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/EB0046 新约书卷详纲 - 马有藻.zip")
+        self.assertEqual("新约书卷详纲", title)
+        self.assertEqual("马有藻", author)
+
+    def test_acts_commentary_volume_and_author_are_split(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/使徒行传注释，卷一，加尔文.zip")
+        self.assertEqual("使徒行传注释：卷一", title)
+        self.assertEqual("加尔文", author)
+
+    def test_acts_commentary_trailing_book_noise_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/M5960 使徒行传注解（下册）徒 黄迦勒.zip")
+        self.assertEqual("使徒行传注解(下册)", title)
+        self.assertEqual("黄迦勒", author)
+
+    def test_traditional_acts_page_range_suffix_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/使徒行傳Acts.1(444-470).zip")
+        self.assertEqual("使徒行傳", title)
+        self.assertEqual("", author)
+
+    def test_traditional_acts_commentary_number_is_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/使徒行傳註釋1.zip")
+        self.assertEqual("使徒行傳註釋：1", title)
+        self.assertEqual("", author)
+
+    def test_nivac_suffix_series_is_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/出埃及記上NIVAC国际释经应用系列 (1).zip")
+        self.assertEqual("NIVAC国际释经应用系列：出埃及記上", title)
+        self.assertEqual("", author)
+
+    def test_known_series_parts_without_catalog_prefix_are_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/出埃及记-莫德-圣经信息系列-台北:校园出版社，2012(1).zip"
+        )
+        self.assertEqual("圣经信息系列：出埃及记", title)
+        self.assertEqual("莫德", author)
+
+    def test_tiandao_commentary_parts_without_catalog_prefix_are_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/出埃及记卷上--赖建国--天道注释.zip")
+        self.assertEqual("天道注释：出埃及记卷上", title)
+        self.assertEqual("赖建国", author)
 
     def test_numeric_catalog_prefix_before_old_testament_title_is_removed(self) -> None:
         title, author = IMPORTER.split_title_author("incoming/2旧约历史书导论-David M.Howard Jr.zip")
