@@ -47,6 +47,9 @@ MAPPING_FIELDS = [
 UNKNOWN_AUTHOR_WORDS = {
     "麦种",
     "麦种出版",
+    "麦种彩色版",
+    "麦种传道会",
+    "美国麦种传道会",
     "华神",
     "天道",
     "好书",
@@ -56,6 +59,13 @@ UNKNOWN_AUTHOR_WORDS = {
 }
 TYNDALE_COMMENTARY_PATTERN = r"丁道尔(?:新约|旧约)(?:圣经)?注释"
 MAIZHONG_COMMENTARY = "麦种圣经注释"
+MAIZHONG_SOURCE_LABELS = {
+    "麦种",
+    "麦种出版",
+    "麦种彩色版",
+    "麦种传道会",
+    "美国麦种传道会",
+}
 NON_AUTHOR_WORDS = (
     "圣经",
     "聖經",
@@ -490,8 +500,24 @@ def clean_person(value: str) -> str:
     for word in UNKNOWN_AUTHOR_WORDS:
         value = re.sub(rf"(?:[\s_\-—]*{re.escape(word)})+$", "", value)
     value = re.sub(r"[《》【】\[\]()（）'\"`]+", " ", value)
-    value = re.sub(r"[.:：·•—–_-]+", " ", value)
+    value = re.sub(r"[.:：·•—–_、-]+", " ", value)
     return re.sub(r"\s+", " ", value).strip()
+
+
+def source_label(value: str) -> str:
+    value = normalize(value)
+    value = re.sub(r"(?:19|20)\d{2}.*$", "", value)
+    value = re.sub(r"[\s_\-—:：,，.。()（）]+", "", value)
+    return value
+
+
+def is_maizhong_source(value: str) -> bool:
+    label = source_label(value)
+    return label in MAIZHONG_SOURCE_LABELS
+
+
+def looks_like_maizhong_author(value: str) -> bool:
+    return looks_like_person(value) or clean_person(value) in {"唐书礼"}
 
 
 def looks_like_person(value: str) -> bool:
@@ -514,6 +540,8 @@ def clean_title(value: str) -> str:
     value = remove_copy_markers(value)
     value = re.sub(r"\s*[-_ ]?repaired\s*$", "", value, flags=re.IGNORECASE)
     value = re.sub(r"^喜乐出版社[-—_:： ]+", "", value)
+    value = re.sub(r"[（(]\s*(?:麦种|麦种出版|麦种彩色版|麦种传道会|美国麦种传道会)\s*[）)]", "", value)
+    value = re.sub(r"\s*[-—_:： ]+(?:麦种|麦种出版|麦种彩色版|麦种传道会|美国麦种传道会)\s*$", "", value)
     value = re.sub(r"^[（(]\d+[）)]\s*", "", value)
     value = re.sub(r"^[（(](?:华神|麦种|天道)[）)]\s*", "", value)
     value = re.sub(r"^[◆◇●○■□▲△★☆※·•]+", "", value)
@@ -625,6 +653,40 @@ def split_title_author(object_key: str) -> tuple[str, str]:
             pieces = pieces[:-1]
         title = "".join(pieces) if len(pieces) == 1 else "：".join(pieces)
         return clean_title(f"{maizhong.group('series')}：{title}"), author
+
+    maizhong_parenthetical = re.match(
+        r"^(?P<title>.+?)[（(]\s*麦种(?:[.．:：\-—]\s*(?P<author>[^）)]+))?\s*[）)]$",
+        stem,
+    )
+    if maizhong_parenthetical:
+        author = maizhong_parenthetical.group("author") or ""
+        return clean_title(maizhong_parenthetical.group("title")), clean_person(author)
+
+    maizhong_source = any(
+        is_maizhong_source(part)
+        for part in re.split(r"\s*(?:--+|——+|[-_—:：])\s*", stem)
+        if part.strip()
+    ) or re.search(r"[（(]\s*(?:麦种|麦种出版|麦种彩色版|麦种传道会|美国麦种传道会)\s*[）)]", stem)
+    if maizhong_source:
+        parts = [
+            part.strip()
+            for part in re.split(r"\s*(?:--+|——+|[-_—:：])\s*", stem)
+            if part.strip()
+        ]
+        removed_code = False
+        while parts and (
+            re.fullmatch(r"\d{1,3}(?:\.\d{1,3}[A-Za-z]?){0,3}", parts[0])
+            or (removed_code and re.fullmatch(r"\d{1,2}", parts[0]))
+        ):
+            parts.pop(0)
+            removed_code = True
+        parts = [part for part in parts if not is_maizhong_source(part)]
+        author = ""
+        if len(parts) >= 2 and looks_like_maizhong_author(parts[-1]):
+            author = clean_person(parts[-1])
+            parts = parts[:-1]
+        title = "：".join(parts) if parts else stem
+        return clean_title(title), author
 
     bibliographic = re.match(
         r"^[（(](?:中|英|美|德|俄|澳|法)[）)](?P<author>[\u3400-\u9fff·.A-Za-z ]{2,24})著[；;].*?[.。]\s*(?P<title>.+?)(?:[.。]\s*(?:北京|上海|香港).*)?$",
