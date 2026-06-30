@@ -1,36 +1,56 @@
-# 密码访问流程
+# 访问码与在线阅读流程
 
-书目详情页只提交书目编号和访问码，不保存原始文件地址。
+书目详情页只提交书目编号和访问码，不保存访问码，也不暴露原始文件地址。
 
-## 流程
+## 下载流程
 
 ```text
 详情页
   ↓ 输入访问码
 Cloudflare Worker
   ↓ 验证 ACCESS_CODE
-R2 metadata/access-map.json
-  ↓ 查找书目对应文件
-R2 原始文件区
-  ↓
+R2 访问映射
+  ↓ 找到对应原始文件
 浏览器下载
 ```
 
-## 生成访问映射
+## 在线阅读流程
 
-访问映射由本地私有 mapping 生成，不提交到公开仓库。
-
-```powershell
-python scripts\build_access_map.py --mapping C:\path\to\public_catalog_mapping.csv --output C:\path\to\access-map.json
-```
-
-生成后上传到 R2：
+在线阅读不再下载 ZIP，也不在浏览器里解压 ZIP。
 
 ```text
-metadata/access-map.json
+详情页
+  ↓ 输入访问码
+Cloudflare Worker
+  ↓ 返回短时阅读 token
+reader.html
+  ↓ 按需请求页面图片
+Cloudflare Worker
+  ↓ 校验 token
+R2 阅读页图片
 ```
 
-## 部署 Worker
+阅读页文件按书目编号放在 R2 的阅读区：
+
+```text
+reader/{book_id}/manifest.json
+reader/{book_id}/page-0001.webp
+reader/{book_id}/page-0002.webp
+```
+
+`manifest.json` 至少包含：
+
+```json
+{
+  "title": "书名",
+  "page_count": 120,
+  "page_extension": "webp"
+}
+```
+
+没有生成阅读页图片的书，在线阅读会提示“阅读版正在生成”，下载入口仍然可用。
+
+## 部署
 
 ```powershell
 wrangler deploy --config workers\wrangler.access.example.toml
@@ -42,14 +62,14 @@ wrangler deploy --config workers\wrangler.access.example.toml
 wrangler secret put ACCESS_CODE --config workers\wrangler.access.example.toml
 ```
 
-部署后，将 Worker 地址写入：
+可选：单独设置阅读 token 密钥。
 
-```text
-public/assets/access-config.js
+```powershell
+wrangler secret put READER_TOKEN_SECRET --config workers\wrangler.access.example.toml
 ```
 
 ## 注意
 
 - 不要把访问码写入公开文件。
 - 不要把 R2 原始文件路径写入公开网页。
-- 当前入口是内部访问码方案，不是完整用户权限系统。
+- ZIP 保留为归档和下载文件；在线阅读使用预先生成的阅读页图片。
