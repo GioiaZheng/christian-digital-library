@@ -121,6 +121,37 @@ class InventoryImportTests(unittest.TestCase):
         self.assertEqual("丁道尔新约圣经注释：雅各书", title)
         self.assertEqual("", author)
 
+    def test_tyndale_old_testament_volume_number_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/丁道尔旧约注释--01-创世记.zip")
+        self.assertEqual("丁道尔旧约注释：创世记", title)
+        self.assertEqual("", author)
+
+    def test_tyndale_old_testament_embedded_volume_number_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/丁道尔旧约注释--08-士师记、路得记.zip")
+        self.assertEqual("丁道尔旧约注释：士师记、路得记", title)
+        self.assertEqual("", author)
+
+    def test_maizhong_commentary_code_and_publisher_are_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/94.09：麦种圣经注释 约翰书信：亚伯勒：麦种.zip"
+        )
+        self.assertEqual("麦种圣经注释：约翰书信", title)
+        self.assertEqual("亚伯勒", author)
+
+    def test_maizhong_commentary_code_is_removed_when_author_is_separate(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/224.1.16-1-麦种圣经注释以赛亚书一至三十九章-欧思沃.zip"
+        )
+        self.assertEqual("麦种圣经注释：以赛亚书一至三十九章", title)
+        self.assertEqual("欧思沃", author)
+
+    def test_maizhong_commentary_letter_code_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/227.1.19a-麦种圣经注释罗马书 上 -穆尔-麦种.zip"
+        )
+        self.assertEqual("麦种圣经注释：罗马书 上", title)
+        self.assertEqual("穆尔", author)
+
     def test_ids_survive_object_rename_with_same_signature(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
