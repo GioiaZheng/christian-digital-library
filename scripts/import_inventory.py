@@ -110,11 +110,38 @@ BIBLE_SERIES_LABELS = (
     "聖經信息系列",
     "生命信息系列",
     "NIVAC国际释经应用系列",
+    "国际释经应用系列",
     "天道研经",
     "天道研經",
     "天道研经导读",
     "天道研經導讀",
 )
+LIVING_SPRING_ABBREVIATIONS = {
+    "太": "马太福音",
+    "可": "马可福音",
+    "路": "路加福音",
+    "约": "约翰福音",
+    "徒": "使徒行传",
+    "罗": "罗马书",
+    "林前后": "哥林多前后书",
+    "加": "加拉太书",
+    "以": "以弗所书",
+    "腓": "腓立比书",
+    "歌": "歌罗西书",
+    "帖前后": "帖撒罗尼迦前后书",
+    "贴前后": "帖撒罗尼迦前后书",
+    "提前后": "提摩太前后书",
+    "多": "提多书",
+    "门": "腓利门书",
+    "来": "希伯来书",
+    "雅": "雅各书",
+    "彼前后": "彼得前后书",
+    "约一": "约翰一书",
+    "约二": "约翰二书",
+    "约三": "约翰三书",
+    "犹": "犹大书",
+    "启": "启示录",
+}
 NON_AUTHOR_WORDS = (
     "圣经",
     "聖經",
@@ -619,7 +646,19 @@ def format_catalog_title(value: str) -> str:
 
 def normalize_bible_series_title(value: str) -> str:
     value = clean_title(value)
+    value = re.sub(
+        r"^NIVAC(?:\+[A-Za-z]+)?\+?(?=国际释经应用系列)",
+        "",
+        value,
+        flags=re.IGNORECASE,
+    )
     series_pattern = "|".join(map(re.escape, BIBLE_SERIES_LABELS))
+    match = re.match(
+        rf"^(?P<series>{series_pattern})\d{{1,6}}\s*[：:]?\s*(?P<title>.+)$",
+        value,
+    )
+    if match:
+        return f"{match.group('series')}：{clean_title(match.group('title'))}"
     match = re.match(rf"^(?P<title>.+?)[（(](?P<series>{series_pattern})[）)\}}]$", value)
     if match:
         return f"{match.group('series')}：{clean_title(match.group('title'))}"
@@ -630,6 +669,40 @@ def normalize_bible_series_title(value: str) -> str:
     if match:
         return f"{match.group('series')}：{clean_title(match.group('title'))}"
     return value
+
+
+def expand_living_spring_books(value: str) -> str:
+    tokens = [
+        token.strip()
+        for token in re.split(r"[\s、，,；;]+", normalize(value))
+        if token.strip()
+    ]
+    expanded = [LIVING_SPRING_ABBREVIATIONS.get(token, token) for token in tokens]
+    return "、".join(expanded)
+
+
+def split_living_spring_title(stem: str) -> tuple[str, str] | None:
+    parts = split_filename_parts(stem)
+    if len(parts) < 2:
+        return None
+
+    match = re.match(r"^(?P<series>活泉(?:新约希腊文解经|丛书)?)(?:\d{1,3})?$", clean_title(parts[0]))
+    if not match:
+        return None
+
+    title = expand_living_spring_books("、".join(parts[1:]))
+    if not title:
+        return None
+    return clean_title(f"{match.group('series')}：{title}"), ""
+
+
+def split_course_text_title(stem: str) -> tuple[str, str] | None:
+    parts = split_filename_parts(stem)
+    if len(parts) < 2:
+        return None
+    if parts[0] == "建立你的神学" and clean_title(parts[1]) == "课程文本":
+        return "建立你的神学：课程文本", ""
+    return None
 
 
 def split_tail_author_from_catalog_title(value: str) -> tuple[str, str]:
@@ -936,6 +1009,12 @@ def clean_title(value: str) -> str:
         r"\1",
         value,
     )
+    value = re.sub(
+        r"[:：]?Building[:：]Your[:：]Theology[:：]TEXT[:：]\d+\s*$",
+        "",
+        value,
+        flags=re.IGNORECASE,
+    )
     value = re.sub(r"(?<=使徒行傳)Acts\.\d+[（(]\d+-\d+[）)]$", "", value, flags=re.IGNORECASE)
     value = re.sub(r"(?<=[\u3400-\u9fffA-Za-z0-9]):(?=[\u3400-\u9fff])", "：", value)
     value = re.sub(r"(?<=[\u3400-\u9fff]):(?=[0-9一二三四五六七八九十上下卷])", "：", value)
@@ -970,6 +1049,14 @@ def split_title_author(object_key: str) -> tuple[str, str]:
     stem = remove_copy_markers(stem)
     stem = re.sub(r"\s*[-_ ]?repaired\s*$", "", stem, flags=re.IGNORECASE)
     stem = re.sub(r"_(?:\d{7,})$", "", stem)
+
+    living_spring = split_living_spring_title(stem)
+    if living_spring:
+        return living_spring
+
+    course_text = split_course_text_title(stem)
+    if course_text:
+        return course_text
 
     tyndale = re.match(
         rf"^({TYNDALE_COMMENTARY_PATTERN})\s*(?:--+|[-_—:：])\s*(?:\d{{1,2}}\s*(?:--+|[-_—:：])\s*)?(?P<title>.+)$",
