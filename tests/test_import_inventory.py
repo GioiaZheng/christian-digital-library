@@ -152,6 +152,37 @@ class InventoryImportTests(unittest.TestCase):
         self.assertEqual("麦种圣经注释：罗马书 上", title)
         self.assertEqual("穆尔", author)
 
+    def test_maizhong_catalog_code_and_source_are_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/227.8.10a-提摩太与提多书信注释上-唐书礼-麦种.zip"
+        )
+        self.assertEqual("提摩太与提多书信注释上", title)
+        self.assertEqual("唐书礼", author)
+
+    def test_maizhong_source_before_author_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/242.2.24-更新的时刻 圣经灵修360-美国麦种传道会-华伦 魏斯比.zip"
+        )
+        self.assertEqual("更新的时刻 圣经灵修360", title)
+        self.assertEqual("华伦 魏斯比", author)
+
+    def test_maizhong_multiple_authors_are_moved_to_author_field(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/225.6.20-1-新约引用旧约上-毕尔、卡森-麦种.zip"
+        )
+        self.assertEqual("新约引用旧约上", title)
+        self.assertEqual("毕尔 卡森", author)
+
+    def test_maizhong_parenthetical_source_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/保罗神学新旧观(麦种).zip")
+        self.assertEqual("保罗神学新旧观", title)
+        self.assertEqual("", author)
+
+    def test_maizhong_parenthetical_source_with_author_is_split(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/新约神学(麦种.马歇尔).zip")
+        self.assertEqual("新约神学", title)
+        self.assertEqual("马歇尔", author)
+
     def test_ids_survive_object_rename_with_same_signature(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
