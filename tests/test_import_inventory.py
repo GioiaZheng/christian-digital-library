@@ -99,6 +99,28 @@ class InventoryImportTests(unittest.TestCase):
         self.assertEqual("一步一步学〈诗篇〉", title)
         self.assertEqual("", author)
 
+    def test_tyndale_new_testament_volume_number_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/丁道尔新约注释--01-马太福音.zip")
+        self.assertEqual("丁道尔新约注释：马太福音", title)
+        self.assertEqual("", author)
+
+    def test_tyndale_embedded_volume_number_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author(
+            "incoming/丁道尔新约注释--13-歌罗西书、16-腓利门书.zip"
+        )
+        self.assertEqual("丁道尔新约注释：歌罗西书、腓利门书", title)
+        self.assertEqual("", author)
+
+    def test_tyndale_revelation_is_not_mistaken_for_author(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/丁道尔新约注释--22-启示录.zip")
+        self.assertEqual("丁道尔新约注释：启示录", title)
+        self.assertEqual("", author)
+
+    def test_tyndale_hyphen_separator_is_normalized(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/《丁道尔新约圣经注释-雅各书》.zip")
+        self.assertEqual("丁道尔新约圣经注释：雅各书", title)
+        self.assertEqual("", author)
+
     def test_ids_survive_object_rename_with_same_signature(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
