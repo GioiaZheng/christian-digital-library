@@ -54,6 +54,8 @@ UNKNOWN_AUTHOR_WORDS = {
     "非完整版",
     "repaired",
 }
+TYNDALE_COMMENTARY_PATTERN = r"丁道尔(?:新约|旧约)(?:圣经)?注释"
+MAIZHONG_COMMENTARY = "麦种圣经注释"
 NON_AUTHOR_WORDS = (
     "圣经",
     "聖經",
@@ -540,6 +542,11 @@ def clean_title(value: str) -> str:
         "",
         value,
     )
+    value = re.sub(
+        rf"^\d{{1,3}}(?:\.\d{{1,3}}[A-Za-z]?)?(?:-\d{{1,2}})?\s*[-—:：]\s*(?={MAIZHONG_COMMENTARY})",
+        "",
+        value,
+    )
     value = re.sub(r"^\d{7,}[：:]\s*", "", value)
     value = re.sub(r"[:：]?fenleiID\s*[A-Za-z0-9]+", "", value, flags=re.IGNORECASE)
     value = re.sub(r"[:：]?\s*(?:p|pg)\s*\d+\s*$", "", value, flags=re.IGNORECASE)
@@ -549,8 +556,10 @@ def clean_title(value: str) -> str:
     value = re.sub(r"[:：]?\s*fenleiID\s*[A-Za-z0-9]+", "", value, flags=re.IGNORECASE)
     value = re.sub(r"[:：]?\s*(?:p|pg)\s*\d+\s*$", "", value, flags=re.IGNORECASE)
     value = re.sub(r"\s*(?:--+|——+)\s*", "：", value)
-    value = re.sub(r"^(丁道尔新约(?:圣经)?注释)\s*[-—:：]\s*", r"\1：", value)
-    value = re.sub(r"^(丁道尔新约(?:圣经)?注释)：\s*\d{1,2}\s*[-—:：]\s*", r"\1：", value)
+    value = re.sub(rf"^({TYNDALE_COMMENTARY_PATTERN})\s*[-—:：]\s*", r"\1：", value)
+    value = re.sub(rf"^({TYNDALE_COMMENTARY_PATTERN})：\s*\d{{1,2}}\s*[-—:：]\s*", r"\1：", value)
+    value = re.sub(rf"^({MAIZHONG_COMMENTARY})\s+", r"\1：", value)
+    value = re.sub(rf"^({MAIZHONG_COMMENTARY})(?=[\u3400-\u9fff])", r"\1：", value)
     value = re.sub(r"(?<=[、，,])\s*\d{1,2}\s*[-—:：]\s*", "", value)
     value = re.sub(r"[-—_ ]+[\u3400-\u9fff]{2,20}出版社.*$", "", value)
     value = re.sub(r"[<>|\\/*?\"`~]+", " ", value)
@@ -587,11 +596,35 @@ def split_title_author(object_key: str) -> tuple[str, str]:
     stem = re.sub(r"_(?:\d{7,})$", "", stem)
 
     tyndale = re.match(
-        r"^(丁道尔新约(?:圣经)?注释)\s*(?:--+|[-_—:：])\s*(?:\d{1,2}\s*(?:--+|[-_—:：])\s*)?(?P<title>.+)$",
+        rf"^({TYNDALE_COMMENTARY_PATTERN})\s*(?:--+|[-_—:：])\s*(?:\d{{1,2}}\s*(?:--+|[-_—:：])\s*)?(?P<title>.+)$",
         stem,
     )
     if tyndale and re.search(r"[\u3400-\u9fff]", tyndale.group("title")):
         return clean_title(f"{tyndale.group(1)}：{tyndale.group('title')}"), ""
+
+    maizhong = re.match(
+        rf"^(?:(?:\d{{1,3}}\.)?\d{{1,3}}(?:\.\d{{1,3}}[A-Za-z]?)?(?:-\d{{1,2}})?\s*[-—:：]\s*)?"
+        rf"(?P<series>{MAIZHONG_COMMENTARY})\s*"
+        rf"(?P<title>.+)$",
+        stem,
+    )
+    if maizhong and re.search(r"[\u3400-\u9fff]", maizhong.group("title")):
+        pieces = [
+            piece.strip()
+            for piece in re.split(r"\s*(?:[：:]|--+|——+|[-—])\s*", maizhong.group("title"))
+            if piece.strip()
+        ]
+        while pieces and (
+            pieces[-1] in UNKNOWN_AUTHOR_WORDS
+            or clean_person(pieces[-1]) in UNKNOWN_AUTHOR_WORDS
+        ):
+            pieces.pop()
+        author = ""
+        if len(pieces) >= 2 and looks_like_person(pieces[-1]):
+            author = clean_person(pieces[-1])
+            pieces = pieces[:-1]
+        title = "".join(pieces) if len(pieces) == 1 else "：".join(pieces)
+        return clean_title(f"{maizhong.group('series')}：{title}"), author
 
     bibliographic = re.match(
         r"^[（(](?:中|英|美|德|俄|澳|法)[）)](?P<author>[\u3400-\u9fff·.A-Za-z ]{2,24})著[；;].*?[.。]\s*(?P<title>.+?)(?:[.。]\s*(?:北京|上海|香港).*)?$",
