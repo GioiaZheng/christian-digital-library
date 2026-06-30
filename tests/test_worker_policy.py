@@ -78,6 +78,17 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertNotIn("ACCESS_CODE", source)
         self.assertNotIn("raw/", source)
 
+    def test_image_viewer_supports_preview_navigation(self) -> None:
+        source = (ROOT / "public" / "assets" / "image-viewer.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("data-media-viewer-item", source)
+        self.assertIn("ArrowLeft", source)
+        self.assertIn("ArrowRight", source)
+        self.assertIn("pointerup", source)
+        self.assertNotIn("ACCESS_CODE", source)
+        self.assertNotIn("raw/", source)
+
     def test_public_access_config_has_no_secret_or_raw_path(self) -> None:
         public_config = (ROOT / "public" / "assets" / "access-config.js").read_text(
             encoding="utf-8"

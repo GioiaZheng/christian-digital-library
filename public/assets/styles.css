@@ -38,6 +38,10 @@ body {
   line-height: 1.75;
 }
 
+body.has-image-viewer {
+  overflow: hidden;
+}
+
 a {
   color: var(--green-2);
   text-decoration-thickness: 1px;
@@ -75,7 +79,8 @@ select {
 }
 
 .site-header {
-  position: static;
+  position: sticky;
+  top: 0;
   z-index: 20;
   border-bottom: 1px solid rgba(222, 217, 205, 0.85);
   background: rgba(247, 244, 237, 0.92);
@@ -556,6 +561,24 @@ h3 {
   box-shadow: var(--shadow);
 }
 
+.media-viewer-trigger {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: zoom-in;
+  font: inherit;
+  text-align: inherit;
+}
+
+.media-viewer-trigger:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+
 .book-cover-card img {
   display: block;
   width: 100%;
@@ -633,8 +656,14 @@ h3 {
 
 .preview-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(170px, 1fr);
   gap: 12px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding-bottom: 12px;
+  scroll-padding-inline: 4px;
+  scroll-snap-type: x mandatory;
 }
 
 .preview-page {
@@ -644,6 +673,11 @@ h3 {
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #fff;
+  scroll-snap-align: start;
+}
+
+.preview-page-button {
+  overflow: hidden;
 }
 
 .preview-page img {
@@ -678,6 +712,99 @@ h3 {
 .preview-placeholder span {
   color: var(--ink);
   font-weight: 700;
+}
+
+.image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: none;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: rgba(13, 28, 24, 0.92);
+  color: #fff8e9;
+}
+
+.image-viewer.is-open {
+  display: grid;
+}
+
+.image-viewer-top,
+.image-viewer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px clamp(16px, 3vw, 34px);
+}
+
+.image-viewer-title {
+  min-width: 0;
+  overflow: hidden;
+  font-family: "Microsoft YaHei", sans-serif;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-viewer-stage {
+  position: relative;
+  display: grid;
+  min-height: 0;
+  place-items: center;
+  padding: clamp(12px, 2vw, 24px);
+}
+
+.image-viewer-image {
+  display: block;
+  max-width: min(96vw, 1280px);
+  max-height: 78vh;
+  border-radius: 12px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+  object-fit: contain;
+}
+
+.image-viewer-button {
+  display: inline-flex;
+  min-width: 46px;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 248, 233, 0.42);
+  border-radius: 999px;
+  background: rgba(255, 248, 233, 0.12);
+  color: #fff8e9;
+  cursor: pointer;
+  font: inherit;
+}
+
+.image-viewer-button:hover,
+.image-viewer-button:focus-visible {
+  background: rgba(255, 248, 233, 0.22);
+}
+
+.image-viewer-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.image-viewer-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.image-viewer-prev {
+  left: clamp(10px, 2vw, 28px);
+}
+
+.image-viewer-next {
+  right: clamp(10px, 2vw, 28px);
+}
+
+.image-viewer-bottom {
+  justify-content: center;
+  color: rgba(255, 248, 233, 0.78);
+  font-family: "Microsoft YaHei", sans-serif;
 }
 
 .access-panel {
@@ -847,10 +974,6 @@ h3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .preview-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .search-panel {
     grid-template-columns: 1fr;
   }
@@ -868,10 +991,6 @@ h3 {
     padding: 14px 0;
   }
 
-  .site-header {
-    position: static;
-  }
-
   .site-nav {
     width: 100%;
     justify-content: space-between;
@@ -887,9 +1006,12 @@ h3 {
 
   .stats,
   .grid,
-  .preview-grid,
   .access-form-row {
     grid-template-columns: 1fr;
+  }
+
+  .preview-grid {
+    grid-auto-columns: minmax(72vw, 1fr);
   }
 
   .section-heading,
@@ -904,6 +1026,10 @@ h3 {
 
   .book-hero-cover .book-cover-card {
     width: 100%;
+  }
+
+  .image-viewer-image {
+    max-height: 72vh;
   }
 }
 

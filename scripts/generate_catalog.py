@@ -440,7 +440,9 @@ def render_preview_section(book: dict[str, Any]) -> str:
         pages = "".join(
             f"""
             <figure class="preview-page">
-              <img src="{escape(base_url)}/page-{index}.jpg" alt="{escape(book['clean_title'])} 第 {index} 页预览" loading="lazy">
+              <button class="media-viewer-trigger preview-page-button" type="button" data-media-viewer-item data-media-group="preview" data-media-src="{escape(base_url)}/page-{index}.jpg" data-media-caption="{escape(book['clean_title'])} · 第 {index} 页">
+                <img src="{escape(base_url)}/page-{index}.jpg" alt="{escape(book['clean_title'])} 第 {index} 页预览" loading="lazy">
+              </button>
               <figcaption>第 {index} 页</figcaption>
             </figure>"""
             for index in range(1, page_count + 1)
@@ -480,7 +482,9 @@ def render_cover_section(book: dict[str, Any]) -> str:
     cover_url = cover_image_url(book)
     if cover_url:
         cover = f"""
-          <img src="{escape(cover_url)}" alt="{escape(book['clean_title'])} 封面" loading="lazy">"""
+          <button class="media-viewer-trigger book-cover-button" type="button" data-media-viewer-item data-media-group="cover" data-media-src="{escape(cover_url)}" data-media-caption="{escape(book['clean_title'])} · 封面">
+            <img src="{escape(cover_url)}" alt="{escape(book['clean_title'])} 封面" loading="lazy">
+          </button>"""
     else:
         cover = f"""
           <div class="book-cover-placeholder">
@@ -571,7 +575,8 @@ def render_book_detail(
       </aside>
     </div></section>
     <script src="../assets/access-config.js" defer></script>
-    <script src="../assets/access.js" defer></script>"""
+    <script src="../assets/access.js" defer></script>
+    <script src="../assets/image-viewer.js" defer></script>"""
     return render_layout(
         template,
         title=f"{book['clean_title']}｜基督教数字图书馆",
