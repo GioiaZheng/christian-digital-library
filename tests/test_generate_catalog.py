@@ -114,6 +114,7 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn('value="read">在线阅读', detail)
             self.assertIn('value="download">下载文件', detail)
             self.assertIn("../assets/access.js", detail)
+            self.assertIn("../assets/image-viewer.js", detail)
 
     def test_preview_heading_uses_actual_page_count(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -136,6 +137,10 @@ class CatalogGenerationTests(unittest.TestCase):
 
             self.assertIn("第 1 页预览", detail)
             self.assertNotIn("前 1 页预览", detail)
+            self.assertIn("data-media-viewer-item", detail)
+            self.assertIn('data-media-group="cover"', detail)
+            self.assertIn('data-media-group="preview"', detail)
+            self.assertIn("preview-page-button", detail)
 
     def test_about_page_contains_upload_request_form(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -188,9 +193,10 @@ class CatalogGenerationTests(unittest.TestCase):
         self.assertIn("[hidden]", css)
         self.assertIn("display: none", css)
 
-    def test_header_does_not_overlay_page_content(self) -> None:
+    def test_header_stays_visible_without_fixed_overlay(self) -> None:
         css = (ROOT / "public" / "assets" / "styles.css").read_text(encoding="utf-8")
-        self.assertNotIn("position: sticky", css)
+        self.assertIn("position: sticky", css)
+        self.assertNotIn(".site-header {\n  position: fixed", css)
 
     def test_homepage_feature_prefers_clean_titles(self) -> None:
         self.assertFalse(GENERATOR.good_homepage_feature({"clean_title": "003cc0701 合神心意的敬拜"}))
