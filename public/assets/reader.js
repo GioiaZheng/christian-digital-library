@@ -13,6 +13,10 @@
   const jumpForm = document.querySelector("[data-reader-jump]");
   const pageInput = document.querySelector("[data-reader-page-input]");
   const pageTotal = document.querySelector("[data-reader-page-total]");
+  const prevPageButton = document.querySelector("[data-reader-prev]");
+  const nextPageButton = document.querySelector("[data-reader-next]");
+  let currentPage = 1;
+  let currentPageTotal = 0;
 
   const setStatus = (message) => {
     if (status) status.textContent = message;
@@ -29,6 +33,18 @@
   };
 
   const validBookId = /^cdl-\d{6}$/.test(bookId);
+
+  const updateCurrentPage = (pageNumber, pageCount = currentPageTotal) => {
+    const total = Number(pageCount) || 0;
+    const safePage = total
+      ? Math.min(Math.max(Number(pageNumber) || 1, 1), total)
+      : Math.max(Number(pageNumber) || 1, 1);
+    currentPage = safePage;
+    currentPageTotal = total;
+    if (pageInput) pageInput.value = String(safePage);
+    if (prevPageButton) prevPageButton.disabled = safePage <= 1;
+    if (nextPageButton) nextPageButton.disabled = total ? safePage >= total : true;
+  };
 
   if (detailLink && validBookId) {
     detailLink.href = `books/${bookId}.html`;
@@ -49,7 +65,7 @@
     const target = document.getElementById(pageId(safePage));
     if (!target) return;
     target.scrollIntoView({ behavior: "smooth", block: "start" });
-    if (pageInput) pageInput.value = String(safePage);
+    updateCurrentPage(safePage, pageCount);
     window.history.replaceState(
       null,
       "",
@@ -65,7 +81,7 @@
           .filter((entry) => entry.isIntersecting)
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
         const pageNumber = visible?.target?.dataset?.page;
-        if (pageNumber) pageInput.value = pageNumber;
+        if (pageNumber) updateCurrentPage(pageNumber);
       },
       {
         rootMargin: "-38% 0px -52% 0px",
@@ -94,13 +110,23 @@
     if (toolbar) toolbar.hidden = false;
     if (pageInput) {
       pageInput.max = String(pageCount);
-      pageInput.value = "1";
     }
+    updateCurrentPage(1, pageCount);
     if (pageTotal) pageTotal.textContent = `共 ${pageCount} 页`;
     if (jumpForm) {
       jumpForm.addEventListener("submit", (event) => {
         event.preventDefault();
         scrollToPage(pageInput?.value, pageCount);
+      });
+    }
+    if (prevPageButton) {
+      prevPageButton.addEventListener("click", () => {
+        scrollToPage(currentPage - 1, pageCount);
+      });
+    }
+    if (nextPageButton) {
+      nextPageButton.addEventListener("click", () => {
+        scrollToPage(currentPage + 1, pageCount);
       });
     }
 

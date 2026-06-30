@@ -24,9 +24,11 @@
           <a class="reader-text-button" href="index.html" data-reader-detail>书目详情</a>
         </div>
         <form class="reader-page-jump" data-reader-jump>
+          <button class="reader-page-step" type="button" data-reader-prev disabled>上一页</button>
           <label for="reader-page-number">跳转到</label>
           <input id="reader-page-number" name="page" type="number" min="1" inputmode="numeric" data-reader-page-input>
           <span data-reader-page-total>共 0 页</span>
+          <button class="reader-page-step" type="button" data-reader-next disabled>下一页</button>
           <button class="button secondary" type="submit">前往</button>
         </form>
       </div>
