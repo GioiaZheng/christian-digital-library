@@ -202,7 +202,10 @@ class CatalogGenerationTests(unittest.TestCase):
             GENERATOR.build_site(project, output)
             home = (output / "index.html").read_text(encoding="utf-8")
 
-            self.assertIn("在浩繁馆藏中，<br>找到想读的那一本。", home)
+            self.assertIn(
+                '<h1 class="hero-title"><span>在浩繁馆藏中，</span><span>找到想读的那一本。</span></h1>',
+                home,
+            )
             self.assertIn("每日推荐", home)
             self.assertIn('id="daily-recommendations"', home)
             self.assertIn("assets/daily-recommendations.js", home)
