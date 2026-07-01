@@ -207,7 +207,11 @@ async function handleAdmin(request, env, pathname) {
 }
 
 async function handleUpload(request, env) {
-  const form = await request.formData();
+  const form = await request.formData().catch(() => null);
+  if (!form) {
+    return jsonResponse(request, env, 400, { message: "请填写书名、作者并选择文件。" });
+  }
+
   const title = cleanText(form.get("title"), 160);
   const author = cleanText(form.get("author"), 120);
   const file = form.get("file");
