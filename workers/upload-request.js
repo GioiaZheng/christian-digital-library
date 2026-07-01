@@ -31,6 +31,7 @@ function jsonResponse(request, env, status, payload) {
     headers: {
       ...corsHeaders(request, env),
       "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
     },
   });
 }
@@ -368,6 +369,38 @@ async function saveBookOverride(request, env, bookId) {
   return jsonResponse(request, env, 200, { item: override });
 }
 
+function publicBookOverride(metadata) {
+  if (!metadata || metadata.status !== "admin_override") return null;
+  const bookId = cleanText(metadata.id, 40);
+  if (!/^cdl-\d{6}$/.test(bookId)) return null;
+  const categories = cleanList(metadata.categories ?? metadata.category, 8, 80);
+  const tags = cleanList(metadata.tags, 20, 80);
+  return {
+    id: bookId,
+    clean_title: cleanText(metadata.clean_title, 220),
+    author: cleanText(metadata.author, 160),
+    publisher: cleanText(metadata.publisher, 160),
+    year: cleanText(metadata.year, 40),
+    category: categories[0] || "",
+    categories,
+    tags,
+    description: cleanText(metadata.description, 1200),
+    updated_at: cleanText(metadata.updated_at, 40),
+  };
+}
+
+async function listCatalogOverrides(request, env) {
+  const listed = await env.BOOK_UPLOADS.list({ prefix: ADMIN_OVERRIDE_PREFIX });
+  const items = [];
+  for (const object of listed.objects) {
+    const metadata = await loadJsonObject(env.BOOK_UPLOADS, object.key).catch(() => null);
+    const override = publicBookOverride(metadata);
+    if (override) items.push(override);
+  }
+  items.sort((a, b) => String(b.updated_at || "").localeCompare(String(a.updated_at || "")));
+  return jsonResponse(request, env, 200, { items, updated_at: new Date().toISOString() });
+}
+
 async function handleAdmin(request, env, pathname) {
   const admin = requireAdmin(request, env);
   if (!admin.ok) {
@@ -485,6 +518,10 @@ export default {
     }
 
     const pathname = new URL(request.url).pathname.replace(/\/+$/, "");
+    if (request.method === "GET" && pathname.endsWith("/catalog-overrides")) {
+      return listCatalogOverrides(request, env);
+    }
+
     if (pathname.includes("/admin/")) {
       return handleAdmin(request, env, pathname);
     }

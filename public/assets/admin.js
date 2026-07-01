@@ -280,6 +280,20 @@
     bookForm.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const applySavedBook = (bookId, override) => {
+    const index = catalog.findIndex((book) => book.id === bookId);
+    if (index < 0 || !override) return;
+    const current = catalog[index];
+    const category = override.category || current.category;
+    catalog[index] = {
+      ...current,
+      ...override,
+      category,
+      category_name: current.category === category ? current.category_name : override.category_name || category,
+      detail_url: current.detail_url,
+    };
+  };
+
   const renderBookResults = async () => {
     const value = String(bookSearch.value || "").trim().toLocaleLowerCase("zh-CN");
     bookResults.replaceChildren();
@@ -396,11 +410,13 @@
     payload.category = categories[0];
     payload.tags = tags;
     try {
-      await requestAdmin(`/admin/books/${encodeURIComponent(bookId)}`, {
+      const data = await requestAdmin(`/admin/books/${encodeURIComponent(bookId)}`, {
         method: "PATCH",
         body: JSON.stringify(payload),
       });
-      setText(bookStatus, "已保存到后台。同步目录后会显示在公开网站。");
+      applySavedBook(bookId, data.item);
+      await renderBookResults();
+      setText(bookStatus, "已保存并上线。当前后台列表已更新；公开页面刷新后即可看到最新资料。");
     } catch (error) {
       setText(bookStatus, error.message || "保存失败。");
     }

@@ -77,7 +77,10 @@
     try {
       const response = await fetch("catalog.json");
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const books = await response.json();
+      const catalog = await response.json();
+      const books = window.CDL_CATALOG_OVERRIDES?.applyToBooks
+        ? await window.CDL_CATALOG_OVERRIDES.applyToBooks(catalog)
+        : catalog;
       const picked = pickDailyBooks(books);
       container.replaceChildren();
       if (!picked.length) {

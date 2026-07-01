@@ -113,6 +113,13 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn('data-access-form', detail)
             self.assertIn('value="read">在线阅读', detail)
             self.assertIn('value="download">下载文件', detail)
+            self.assertIn('data-book-detail-id="sample-book"', detail)
+            self.assertIn('data-live-field="clean_title"', detail)
+            self.assertIn("data-live-metadata='author'", detail)
+            self.assertIn("data-live-tags", detail)
+            self.assertIn("../assets/upload-config.js", detail)
+            self.assertIn("../assets/catalog-overrides.js", detail)
+            self.assertIn("../assets/book-live-overrides.js", detail)
             self.assertIn("../assets/access.js", detail)
             self.assertIn("../assets/image-viewer.js", detail)
 
@@ -197,6 +204,8 @@ class CatalogGenerationTests(unittest.TestCase):
 
             self.assertIn('id="catalog-scroll-sentinel"', catalog)
             self.assertIn('id="alphabet-index"', catalog)
+            self.assertIn("assets/upload-config.js", catalog)
+            self.assertIn("assets/catalog-overrides.js", catalog)
             self.assertNotIn("显示更多", catalog)
             self.assertNotIn('id="load-more"', catalog)
 
@@ -213,6 +222,8 @@ class CatalogGenerationTests(unittest.TestCase):
             )
             self.assertIn("每日推荐", home)
             self.assertIn('id="daily-recommendations"', home)
+            self.assertIn("assets/upload-config.js", home)
+            self.assertIn("assets/catalog-overrides.js", home)
             self.assertIn("assets/daily-recommendations.js", home)
 
     def test_category_detail_page_contains_filter_controls(self) -> None:
@@ -229,6 +240,10 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn('id="category-results"', category)
             self.assertIn('id="category-empty-state"', category)
             self.assertIn('data-filter-text=', category)
+            self.assertIn('data-catalog-book-id=', category)
+            self.assertIn('data-card-title', category)
+            self.assertIn('../assets/upload-config.js', category)
+            self.assertIn('../assets/catalog-overrides.js', category)
             self.assertIn('../assets/category-filter.js', category)
 
     def test_generated_site_has_no_download_links(self) -> None:
