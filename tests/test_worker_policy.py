@@ -47,6 +47,11 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertNotIn("UPLOAD_CODE", public_config)
         self.assertNotIn("upload_code", public_config)
 
+    def test_upload_worker_returns_json_for_bad_form_data(self) -> None:
+        source = UPLOAD_WORKER.read_text(encoding="utf-8")
+        self.assertIn("request.formData().catch(() => null)", source)
+        self.assertIn("请填写书名、作者并选择文件。", source)
+
     def test_admin_worker_requires_separate_admin_secret(self) -> None:
         source = UPLOAD_WORKER.read_text(encoding="utf-8")
         self.assertIn("env.ADMIN_CODE", source)
