@@ -268,7 +268,7 @@ def render_home(
       <div class="shell hero-grid">
         <div>
           <p class="eyebrow">中文基督教数字图书馆</p>
-          <h1>在浩繁馆藏中，<br>找到想读的那一本。</h1>
+          <h1 class="hero-title"><span>在浩繁馆藏中，</span><span>找到想读的那一本。</span></h1>
           <p class="lead">按书名、作者和主题检索中文基督教书目，快速浏览馆藏内容。</p>
           <div class="actions">
             <a class="button" href="catalog.html">搜索馆藏</a>
