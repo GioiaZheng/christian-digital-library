@@ -618,9 +618,9 @@ def render_about(template: Template) -> str:
         <div>
           <p class="eyebrow">上传申请</p>
           <h2>提交书籍资料</h2>
-          <p class="description">你可以提交书名、作者和文件。提交后会进入待审核区，不会自动公开显示，也不会自动开放下载。</p>
+          <p class="description">你可以提交书名、作者和整理后的文件。提交后会进入待审核区，不会自动公开显示，也不会自动开放下载。请上传 PDF、EPUB 或 MOBI，不要上传 ZIP。</p>
         </div>
-        <form id="upload-request-form" class="upload-form" enctype="multipart/form-data" data-upload-endpoint="">
+        <form id="upload-request-form" class="upload-form" enctype="multipart/form-data" data-upload-endpoint="" data-max-bytes="104857600">
           <div class="field">
             <label for="upload-title">书名</label>
             <input id="upload-title" name="title" type="text" autocomplete="off" required>
@@ -631,7 +631,7 @@ def render_about(template: Template) -> str:
           </div>
           <div class="field">
             <label for="upload-file">文件</label>
-            <input id="upload-file" name="file" type="file" accept=".zip,.pdf,.epub,.mobi" required>
+            <input id="upload-file" name="file" type="file" accept=".pdf,.epub,.mobi,application/pdf,application/epub+zip,application/x-mobipocket-ebook" required>
           </div>
           <button class="button" type="submit">提交审核</button>
           <p id="upload-request-status" class="form-status" aria-live="polite">上传入口正在接入中。</p>
@@ -671,6 +671,27 @@ def render_admin(template: Template) -> str:
       </form>
 
       <div id="admin-panel" class="admin-panel" hidden>
+        <div class="section-heading admin-add-heading">
+          <div><p class="eyebrow">添加</p><h2>直接添加书籍</h2></div>
+        </div>
+        <form id="admin-add-book-form" class="admin-add-book-form" enctype="multipart/form-data" data-max-bytes="104857600">
+          <div class="field">
+            <label for="admin-add-title">书名</label>
+            <input id="admin-add-title" name="title" type="text" autocomplete="off" required>
+          </div>
+          <div class="field">
+            <label for="admin-add-author">作者</label>
+            <input id="admin-add-author" name="author" type="text" autocomplete="off" required>
+          </div>
+          <div class="field">
+            <label for="admin-add-file">文件</label>
+            <input id="admin-add-file" name="file" type="file" accept=".pdf,.epub,.mobi,application/pdf,application/epub+zip,application/x-mobipocket-ebook" required>
+            <p class="field-help">上传整理后的 PDF、EPUB 或 MOBI，不要上传 ZIP。单个文件最大 100 MB。</p>
+          </div>
+          <button class="button" type="submit">添加到后台</button>
+          <p id="admin-add-status" class="form-status" aria-live="polite"></p>
+        </form>
+
         <div class="section-heading">
           <div><p class="eyebrow">审核</p><h2>待审核上传</h2></div>
           <button id="admin-refresh-uploads" class="button secondary" type="button">刷新</button>

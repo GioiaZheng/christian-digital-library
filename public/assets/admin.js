@@ -5,6 +5,8 @@
   const panel = document.querySelector("#admin-panel");
   const refreshUploads = document.querySelector("#admin-refresh-uploads");
   const uploadList = document.querySelector("#admin-upload-list");
+  const addBookForm = document.querySelector("#admin-add-book-form");
+  const addBookStatus = document.querySelector("#admin-add-status");
   const bookSearch = document.querySelector("#admin-book-search");
   const bookResults = document.querySelector("#admin-book-results");
   const bookForm = document.querySelector("#admin-book-form");
@@ -21,6 +23,7 @@
     { value: "want_to_read", label: "想读" },
     { value: "finished", label: "读完" },
   ];
+  const allowedAdminExtensions = new Set(["pdf", "epub", "mobi"]);
 
   const setText = (target, value) => {
     if (target) target.textContent = value;
@@ -31,7 +34,7 @@
   const requestAdmin = async (path, options = {}) => {
     const headers = new Headers(options.headers || {});
     headers.set("X-CDL-Admin-Code", adminCode);
-    if (options.body && !headers.has("Content-Type")) {
+    if (options.body && !(options.body instanceof FormData) && !headers.has("Content-Type")) {
       headers.set("Content-Type", "application/json");
     }
     const response = await fetch(adminUrl(path), {
@@ -50,6 +53,27 @@
     if (className) element.className = className;
     element.textContent = text;
     return element;
+  };
+
+  const extensionOf = (filename) => {
+    const match = /\.([A-Za-z0-9]+)$/.exec(String(filename || ""));
+    return match ? match[1].toLowerCase() : "";
+  };
+
+  const validateAdminBookFile = (formData) => {
+    const file = formData.get("file");
+    if (!(file instanceof File) || !file.name) {
+      return "请选择整理后的书籍文件。";
+    }
+    if (!allowedAdminExtensions.has(extensionOf(file.name))) {
+      return "请上传 PDF、EPUB 或 MOBI 文件，不要上传 ZIP。";
+    }
+    const maxBytes = Number(addBookForm?.dataset.maxBytes || 104857600);
+    if (Number.isFinite(maxBytes) && maxBytes > 0 && file.size > maxBytes) {
+      const maxMb = Math.floor(maxBytes / 1024 / 1024);
+      return `文件太大，单个文件最大 ${maxMb} MB。`;
+    }
+    return "";
   };
 
   const loadCatalog = async () => {
@@ -303,6 +327,33 @@
 
   refreshUploads?.addEventListener("click", () => {
     loadUploads().catch((error) => setText(loginStatus, error.message || "刷新失败。"));
+  });
+
+  addBookForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(addBookForm);
+    const validationMessage = validateAdminBookFile(formData);
+    if (validationMessage) {
+      setText(addBookStatus, validationMessage);
+      return;
+    }
+
+    const submit = addBookForm.querySelector('button[type="submit"]');
+    if (submit) submit.disabled = true;
+    setText(addBookStatus, "正在添加到后台，请不要关闭页面。");
+
+    try {
+      const data = await requestAdmin("/admin/books", {
+        method: "POST",
+        body: formData,
+      });
+      addBookForm.reset();
+      setText(addBookStatus, `已添加《${data.item?.title || "新书"}》，同步目录后会显示到公开网站。`);
+    } catch (error) {
+      setText(addBookStatus, error.message || "添加失败。");
+    } finally {
+      if (submit) submit.disabled = false;
+    }
   });
 
   bookSearch?.addEventListener("input", () => {

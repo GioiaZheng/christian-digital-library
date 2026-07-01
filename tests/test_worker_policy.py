@@ -69,7 +69,23 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertNotIn("covers/", source)
         self.assertNotIn("previews/", source)
         self.assertIn("metadata/admin-overrides/", source)
-        self.assertIn("raw/admin-approved/", source)
+        self.assertIn("files/admin-approved/", source)
+        self.assertNotIn("raw/admin-approved/", source)
+
+    def test_upload_worker_rejects_zip_for_new_uploads(self) -> None:
+        source = UPLOAD_WORKER.read_text(encoding="utf-8")
+        self.assertIn('new Set(["pdf", "epub", "mobi"])', source)
+        self.assertNotIn('"zip"', source)
+        self.assertIn("不要上传 ZIP", source)
+        self.assertIn("MAX_UPLOAD_BYTES", source)
+
+    def test_admin_worker_supports_direct_book_add(self) -> None:
+        source = UPLOAD_WORKER.read_text(encoding="utf-8")
+        self.assertIn("files/admin-added/", source)
+        self.assertIn("metadata/admin-added/", source)
+        self.assertIn('pathname.endsWith("/admin/books")', source)
+        self.assertIn('status: "admin_added"', source)
+        self.assertIn("file.size > maxBytes", source)
 
     def test_admin_worker_supports_private_reading_status(self) -> None:
         source = UPLOAD_WORKER.read_text(encoding="utf-8")
