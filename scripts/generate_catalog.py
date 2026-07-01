@@ -733,12 +733,14 @@ def render_admin(template: Template) -> str:
             <input id="admin-book-year" name="year" type="text">
           </div>
           <div class="field">
-            <label for="admin-book-category">分类</label>
-            <input id="admin-book-category" name="category" type="text">
+            <label for="admin-book-category">分类（可多个）</label>
+            <input id="admin-book-category" name="categories" type="text" required placeholder="例如：圣经研究、神学与教义">
+            <p class="field-help">可用顿号、逗号或分号分隔；至少填写一个。</p>
           </div>
           <div class="field">
-            <label for="admin-book-tags">标签</label>
-            <input id="admin-book-tags" name="tags" type="text">
+            <label for="admin-book-tags">标签（可多个）</label>
+            <input id="admin-book-tags" name="tags" type="text" required placeholder="例如：注释、旧约、灵修">
+            <p class="field-help">可用顿号、逗号或分号分隔；至少填写一个。</p>
           </div>
           <div class="field">
             <label for="admin-book-description">内容简介</label>

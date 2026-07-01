@@ -96,6 +96,24 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("finished", source)
         self.assertIn("阅读状态不正确", source)
 
+    def test_admin_book_override_requires_multiple_categories_and_tags(self) -> None:
+        worker_source = UPLOAD_WORKER.read_text(encoding="utf-8")
+        self.assertIn("function cleanList", worker_source)
+        self.assertIn("const categories = cleanList", worker_source)
+        self.assertIn("const tags = cleanList", worker_source)
+        self.assertIn("请至少填写一个分类", worker_source)
+        self.assertIn("请至少填写一个标签", worker_source)
+        self.assertIn("category: categories[0]", worker_source)
+        self.assertIn("categories,", worker_source)
+
+        admin_source = (ROOT / "public" / "assets" / "admin.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("const splitList", admin_source)
+        self.assertIn('namedItem("categories")', admin_source)
+        self.assertIn("payload.categories = categories", admin_source)
+        self.assertIn("payload.tags = tags", admin_source)
+
     def test_access_worker_requires_secret_and_private_map(self) -> None:
         source = ACCESS_WORKER.read_text(encoding="utf-8")
         self.assertIn("env.ACCESS_CODE", source)

@@ -39,6 +39,20 @@ function cleanText(value, maxLength) {
   return String(value || "").trim().replace(/\s+/g, " ").slice(0, maxLength);
 }
 
+function cleanList(value, maxItems = 12, maxItemLength = 80) {
+  const source = Array.isArray(value) ? value : String(value || "").split(/[、,，;；\n]+/);
+  const seen = new Set();
+  const items = [];
+  for (const rawItem of source) {
+    const item = cleanText(rawItem, maxItemLength);
+    if (!item || seen.has(item)) continue;
+    seen.add(item);
+    items.push(item);
+    if (items.length >= maxItems) break;
+  }
+  return items;
+}
+
 function safeFilename(name) {
   const cleaned = String(name || "upload")
     .normalize("NFKC")
@@ -321,14 +335,23 @@ async function saveBookOverride(request, env, bookId) {
     return jsonResponse(request, env, 400, { message: "书号不正确。" });
   }
   const body = await request.json().catch(() => ({}));
+  const categories = cleanList(body.categories ?? body.category, 8, 80);
+  const tags = cleanList(body.tags, 20, 80);
+  if (!categories.length) {
+    return jsonResponse(request, env, 400, { message: "请至少填写一个分类。" });
+  }
+  if (!tags.length) {
+    return jsonResponse(request, env, 400, { message: "请至少填写一个标签。" });
+  }
   const override = {
     id: bookId,
     clean_title: cleanText(body.clean_title, 220),
     author: cleanText(body.author, 160),
     publisher: cleanText(body.publisher, 160),
     year: cleanText(body.year, 40),
-    category: cleanText(body.category, 80),
-    tags: cleanText(body.tags, 220),
+    category: categories[0],
+    categories,
+    tags,
     description: cleanText(body.description, 1200),
     updated_at: new Date().toISOString(),
     status: "admin_override",
