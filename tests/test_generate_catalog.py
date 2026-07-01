@@ -180,6 +180,11 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("单个文件最大 100 MB", admin)
             self.assertIn('id="admin-reading-summary"', admin)
             self.assertIn('id="admin-reading-list"', admin)
+            self.assertIn("分类（可多个）", admin)
+            self.assertIn('name="categories"', admin)
+            self.assertIn("标签（可多个）", admin)
+            self.assertIn('name="tags"', admin)
+            self.assertIn("至少填写一个", admin)
             self.assertNotIn("ACCESS_CODE", admin)
             self.assertNotIn("ADMIN_CODE", admin)
 

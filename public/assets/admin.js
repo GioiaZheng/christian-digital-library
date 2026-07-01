@@ -55,6 +55,19 @@
     return element;
   };
 
+  const splitList = (value) => {
+    const seen = new Set();
+    return String(value || "")
+      .split(/[、,，;；\n]+/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .filter((item) => {
+        if (seen.has(item)) return false;
+        seen.add(item);
+        return true;
+      });
+  };
+
   const extensionOf = (filename) => {
     const match = /\.([A-Za-z0-9]+)$/.exec(String(filename || ""));
     return match ? match[1].toLowerCase() : "";
@@ -256,8 +269,12 @@
     bookForm.elements.namedItem("author").value = book.author || "";
     bookForm.elements.namedItem("publisher").value = book.publisher || "";
     bookForm.elements.namedItem("year").value = book.year || "";
-    bookForm.elements.namedItem("category").value = book.category || "";
-    bookForm.elements.namedItem("tags").value = Array.isArray(book.tags) ? book.tags.join("、") : "";
+    bookForm.elements.namedItem("categories").value = (
+      Array.isArray(book.categories) && book.categories.length ? book.categories : [book.category || book.category_name]
+    )
+      .filter(Boolean)
+      .join("、");
+    bookForm.elements.namedItem("tags").value = Array.isArray(book.tags) ? book.tags.join("、") : String(book.tags || "");
     bookForm.elements.namedItem("description").value = book.description || "";
     setText(bookStatus, `正在修改：${book.id}`);
     bookForm.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -365,6 +382,19 @@
     const payload = Object.fromEntries(new FormData(bookForm).entries());
     const bookId = payload.id;
     delete payload.id;
+    const categories = splitList(payload.categories);
+    const tags = splitList(payload.tags);
+    if (!categories.length) {
+      setText(bookStatus, "请至少填写一个分类。");
+      return;
+    }
+    if (!tags.length) {
+      setText(bookStatus, "请至少填写一个标签。");
+      return;
+    }
+    payload.categories = categories;
+    payload.category = categories[0];
+    payload.tags = tags;
     try {
       await requestAdmin(`/admin/books/${encodeURIComponent(bookId)}`, {
         method: "PATCH",
