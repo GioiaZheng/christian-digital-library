@@ -72,4 +72,5 @@ wrangler secret put READER_TOKEN_SECRET --config workers\wrangler.access.example
 
 - 不要把访问码写入公开文件。
 - 不要把 R2 原始文件路径写入公开网页。
-- ZIP 保留为归档和下载文件；在线阅读使用预先生成的阅读页图片。
+- 旧 ZIP 只作为历史导入源和临时备份，不再作为新增书籍的正式存储格式。
+- 正式下载目标应是解包、核对后的 PDF、EPUB 或 MOBI；在线阅读使用预先生成的阅读页图片。

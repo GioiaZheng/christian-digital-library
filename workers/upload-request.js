@@ -1,9 +1,11 @@
 const DEFAULT_ALLOWED_ORIGIN = "https://gioiazheng.github.io";
 const DEFAULT_MAX_BYTES = 100 * 1024 * 1024;
-const ALLOWED_EXTENSIONS = new Set(["zip", "pdf", "epub", "mobi"]);
+const ALLOWED_EXTENSIONS = new Set(["pdf", "epub", "mobi"]);
 const PENDING_METADATA_PREFIX = "pending/metadata/";
 const PENDING_UPLOAD_PREFIX = "pending/uploads/";
-const APPROVED_UPLOAD_PREFIX = "raw/admin-approved/";
+const APPROVED_UPLOAD_PREFIX = "files/admin-approved/";
+const ADMIN_ADDED_FILE_PREFIX = "files/admin-added/";
+const ADMIN_ADDED_METADATA_PREFIX = "metadata/admin-added/";
 const ADMIN_OVERRIDE_PREFIX = "metadata/admin-overrides/";
 const ADMIN_READING_STATUS_KEY = "metadata/admin-reading-status.json";
 const READING_STATUSES = new Set(["want_to_read", "finished"]);
@@ -49,6 +51,38 @@ function safeFilename(name) {
 function extensionOf(filename) {
   const match = /\.([A-Za-z0-9]+)$/.exec(filename);
   return match ? match[1].toLowerCase() : "";
+}
+
+function maxUploadBytes(env) {
+  const configured = Number(env.MAX_UPLOAD_BYTES || DEFAULT_MAX_BYTES);
+  return Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_MAX_BYTES;
+}
+
+function maxUploadMegabytes(env) {
+  return Math.floor(maxUploadBytes(env) / 1024 / 1024);
+}
+
+function invalidFileResponse(request, env, file, messagePrefix = "") {
+  if (!(file instanceof File)) {
+    return jsonResponse(request, env, 400, { message: "请选择整理后的书籍文件。" });
+  }
+
+  const filename = safeFilename(file.name);
+  const extension = extensionOf(filename);
+  if (!ALLOWED_EXTENSIONS.has(extension)) {
+    return jsonResponse(request, env, 400, {
+      message: `${messagePrefix}请上传 PDF、EPUB 或 MOBI 文件，不要上传 ZIP。`,
+    });
+  }
+
+  const maxBytes = maxUploadBytes(env);
+  if (file.size > maxBytes) {
+    return jsonResponse(request, env, 413, {
+      message: `${messagePrefix}文件太大，单个文件最大 ${maxUploadMegabytes(env)} MB。`,
+    });
+  }
+
+  return null;
 }
 
 function allowedOrigin(request, env) {
@@ -224,6 +258,64 @@ async function updateUploadStatus(request, env, requestId, status) {
   return jsonResponse(request, env, 200, { item: metadata });
 }
 
+async function addAdminBook(request, env) {
+  const form = await request.formData().catch(() => null);
+  if (!form) {
+    return jsonResponse(request, env, 400, { message: "请填写书名、作者并选择整理后的文件。" });
+  }
+
+  const title = cleanText(form.get("title"), 160);
+  const author = cleanText(form.get("author"), 120);
+  const file = form.get("file");
+
+  if (!title || !author || !(file instanceof File)) {
+    return jsonResponse(request, env, 400, { message: "请填写书名、作者并选择整理后的文件。" });
+  }
+
+  const fileError = invalidFileResponse(request, env, file, "添加失败：");
+  if (fileError) return fileError;
+
+  const requestId = crypto.randomUUID();
+  const now = new Date().toISOString();
+  const filename = safeFilename(file.name);
+  const fileKey = `${ADMIN_ADDED_FILE_PREFIX}${requestId}/${filename}`;
+  const metadataKey = `${ADMIN_ADDED_METADATA_PREFIX}${requestId}.json`;
+  const metadata = {
+    id: requestId,
+    title,
+    author,
+    filename,
+    file_key: fileKey,
+    size: file.size,
+    content_type: file.type || "",
+    status: "admin_added",
+    added_at: now,
+  };
+
+  await env.BOOK_UPLOADS.put(fileKey, file.stream(), {
+    httpMetadata: {
+      contentType: file.type || "application/octet-stream",
+    },
+    customMetadata: {
+      requestId,
+      title,
+      author,
+      status: "admin_added",
+    },
+  });
+
+  await env.BOOK_UPLOADS.put(metadataKey, JSON.stringify(metadata, null, 2), {
+    httpMetadata: {
+      contentType: "application/json; charset=utf-8",
+    },
+  });
+
+  return jsonResponse(request, env, 202, {
+    item: metadata,
+    message: "已添加到后台，之后同步目录后再显示到公开网站。",
+  });
+}
+
 async function saveBookOverride(request, env, bookId) {
   if (!/^cdl-\d{6}$/.test(bookId)) {
     return jsonResponse(request, env, 400, { message: "书号不正确。" });
@@ -267,6 +359,10 @@ async function handleAdmin(request, env, pathname) {
     return listReadingStatuses(request, env);
   }
 
+  if (request.method === "POST" && pathname.endsWith("/admin/books")) {
+    return addAdminBook(request, env);
+  }
+
   const uploadAction = pathname.match(/\/admin\/uploads\/([^/]+)\/(approve|reject)$/);
   if (request.method === "POST" && uploadAction) {
     return updateUploadStatus(
@@ -305,15 +401,8 @@ async function handleUpload(request, env) {
   }
 
   const filename = safeFilename(file.name);
-  const extension = extensionOf(filename);
-  if (!ALLOWED_EXTENSIONS.has(extension)) {
-    return jsonResponse(request, env, 400, { message: "文件格式暂不支持。" });
-  }
-
-  const maxBytes = Number(env.MAX_UPLOAD_BYTES || DEFAULT_MAX_BYTES);
-  if (file.size > maxBytes) {
-    return jsonResponse(request, env, 413, { message: "文件太大，请联系管理员处理。" });
-  }
+  const fileError = invalidFileResponse(request, env, file);
+  if (fileError) return fileError;
 
   const requestId = crypto.randomUUID();
   const now = new Date().toISOString();

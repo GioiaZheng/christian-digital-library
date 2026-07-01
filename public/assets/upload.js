@@ -7,9 +7,15 @@
     String(window.CDL_UPLOAD_ENDPOINT || "").trim() ||
     String(form.dataset.uploadEndpoint || "").trim();
   const submit = form.querySelector('button[type="submit"]');
+  const allowedExtensions = new Set(["pdf", "epub", "mobi"]);
 
   const setStatus = (message) => {
     status.textContent = message;
+  };
+
+  const extensionOf = (filename) => {
+    const match = /\.([A-Za-z0-9]+)$/.exec(String(filename || ""));
+    return match ? match[1].toLowerCase() : "";
   };
 
   if (!endpoint) {
@@ -27,6 +33,16 @@
     const file = form.file?.files?.[0];
     if (!file) {
       setStatus("请选择要上传的文件。");
+      return;
+    }
+    if (!allowedExtensions.has(extensionOf(file.name))) {
+      setStatus("请上传 PDF、EPUB 或 MOBI 文件，不要上传 ZIP。");
+      return;
+    }
+    const maxBytes = Number(form.dataset.maxBytes || 104857600);
+    if (Number.isFinite(maxBytes) && maxBytes > 0 && file.size > maxBytes) {
+      const maxMb = Math.floor(maxBytes / 1024 / 1024);
+      setStatus(`文件太大，单个文件最大 ${maxMb} MB。`);
       return;
     }
 
