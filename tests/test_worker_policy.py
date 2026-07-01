@@ -71,6 +71,15 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("metadata/admin-overrides/", source)
         self.assertIn("raw/admin-approved/", source)
 
+    def test_admin_worker_supports_private_reading_status(self) -> None:
+        source = UPLOAD_WORKER.read_text(encoding="utf-8")
+        self.assertIn("metadata/admin-reading-status.json", source)
+        self.assertIn("/admin/reading-status", source)
+        self.assertIn("/reading-status", source)
+        self.assertIn("want_to_read", source)
+        self.assertIn("finished", source)
+        self.assertIn("阅读状态不正确", source)
+
     def test_access_worker_requires_secret_and_private_map(self) -> None:
         source = ACCESS_WORKER.read_text(encoding="utf-8")
         self.assertIn("env.ACCESS_CODE", source)

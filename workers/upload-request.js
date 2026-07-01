@@ -5,6 +5,12 @@ const PENDING_METADATA_PREFIX = "pending/metadata/";
 const PENDING_UPLOAD_PREFIX = "pending/uploads/";
 const APPROVED_UPLOAD_PREFIX = "raw/admin-approved/";
 const ADMIN_OVERRIDE_PREFIX = "metadata/admin-overrides/";
+const ADMIN_READING_STATUS_KEY = "metadata/admin-reading-status.json";
+const READING_STATUSES = new Set(["want_to_read", "finished"]);
+const READING_STATUS_LABELS = {
+  want_to_read: "想读",
+  finished: "读完",
+};
 
 function corsHeaders(request, env) {
   const origin = request.headers.get("Origin") || "";
@@ -76,6 +82,75 @@ async function loadJsonObject(bucket, key) {
   const object = await bucket.get(key);
   if (!object) return null;
   return object.json();
+}
+
+async function loadReadingStatuses(env) {
+  const stored = await loadJsonObject(env.BOOK_UPLOADS, ADMIN_READING_STATUS_KEY).catch(() => null);
+  if (!stored || typeof stored !== "object" || !stored.books || typeof stored.books !== "object") {
+    return { books: {} };
+  }
+  return { books: stored.books };
+}
+
+function serializeReadingStatus(bookId, item) {
+  const status = String(item?.status || "");
+  if (!READING_STATUSES.has(status)) return null;
+  return {
+    id: bookId,
+    status,
+    label: READING_STATUS_LABELS[status],
+    updated_at: String(item?.updated_at || ""),
+  };
+}
+
+async function listReadingStatuses(request, env) {
+  const stored = await loadReadingStatuses(env);
+  const items = Object.entries(stored.books)
+    .map(([bookId, item]) => serializeReadingStatus(bookId, item))
+    .filter(Boolean)
+    .sort((a, b) => String(b.updated_at || "").localeCompare(String(a.updated_at || "")));
+  return jsonResponse(request, env, 200, { items });
+}
+
+async function saveReadingStatus(request, env, bookId) {
+  if (!/^cdl-\d{6}$/.test(bookId)) {
+    return jsonResponse(request, env, 400, { message: "书号不正确。" });
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const status = cleanText(body.status, 40);
+  const now = new Date().toISOString();
+  const stored = await loadReadingStatuses(env);
+
+  if (!status || status === "none") {
+    delete stored.books[bookId];
+  } else if (!READING_STATUSES.has(status)) {
+    return jsonResponse(request, env, 400, { message: "阅读状态不正确。" });
+  } else {
+    stored.books[bookId] = {
+      status,
+      updated_at: now,
+    };
+  }
+
+  await env.BOOK_UPLOADS.put(
+    ADMIN_READING_STATUS_KEY,
+    JSON.stringify({ books: stored.books, updated_at: now }, null, 2),
+    {
+      httpMetadata: {
+        contentType: "application/json; charset=utf-8",
+      },
+    },
+  );
+
+  return jsonResponse(request, env, 200, {
+    item: serializeReadingStatus(bookId, stored.books[bookId]) || {
+      id: bookId,
+      status: "none",
+      label: "未标记",
+      updated_at: now,
+    },
+  });
 }
 
 async function savePendingMetadata(env, requestId, metadata) {
@@ -188,6 +263,10 @@ async function handleAdmin(request, env, pathname) {
     return listPendingUploads(request, env);
   }
 
+  if (request.method === "GET" && pathname.endsWith("/admin/reading-status")) {
+    return listReadingStatuses(request, env);
+  }
+
   const uploadAction = pathname.match(/\/admin\/uploads\/([^/]+)\/(approve|reject)$/);
   if (request.method === "POST" && uploadAction) {
     return updateUploadStatus(
@@ -201,6 +280,11 @@ async function handleAdmin(request, env, pathname) {
   const bookUpdate = pathname.match(/\/admin\/books\/(cdl-\d{6})$/);
   if (request.method === "PATCH" && bookUpdate) {
     return saveBookOverride(request, env, bookUpdate[1]);
+  }
+
+  const readingStatusUpdate = pathname.match(/\/admin\/books\/(cdl-\d{6})\/reading-status$/);
+  if (request.method === "PATCH" && readingStatusUpdate) {
+    return saveReadingStatus(request, env, readingStatusUpdate[1]);
   }
 
   return jsonResponse(request, env, 404, { message: "管理员接口不存在。" });

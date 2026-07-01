@@ -169,6 +169,8 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("管理馆藏", admin)
             self.assertIn('name="admin_code"', admin)
             self.assertIn("assets/admin.js", admin)
+            self.assertIn('id="admin-reading-summary"', admin)
+            self.assertIn('id="admin-reading-list"', admin)
             self.assertNotIn("ACCESS_CODE", admin)
             self.assertNotIn("ADMIN_CODE", admin)
 
