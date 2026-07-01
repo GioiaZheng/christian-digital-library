@@ -9,11 +9,18 @@
   const bookResults = document.querySelector("#admin-book-results");
   const bookForm = document.querySelector("#admin-book-form");
   const bookStatus = document.querySelector("#admin-book-status");
+  const readingSummary = document.querySelector("#admin-reading-summary");
+  const readingList = document.querySelector("#admin-reading-list");
 
   if (!loginForm || !panel || !endpoint) return;
 
   let adminCode = "";
   let catalog = [];
+  let readingStatuses = new Map();
+  const readingStatusOptions = [
+    { value: "want_to_read", label: "想读" },
+    { value: "finished", label: "读完" },
+  ];
 
   const setText = (target, value) => {
     if (target) target.textContent = value;
@@ -52,6 +59,107 @@
     catalog = await response.json();
     return catalog;
   };
+
+  const statusLabel = (status) => {
+    const option = readingStatusOptions.find((item) => item.value === status);
+    return option ? option.label : "";
+  };
+
+  const loadReadingStatuses = async () => {
+    const data = await requestAdmin("/admin/reading-status");
+    readingStatuses = new Map((data.items || []).map((item) => [item.id, item]));
+    renderReadingList();
+  };
+
+  const findCatalogBook = (bookId) => catalog.find((book) => book.id === bookId);
+
+  const renderReadingList = () => {
+    if (!readingList) return;
+    readingList.replaceChildren();
+    const items = Array.from(readingStatuses.values());
+    const wantCount = items.filter((item) => item.status === "want_to_read").length;
+    const finishedCount = items.filter((item) => item.status === "finished").length;
+    setText(readingSummary, `想读 ${wantCount} 本，读完 ${finishedCount} 本。`);
+
+    if (!items.length) {
+      readingList.append(createText("div", "empty-state", "还没有标记书籍。可以在下面搜索书目后标记。"));
+      return;
+    }
+
+    for (const item of items.slice(0, 18)) {
+      const book = findCatalogBook(item.id) || { id: item.id, clean_title: item.id, author: "" };
+      const card = document.createElement("article");
+      card.className = "admin-reading-card";
+      const title = document.createElement("a");
+      title.href = book.detail_url || `books/${item.id}.html`;
+      title.target = "_blank";
+      title.rel = "noreferrer";
+      title.textContent = book.clean_title || item.id;
+      const meta = createText("p", "meta", [book.author || "作者待核", item.label || statusLabel(item.status)].join(" · "));
+      const actions = createReadingActions(book);
+      card.append(title, meta, actions);
+      readingList.append(card);
+    }
+  };
+
+  const saveReadingStatus = async (book, status) => {
+    const bookId = book.id;
+    const data = await requestAdmin(`/admin/books/${encodeURIComponent(bookId)}/reading-status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+    if (data.item?.status && data.item.status !== "none") {
+      readingStatuses.set(bookId, data.item);
+      setText(bookStatus, `已标记《${book.clean_title || bookId}》为${data.item.label}。`);
+    } else {
+      readingStatuses.delete(bookId);
+      setText(bookStatus, `已取消《${book.clean_title || bookId}》的阅读标记。`);
+    }
+    renderReadingList();
+    await renderBookResults();
+  };
+
+  function createReadingActions(book) {
+    const actions = document.createElement("div");
+    actions.className = "admin-reading-actions";
+    const current = readingStatuses.get(book.id)?.status || "";
+
+    for (const option of readingStatusOptions) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `button secondary compact${current === option.value ? " is-active" : ""}`;
+      button.textContent = option.label;
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+          await saveReadingStatus(book, option.value);
+        } catch (error) {
+          setText(bookStatus, error.message || "标记失败。");
+        } finally {
+          button.disabled = false;
+        }
+      });
+      actions.append(button);
+    }
+
+    const clear = document.createElement("button");
+    clear.type = "button";
+    clear.className = "button ghost compact";
+    clear.textContent = "取消";
+    clear.disabled = !current;
+    clear.addEventListener("click", async () => {
+      clear.disabled = true;
+      try {
+        await saveReadingStatus(book, "none");
+      } catch (error) {
+        setText(bookStatus, error.message || "取消失败。");
+      } finally {
+        clear.disabled = false;
+      }
+    });
+    actions.append(clear);
+    return actions;
+  }
 
   const renderUploads = (items) => {
     uploadList.replaceChildren();
@@ -151,14 +259,26 @@
     }
 
     for (const book of matches) {
+      const card = document.createElement("article");
+      card.className = "admin-book-result";
+
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "admin-book-result";
+      button.className = "admin-book-result-main";
       button.innerHTML = `<strong></strong><span></span>`;
       button.querySelector("strong").textContent = book.clean_title || book.id;
-      button.querySelector("span").textContent = [book.id, book.author || "作者待核"].join(" · ");
+      const status = readingStatuses.get(book.id);
+      button.querySelector("span").textContent = [
+        book.id,
+        book.author || "作者待核",
+        status?.label ? `已标记：${status.label}` : "",
+      ]
+        .filter(Boolean)
+        .join(" · ");
       button.addEventListener("click", () => fillBookForm(book));
-      bookResults.append(button);
+
+      card.append(button, createReadingActions(book));
+      bookResults.append(card);
     }
   };
 
@@ -171,6 +291,7 @@
     }
     try {
       await loadCatalog();
+      await loadReadingStatuses();
       await loadUploads();
       loginForm.hidden = true;
       panel.hidden = false;

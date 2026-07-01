@@ -677,6 +677,12 @@ def render_admin(template: Template) -> str:
         </div>
         <div id="admin-upload-list" class="admin-list" aria-live="polite"></div>
 
+        <div class="section-heading admin-reading-heading">
+          <div><p class="eyebrow">我的书单</p><h2>收藏与阅读状态</h2></div>
+        </div>
+        <p id="admin-reading-summary" class="result-summary" aria-live="polite">登录后显示阅读状态。</p>
+        <div id="admin-reading-list" class="admin-reading-list" aria-live="polite"></div>
+
         <div class="section-heading admin-edit-heading">
           <div><p class="eyebrow">书目资料</p><h2>修改书目信息</h2></div>
         </div>

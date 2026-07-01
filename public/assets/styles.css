@@ -251,6 +251,28 @@ h3 {
   background: rgba(23, 63, 53, 0.06);
 }
 
+.button.compact {
+  min-height: 34px;
+  padding: 7px 13px;
+  font-size: 0.88rem;
+}
+
+.button.ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+
+.button.ghost:hover {
+  background: rgba(23, 63, 53, 0.06);
+  color: var(--green);
+}
+
+.button.is-active {
+  background: var(--gold-soft);
+  color: var(--green);
+}
+
 .hero-note,
 .notice {
   border: 1px solid var(--line);
@@ -1039,13 +1061,15 @@ h3 {
 }
 
 .admin-list,
-.admin-book-results {
+.admin-book-results,
+.admin-reading-list {
   display: grid;
   gap: 12px;
 }
 
 .admin-upload-card,
-.admin-book-result {
+.admin-book-result,
+.admin-reading-card {
   width: 100%;
   padding: 18px;
   border: 1px solid var(--line);
@@ -1056,21 +1080,52 @@ h3 {
 }
 
 .admin-book-result {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-book-result-main {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
 }
 
 .admin-book-result strong,
-.admin-book-result span {
+.admin-book-result span,
+.admin-reading-card a {
   display: block;
 }
 
-.admin-card-actions {
+.admin-reading-card a {
+  color: var(--green);
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-reading-card a:hover {
+  text-decoration: underline;
+}
+
+.admin-card-actions,
+.admin-reading-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 14px;
 }
 
+.admin-book-result .admin-reading-actions {
+  margin-top: 0;
+}
+
+.admin-reading-heading,
 .admin-edit-heading {
   margin-top: 12px;
 }
