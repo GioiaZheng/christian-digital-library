@@ -172,7 +172,10 @@
     try {
       const response = await fetch("catalog.json");
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      allBooks = await response.json();
+      const books = await response.json();
+      allBooks = window.CDL_CATALOG_OVERRIDES?.applyToBooks
+        ? await window.CDL_CATALOG_OVERRIDES.applyToBooks(books)
+        : books;
       const params = new URLSearchParams(location.search);
       searchInput.value = params.get("q") || "";
       categorySelect.value = params.get("category") || "";

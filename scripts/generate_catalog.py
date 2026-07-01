@@ -201,12 +201,12 @@ def render_book_card(
     category = categories[book["category"]]
     filter_text = book_filter_text(book, category)
     return f"""
-        <article class="card" data-filter-text="{escape(filter_text)}">
-          <h3><a href="{link_prefix}books/{escape(book['id'])}.html">{escape(book['clean_title'])}</a></h3>
-          <p class="meta">{escape(byline)}</p>
-          {description}
+        <article class="card" data-catalog-book-id="{escape(book['id'])}" data-filter-text="{escape(filter_text)}">
+          <h3><a href="{link_prefix}books/{escape(book['id'])}.html" data-card-title>{escape(book['clean_title'])}</a></h3>
+          <p class="meta" data-card-byline>{escape(byline)}</p>
+          {description.replace('<p class="description">', '<p class="description" data-card-description>')}
           <div class="card-footer">
-            <span class="badge">{escape(category['name'])}</span>
+            <span class="badge" data-card-category>{escape(category['name'])}</span>
             <span class="meta">查看书目 →</span>
           </div>
         </article>"""
@@ -314,6 +314,8 @@ def render_home(
         <div class="grid">{featured}</div>
       </div>
     </section>
+    <script src="assets/upload-config.js" defer></script>
+    <script src="assets/catalog-overrides.js" defer></script>
     <script src="assets/daily-recommendations.js" defer></script>"""
     return render_layout(
         template,
@@ -359,6 +361,8 @@ def render_catalog(template: Template, categories: list[dict[str, str]]) -> str:
         <noscript><div class="empty-state">搜索功能需要 JavaScript。你仍可前往“分类”页面浏览全部书目。</div></noscript>
       </div>
     </section>
+    <script src="assets/upload-config.js" defer></script>
+    <script src="assets/catalog-overrides.js" defer></script>
     <script src="assets/search.js" defer></script>"""
     return render_layout(
         template,
@@ -427,6 +431,8 @@ def render_category_detail(
       <div id="category-results" class="grid" data-category-total="{len(books)}">{cards}</div>
       <div id="category-empty-state" class="empty-state" hidden>没有找到匹配的书目，请尝试缩短关键词。</div>
     </div></section>
+    <script src="../assets/upload-config.js" defer></script>
+    <script src="../assets/catalog-overrides.js" defer></script>
     <script src="../assets/category-filter.js" defer></script>"""
     return render_layout(
         template,
@@ -550,8 +556,15 @@ def render_book_detail(
         ("分类", category["name"]),
         ("版权状态", book["copyright_status"]),
     ]
+    metadata_keys = {
+        "作者": "author",
+        "出版社": "publisher",
+        "年份": "year",
+        "分类": "category",
+    }
     metadata = "".join(
-        f'<div class="metadata-row"><dt>{escape(label)}</dt><dd>{escape(value)}</dd></div>'
+        f'<div class="metadata-row"><dt>{escape(label)}</dt><dd'
+        f'{f" data-live-metadata={metadata_keys[label]!r}" if label in metadata_keys else ""}>{escape(value)}</dd></div>'
         for label, value in metadata_items
     )
     tags = "".join(f'<span class="tag">{escape(tag)}</span>' for tag in book["tags"])
@@ -563,12 +576,12 @@ def render_book_detail(
     )
     availability = "当前书目用于馆藏查询，文件访问按实际授权情况提供。"
     content = f"""
-    <header class="page-hero book-detail-hero"><div class="shell book-hero-grid">
+    <header class="page-hero book-detail-hero" data-book-detail-id="{escape(book['id'])}"><div class="shell book-hero-grid">
       <div class="book-hero-copy">
         <nav class="breadcrumbs" aria-label="面包屑"><a href="../categories.html">馆藏分类</a> / <a href="../categories/{escape(category['id'])}.html">{escape(category['name'])}</a> / 当前书目</nav>
         <p class="eyebrow">书目编号 · {escape(book['id'])}</p>
-        <h1>{escape(book['clean_title'])}</h1>
-        <p class="lead">{escape(book['author'] or '作者信息待核实')}</p>
+        <h1 data-live-field="clean_title">{escape(book['clean_title'])}</h1>
+        <p class="lead" data-live-field="author">{escape(book['author'] or '作者信息待核实')}</p>
       </div>
       <div class="book-hero-cover">
         {render_cover_section(book)}
@@ -576,10 +589,10 @@ def render_book_detail(
     </div></header>
     <section class="section"><div class="shell book-layout">
       <div class="book-main">
-        <section class="book-section"><h2>内容简介</h2><p>{escape(book['description'] or '暂无内容简介。')}</p></section>
+        <section class="book-section"><h2>内容简介</h2><p data-live-field="description">{escape(book['description'] or '暂无内容简介。')}</p></section>
         {render_preview_section(book)}
         {toc_section}
-        <section class="book-section"><h2>主题标签</h2><div class="tags">{tags or '<span class="meta">暂无标签</span>'}</div></section>
+        <section class="book-section"><h2>主题标签</h2><div class="tags" data-live-tags>{tags or '<span class="meta">暂无标签</span>'}</div></section>
       </div>
       <aside class="book-aside">
         <section class="book-section"><h2>书目信息</h2><dl class="metadata-list">{metadata}</dl></section>
@@ -588,6 +601,9 @@ def render_book_detail(
       </aside>
     </div></section>
     <script src="../assets/access-config.js" defer></script>
+    <script src="../assets/upload-config.js" defer></script>
+    <script src="../assets/catalog-overrides.js" defer></script>
+    <script src="../assets/book-live-overrides.js" defer></script>
     <script src="../assets/access.js" defer></script>
     <script src="../assets/image-viewer.js" defer></script>"""
     return render_layout(
