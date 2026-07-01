@@ -10,6 +10,13 @@
     touchStartX: 0,
     touchStartY: 0,
     scale: 1,
+    panX: 0,
+    panY: 0,
+    panStartX: 0,
+    panStartY: 0,
+    dragStartX: 0,
+    dragStartY: 0,
+    isPanning: false,
   };
 
   const getCaption = (trigger) =>
@@ -67,9 +74,17 @@
   const zoomOutButton = viewer.querySelector("[data-image-viewer-zoom-out]");
   const zoomResetButton = viewer.querySelector("[data-image-viewer-zoom-reset]");
   const zoomInButton = viewer.querySelector("[data-image-viewer-zoom-in]");
+  image.draggable = false;
 
   const applyZoom = () => {
-    image.style.transform = `scale(${state.scale})`;
+    if (state.scale <= 1) {
+      state.panX = 0;
+      state.panY = 0;
+    }
+    image.style.transform = `translate3d(${state.panX}px, ${state.panY}px, 0) scale(${state.scale})`;
+    image.classList.toggle("is-pannable", state.scale > 1);
+    image.classList.toggle("is-panning", state.isPanning);
+    stage.classList.toggle("is-zoomed", state.scale > 1);
     if (zoomResetButton) zoomResetButton.textContent = `${Math.round(state.scale * 100)}%`;
     if (zoomOutButton) zoomOutButton.disabled = state.scale <= 0.6;
     if (zoomInButton) zoomInButton.disabled = state.scale >= 2.4;
@@ -82,6 +97,8 @@
 
   const resetZoom = () => {
     state.scale = 1;
+    state.panX = 0;
+    state.panY = 0;
     applyZoom();
   };
 
@@ -141,6 +158,41 @@
   zoomResetButton?.addEventListener("click", resetZoom);
   zoomInButton?.addEventListener("click", () => zoom(0.2));
 
+  image.addEventListener("pointerdown", (event) => {
+    if (state.scale <= 1) return;
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    state.isPanning = true;
+    state.dragStartX = event.clientX;
+    state.dragStartY = event.clientY;
+    state.panStartX = state.panX;
+    state.panStartY = state.panY;
+    image.setPointerCapture?.(event.pointerId);
+    applyZoom();
+  });
+
+  image.addEventListener("pointermove", (event) => {
+    if (!state.isPanning) return;
+    event.preventDefault();
+    event.stopPropagation();
+    state.panX = state.panStartX + event.clientX - state.dragStartX;
+    state.panY = state.panStartY + event.clientY - state.dragStartY;
+    applyZoom();
+  });
+
+  const stopPanning = (event) => {
+    if (!state.isPanning) return;
+    event.preventDefault();
+    event.stopPropagation();
+    state.isPanning = false;
+    image.releasePointerCapture?.(event.pointerId);
+    applyZoom();
+  };
+
+  image.addEventListener("pointerup", stopPanning);
+  image.addEventListener("pointercancel", stopPanning);
+
   viewer.addEventListener("click", (event) => {
     if (event.target === viewer || event.target === stage) close();
   });
@@ -151,6 +203,7 @@
   });
 
   stage.addEventListener("pointerup", (event) => {
+    if (state.scale > 1) return;
     const deltaX = event.clientX - state.touchStartX;
     const deltaY = event.clientY - state.touchStartY;
     if (Math.abs(deltaX) < 42 || Math.abs(deltaX) < Math.abs(deltaY)) return;
