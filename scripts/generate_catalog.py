@@ -691,7 +691,7 @@ def render_book_detail(
       <div class="book-main">
         <section class="book-section"><h2>内容简介</h2><p data-live-field="description">{escape(book['description'] or '简介待补充。')}</p></section>
         <section class="book-section author-bio-section"><h2>作者简介</h2><p data-live-field="author_bio">{escape(book['author_bio'] or '作者介绍待补充。')}</p></section>
-        <p class="catalog-note">本馆目录仍在整理中，书名与分类会持续校对。</p>
+        <p class="catalog-note">本馆目录仍在整理中。</p>
         {render_preview_section(book)}
         {toc_section}
         <section class="book-section"><h2>主题标签</h2><div class="tags" data-live-tags>{tags or '<span class="meta">暂无标签</span>'}</div></section>
