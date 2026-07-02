@@ -227,6 +227,14 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("assets/catalog-overrides.js", home)
             self.assertIn("assets/daily-recommendations.js", home)
 
+            daily_source = (
+                project / "public" / "assets" / "daily-recommendations.js"
+            ).read_text(encoding="utf-8")
+            self.assertIn("hasPreviewAssets", daily_source)
+            self.assertIn("canUseReadingFlow", daily_source)
+            self.assertIn("recommendationRank", daily_source)
+            self.assertIn("reader_ready", daily_source)
+
     def test_category_detail_page_contains_filter_controls(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = create_sample_project(Path(directory))

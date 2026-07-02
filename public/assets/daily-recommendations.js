@@ -41,6 +41,24 @@
     return true;
   };
 
+  const hasPreviewAssets = (book) =>
+    Boolean(String(book.cover_image_url || "").trim()) &&
+    Boolean(String(book.preview_base_url || "").trim()) &&
+    Number(book.preview_page_count || 0) > 0;
+
+  const canUseReadingFlow = (book) => {
+    if (book.reader_ready === false) return false;
+    if (book.reader_ready === true || Number(book.reader_page_count || 0) > 0) return true;
+    return book.access_required !== false;
+  };
+
+  const recommendationRank = (book) => {
+    if (!goodRecommendation(book)) return 0;
+    if (hasPreviewAssets(book) && canUseReadingFlow(book)) return 3;
+    if (hasPreviewAssets(book)) return 2;
+    return 1;
+  };
+
   const renderBook = (book) => {
     const article = document.createElement("article");
     article.className = "card";
@@ -62,13 +80,16 @@
   };
 
   const pickDailyBooks = (books) => {
-    const candidates = books.filter(goodRecommendation);
     const random = randomFromSeed(hashSeed(todayKey()));
-    const pool = [...candidates];
     const picked = [];
-    while (pool.length && picked.length < 5) {
-      const index = Math.floor(random() * pool.length);
-      picked.push(pool.splice(index, 1)[0]);
+
+    for (const rank of [3, 2, 1]) {
+      const pool = books.filter((book) => recommendationRank(book) === rank && !picked.some((item) => item.id === book.id));
+      while (pool.length && picked.length < 5) {
+        const index = Math.floor(random() * pool.length);
+        picked.push(pool.splice(index, 1)[0]);
+      }
+      if (picked.length >= 5) break;
     }
     return picked;
   };
