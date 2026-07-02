@@ -110,7 +110,9 @@ class WorkerPolicyTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("const splitList", admin_source)
-        self.assertIn('namedItem("categories")', admin_source)
+        self.assertIn("loadCategories", admin_source)
+        self.assertIn("renderCategoryCheckboxes", admin_source)
+        self.assertIn("selectedCategories()", admin_source)
         self.assertIn("payload.categories = categories", admin_source)
         self.assertIn("payload.tags = tags", admin_source)
         self.assertIn("已保存并上线", admin_source)
