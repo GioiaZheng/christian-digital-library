@@ -21,6 +21,7 @@ BOOK_FIELDS = [
     "id",
     "clean_title",
     "author",
+    "translator",
     "publisher",
     "year",
     "language",
@@ -53,6 +54,7 @@ def book_filter_text(book: dict[str, Any], category: dict[str, str]) -> str:
         for part in (
             book["clean_title"],
             book["author"],
+            book["translator"],
             book["publisher"],
             book["year"],
             book["language"],
@@ -192,7 +194,8 @@ def render_book_card(
     book: dict[str, Any], categories: dict[str, dict[str, str]], link_prefix: str = ""
 ) -> str:
     author = book["author"] or "作者待核"
-    byline = " · ".join(part for part in (author, book["year"]) if part)
+    translator = f"译者：{book['translator']}" if book["translator"] else ""
+    byline = " · ".join(part for part in (author, translator, book["year"]) if part)
     description = (
         f'<p class="description">{escape(book["description"])}</p>'
         if book["description"]
@@ -550,6 +553,7 @@ def render_book_detail(
 ) -> str:
     metadata_items = [
         ("作者", book["author"] or "待核实"),
+        ("译者", book["translator"] or "待核实"),
         ("出版社", book["publisher"] or "待核实"),
         ("年份", book["year"] or "待核实"),
         ("语言", book["language"] or "待核实"),
@@ -558,6 +562,7 @@ def render_book_detail(
     ]
     metadata_keys = {
         "作者": "author",
+        "译者": "translator",
         "出版社": "publisher",
         "年份": "year",
         "分类": "category",
@@ -634,7 +639,7 @@ def render_about(template: Template) -> str:
         <div>
           <p class="eyebrow">上传申请</p>
           <h2>提交书籍资料</h2>
-          <p class="description">你可以提交书名、作者和整理后的文件。提交后会进入待审核区，不会自动公开显示，也不会自动开放下载。请上传 PDF、EPUB 或 MOBI，不要上传 ZIP。</p>
+          <p class="description">你可以提交书名、作者、译者和整理后的文件。提交后会进入待审核区，不会自动公开显示，也不会自动开放下载。请上传 PDF、EPUB 或 MOBI，不要上传 ZIP。</p>
         </div>
         <form id="upload-request-form" class="upload-form" enctype="multipart/form-data" data-upload-endpoint="" data-max-bytes="104857600">
           <div class="field">
@@ -644,6 +649,10 @@ def render_about(template: Template) -> str:
           <div class="field">
             <label for="upload-author">作者</label>
             <input id="upload-author" name="author" type="text" autocomplete="off" required>
+          </div>
+          <div class="field">
+            <label for="upload-translator">译者</label>
+            <input id="upload-translator" name="translator" type="text" autocomplete="off">
           </div>
           <div class="field">
             <label for="upload-file">文件</label>
@@ -700,6 +709,10 @@ def render_admin(template: Template) -> str:
             <input id="admin-add-author" name="author" type="text" autocomplete="off" required>
           </div>
           <div class="field">
+            <label for="admin-add-translator">译者</label>
+            <input id="admin-add-translator" name="translator" type="text" autocomplete="off">
+          </div>
+          <div class="field">
             <label for="admin-add-file">文件</label>
             <input id="admin-add-file" name="file" type="file" accept=".pdf,.epub,.mobi,application/pdf,application/epub+zip,application/x-mobipocket-ebook" required>
             <p class="field-help">上传整理后的 PDF、EPUB 或 MOBI，不要上传 ZIP。单个文件最大 100 MB。</p>
@@ -726,7 +739,7 @@ def render_admin(template: Template) -> str:
         <div class="search-panel admin-search-panel" role="search">
           <div class="field">
             <label for="admin-book-search">搜索书目</label>
-            <input id="admin-book-search" type="search" placeholder="输入书名、作者或书号" autocomplete="off">
+            <input id="admin-book-search" type="search" placeholder="输入书名、作者、译者或书号" autocomplete="off">
           </div>
         </div>
         <div id="admin-book-results" class="admin-book-results" aria-live="polite"></div>
@@ -739,6 +752,10 @@ def render_admin(template: Template) -> str:
           <div class="field">
             <label for="admin-book-author">作者</label>
             <input id="admin-book-author" name="author" type="text">
+          </div>
+          <div class="field">
+            <label for="admin-book-translator">译者</label>
+            <input id="admin-book-translator" name="translator" type="text">
           </div>
           <div class="field">
             <label for="admin-book-publisher">出版社</label>

@@ -70,7 +70,13 @@
     title.append(link);
     article.append(title);
 
-    article.append(createText("p", "meta", book.author || "作者待核"));
+    article.append(
+      createText(
+        "p",
+        "meta",
+        [book.author || "作者待核", book.translator ? `译者：${book.translator}` : ""].filter(Boolean).join(" · "),
+      ),
+    );
     const footer = document.createElement("div");
     footer.className = "card-footer";
     footer.append(createText("span", "badge", book.category_name || "馆藏"));

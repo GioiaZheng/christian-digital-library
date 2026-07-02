@@ -42,6 +42,7 @@
       id: String(item.id),
       clean_title: String(item.clean_title || "").trim(),
       author: String(item.author || "").trim(),
+      translator: String(item.translator || "").trim(),
       publisher: String(item.publisher || "").trim(),
       year: String(item.year || "").trim(),
       category,
@@ -75,7 +76,7 @@
   const applyOverride = (book, override) => {
     if (!book || !override) return book;
     const next = { ...book };
-    for (const key of ["clean_title", "author", "publisher", "year", "description", "updated_at"]) {
+    for (const key of ["clean_title", "author", "translator", "publisher", "year", "description", "updated_at"]) {
       if (override[key]) next[key] = override[key];
     }
     if (override.category) {

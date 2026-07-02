@@ -224,6 +224,7 @@ async function listPendingUploads(request, env) {
       id: metadata.id,
       title: metadata.title,
       author: metadata.author,
+      translator: metadata.translator,
       filename: metadata.filename,
       size: metadata.size,
       status: metadata.status,
@@ -263,6 +264,7 @@ async function updateUploadStatus(request, env, requestId, status) {
         requestId: cleanId,
         title: String(metadata.title || ""),
         author: String(metadata.author || ""),
+        translator: String(metadata.translator || ""),
         status: "approved",
       },
     });
@@ -281,6 +283,7 @@ async function addAdminBook(request, env) {
 
   const title = cleanText(form.get("title"), 160);
   const author = cleanText(form.get("author"), 120);
+  const translator = cleanText(form.get("translator"), 120);
   const file = form.get("file");
 
   if (!title || !author || !(file instanceof File)) {
@@ -299,6 +302,7 @@ async function addAdminBook(request, env) {
     id: requestId,
     title,
     author,
+    translator,
     filename,
     file_key: fileKey,
     size: file.size,
@@ -315,6 +319,7 @@ async function addAdminBook(request, env) {
       requestId,
       title,
       author,
+      translator,
       status: "admin_added",
     },
   });
@@ -348,6 +353,7 @@ async function saveBookOverride(request, env, bookId) {
     id: bookId,
     clean_title: cleanText(body.clean_title, 220),
     author: cleanText(body.author, 160),
+    translator: cleanText(body.translator, 160),
     publisher: cleanText(body.publisher, 160),
     year: cleanText(body.year, 40),
     category: categories[0],
@@ -379,6 +385,7 @@ function publicBookOverride(metadata) {
     id: bookId,
     clean_title: cleanText(metadata.clean_title, 220),
     author: cleanText(metadata.author, 160),
+    translator: cleanText(metadata.translator, 160),
     publisher: cleanText(metadata.publisher, 160),
     year: cleanText(metadata.year, 40),
     category: categories[0] || "",
@@ -450,6 +457,7 @@ async function handleUpload(request, env) {
 
   const title = cleanText(form.get("title"), 160);
   const author = cleanText(form.get("author"), 120);
+  const translator = cleanText(form.get("translator"), 120);
   const file = form.get("file");
 
   if (!title || !author || !(file instanceof File)) {
@@ -473,6 +481,7 @@ async function handleUpload(request, env) {
       requestId,
       title,
       author,
+      translator,
       status: "pending",
     },
   });
@@ -484,6 +493,7 @@ async function handleUpload(request, env) {
         id: requestId,
         title,
         author,
+        translator,
         filename,
         file_key: fileKey,
         size: file.size,

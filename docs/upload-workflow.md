@@ -6,6 +6,7 @@
 
 - 书名
 - 作者
+- 译者（可选）
 - 文件
 
 ## Worker 行为
@@ -23,6 +24,7 @@ metadata 记录：
 
 - 书名
 - 作者
+- 译者（如有）
 - 文件名
 - 文件大小
 - 提交时间
@@ -57,7 +59,7 @@ python scripts\review_uploads.py --env-file C:\path\to\.env show <提交 ID>
 python scripts\review_uploads.py --env-file C:\path\to\.env delete <提交 ID> --yes
 ```
 
-当前脚本只处理 `pending/` 区。正式入库仍需要人工核对书名、作者、版本、版权状态和分类后，再整理到书目数据中。
+当前脚本只处理 `pending/` 区。正式入库仍需要人工核对书名、作者、译者、版本、版权状态和分类后，再整理到书目数据中。
 
 ## 部署上传和管理员 Worker
 

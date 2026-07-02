@@ -73,7 +73,11 @@
     title.append(link);
     article.append(title);
 
-    const bylineParts = [book.author || "作者待核", book.year].filter(Boolean);
+    const bylineParts = [
+      book.author || "作者待核",
+      book.translator ? `译者：${book.translator}` : "",
+      book.year,
+    ].filter(Boolean);
     article.append(createText("p", "meta", bylineParts.join(" · ")));
     if (book.description) {
       article.append(createText("p", "description", book.description));
@@ -128,6 +132,7 @@
         const haystack = normalize([
           book.clean_title,
           book.author,
+          book.translator,
           book.publisher,
           book.description,
           book.category_name,

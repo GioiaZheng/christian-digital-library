@@ -18,6 +18,7 @@ BOOK_FIELDS = [
     "id",
     "clean_title",
     "author",
+    "translator",
     "publisher",
     "year",
     "language",
@@ -40,6 +41,7 @@ MAPPING_FIELDS = [
     "etag",
     "clean_title",
     "author",
+    "translator",
     "category",
     "reviewed",
 ]
@@ -1307,6 +1309,7 @@ def import_inventory(
             title = previous.get("clean_title", title) or title
             author = previous.get("author", author)
             category = previous.get("category", category) or category
+        translator = previous.get("translator", "") if previous else ""
         assets = assets_by_id.get(book_id, {})
         preview_page_count = assets.get("preview_page_count") or "5"
         if not re.fullmatch(r"\d{1,2}", preview_page_count):
@@ -1320,6 +1323,7 @@ def import_inventory(
                 "etag": etag,
                 "clean_title": title,
                 "author": author,
+                "translator": translator,
                 "category": category,
                 "reviewed": "true" if reviewed else "false",
             }
@@ -1329,6 +1333,7 @@ def import_inventory(
                 "id": book_id,
                 "clean_title": title,
                 "author": author,
+                "translator": translator,
                 "publisher": "",
                 "year": "",
                 "language": "中文",
