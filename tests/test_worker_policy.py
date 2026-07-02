@@ -136,6 +136,8 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("getBookOverride", override_source)
         self.assertIn('"translator"', override_source)
         self.assertIn('"author_bio"', override_source)
+        self.assertIn("localStorage.getItem(storageKey)", override_source)
+        self.assertIn("refreshOverrides().catch", override_source)
         self.assertIn("/catalog-overrides", override_source)
         self.assertNotIn("ADMIN_CODE", override_source)
         self.assertNotIn("ACCESS_CODE", override_source)
