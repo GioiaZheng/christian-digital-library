@@ -12,9 +12,27 @@
   const accessButtons = (form) => Array.from(form.querySelectorAll('button[type="submit"]'));
 
   const setBusy = (form, busy) => {
+    form.dataset.accessBusy = busy ? "true" : "false";
     for (const button of accessButtons(form)) {
       button.disabled = busy;
     }
+  };
+
+  const safeExtension = (value) =>
+    /^[A-Za-z0-9]+$/.test(String(value || "")) ? String(value).toLowerCase() : "pdf";
+
+  const formatExpiry = (value) => {
+    const timestamp = Number(value) * 1000;
+    if (!Number.isFinite(timestamp)) return "";
+    const date = new Date(timestamp);
+    if (!Number.isFinite(date.getTime())) return "";
+    return date.toLocaleString("zh-CN", {
+      hour12: false,
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   const filenameFromDisposition = (value, fallback) => {
@@ -90,18 +108,25 @@
             throw new Error("在线阅读入口暂不可用，请先下载文件。");
           }
           openReader(data.reader_url);
-          setStatus(form, "访问码已通过，在线阅读已打开。");
+          const expiry = formatExpiry(data.expires_at);
+          setStatus(
+            form,
+            expiry
+              ? `访问码已通过，在线阅读已打开。阅读链接有效至 ${expiry}。`
+              : "访问码已通过，在线阅读已打开。",
+          );
           return;
         }
 
         const blob = await response.blob();
-        const fallback = `${form.elements.book_id?.value || "book"}.zip`;
+        const extension = safeExtension(response.headers.get("X-CDL-File-Extension"));
+        const fallback = `${form.elements.book_id?.value || "book"}.${extension}`;
         const filename = filenameFromDisposition(
           response.headers.get("Content-Disposition"),
           fallback,
         );
         downloadBlob(blob, filename);
-        setStatus(form, "访问码已通过，下载已开始。");
+        setStatus(form, "访问码已通过，下载已开始。如果浏览器没有反应，请检查下载权限后重试。");
       } catch (error) {
         setStatus(form, error.message || "访问失败，请稍后再试。");
       } finally {
