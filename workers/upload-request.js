@@ -8,6 +8,7 @@ const ADMIN_ADDED_FILE_PREFIX = "files/admin-added/";
 const ADMIN_ADDED_METADATA_PREFIX = "metadata/admin-added/";
 const ADMIN_OVERRIDE_PREFIX = "metadata/admin-overrides/";
 const ADMIN_READING_STATUS_KEY = "metadata/admin-reading-status.json";
+const READER_COMMENT_PREFIX = "metadata/reader-comments/";
 const READING_STATUSES = new Set(["want_to_read", "finished"]);
 const READING_STATUS_LABELS = {
   want_to_read: "想读",
@@ -19,7 +20,7 @@ function corsHeaders(request, env) {
   const allowedOrigin = env.ALLOWED_ORIGIN || DEFAULT_ALLOWED_ORIGIN;
   return {
     "Access-Control-Allow-Origin": origin === allowedOrigin ? origin : allowedOrigin,
-    "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, X-CDL-Admin-Code",
     "X-Content-Type-Options": "nosniff",
   };
@@ -131,6 +132,70 @@ async function loadJsonObject(bucket, key) {
   const object = await bucket.get(key);
   if (!object) return null;
   return object.json();
+}
+
+function readerCommentsKey(bookId, pageNumber) {
+  return `${READER_COMMENT_PREFIX}${bookId}/page-${pageNumber}.json`;
+}
+
+function publicCommentItem(bookId, pageNumber, comment) {
+  return {
+    id: cleanText(comment?.id, 80),
+    book_id: bookId,
+    page: Number(pageNumber),
+    name: cleanText(comment?.name, 40) || "读者",
+    message: String(comment?.message || "").trim().slice(0, 800),
+    created_at: cleanText(comment?.created_at, 40),
+  };
+}
+
+async function listReaderComments(request, env) {
+  const listed = await env.BOOK_UPLOADS.list({ prefix: READER_COMMENT_PREFIX });
+  const items = [];
+  for (const object of listed.objects) {
+    const match = object.key.match(/^metadata\/reader-comments\/(cdl-\d{6})\/page-([1-9]\d*)\.json$/);
+    if (!match) continue;
+    const [, bookId, pageText] = match;
+    const stored = await loadJsonObject(env.BOOK_UPLOADS, object.key).catch(() => null);
+    const comments = Array.isArray(stored?.comments) ? stored.comments : [];
+    for (const comment of comments) {
+      const item = publicCommentItem(bookId, Number(pageText), comment);
+      if (item.id && item.message) items.push(item);
+    }
+  }
+  items.sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+  return jsonResponse(request, env, 200, { items });
+}
+
+async function deleteReaderComment(request, env, bookId, pageText, commentId) {
+  const pageNumber = Number(pageText);
+  if (!/^cdl-\d{6}$/.test(bookId) || !Number.isInteger(pageNumber) || pageNumber < 1) {
+    return jsonResponse(request, env, 400, { message: "评论位置不正确。" });
+  }
+  const key = readerCommentsKey(bookId, pageNumber);
+  const stored = await loadJsonObject(env.BOOK_UPLOADS, key).catch(() => null);
+  if (!stored || !Array.isArray(stored.comments)) {
+    return jsonResponse(request, env, 404, { message: "没有找到这条评论。" });
+  }
+
+  const beforeCount = stored.comments.length;
+  const comments = stored.comments.filter((comment) => String(comment?.id || "") !== commentId);
+  if (comments.length === beforeCount) {
+    return jsonResponse(request, env, 404, { message: "没有找到这条评论。" });
+  }
+
+  const now = new Date().toISOString();
+  await env.BOOK_UPLOADS.put(
+    key,
+    JSON.stringify({ book_id: bookId, page: pageNumber, comments, updated_at: now }, null, 2),
+    {
+      httpMetadata: {
+        contentType: "application/json; charset=utf-8",
+      },
+    },
+  );
+
+  return jsonResponse(request, env, 200, { deleted: true, id: commentId });
 }
 
 async function loadReadingStatuses(env) {
@@ -424,6 +489,10 @@ async function handleAdmin(request, env, pathname) {
     return listReadingStatuses(request, env);
   }
 
+  if (request.method === "GET" && pathname.endsWith("/admin/comments")) {
+    return listReaderComments(request, env);
+  }
+
   if (request.method === "POST" && pathname.endsWith("/admin/books")) {
     return addAdminBook(request, env);
   }
@@ -446,6 +515,17 @@ async function handleAdmin(request, env, pathname) {
   const readingStatusUpdate = pathname.match(/\/admin\/books\/(cdl-\d{6})\/reading-status$/);
   if (request.method === "PATCH" && readingStatusUpdate) {
     return saveReadingStatus(request, env, readingStatusUpdate[1]);
+  }
+
+  const commentDelete = pathname.match(/\/admin\/comments\/(cdl-\d{6})\/pages\/([1-9]\d*)\/([^/]+)$/);
+  if (request.method === "DELETE" && commentDelete) {
+    return deleteReaderComment(
+      request,
+      env,
+      commentDelete[1],
+      commentDelete[2],
+      decodeURIComponent(commentDelete[3]),
+    );
   }
 
   return jsonResponse(request, env, 404, { message: "管理员接口不存在。" });

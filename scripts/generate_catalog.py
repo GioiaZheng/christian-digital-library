@@ -836,6 +836,13 @@ def render_admin(template: Template) -> str:
         <p id="admin-reading-summary" class="result-summary" aria-live="polite">登录后显示阅读状态。</p>
         <div id="admin-reading-list" class="admin-reading-list" aria-live="polite"></div>
 
+        <div class="section-heading admin-comments-heading">
+          <div><p class="eyebrow">页内留言</p><h2>阅读评论管理</h2></div>
+          <button id="admin-refresh-comments" class="button secondary" type="button">刷新</button>
+        </div>
+        <p id="admin-comments-summary" class="result-summary" aria-live="polite">登录后显示读者留言。</p>
+        <div id="admin-comments-list" class="admin-comments-list" aria-live="polite"></div>
+
         <div class="section-heading admin-edit-heading">
           <div><p class="eyebrow">书目资料</p><h2>修改书目信息</h2></div>
         </div>
