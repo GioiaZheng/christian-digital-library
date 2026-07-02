@@ -22,6 +22,7 @@
   let currentPage = 1;
   let currentPageTotal = 0;
   let readerScale = 1;
+  const loadedCommentPages = new Set();
 
   const setStatus = (message) => {
     if (status) status.textContent = message;
@@ -56,23 +57,67 @@
     return url.toString();
   };
 
+  const readerCommentsUrl = (pageNumber) => {
+    const url = new URL(`${endpoint.replace(/\/+$/, "")}/reader-comments/${bookId}/pages/${pageNumber}`);
+    url.searchParams.set("token", token);
+    return url.toString();
+  };
+
   const validBookId = /^cdl-\d{6}$/.test(bookId);
 
   const applyReaderZoom = () => {
     if (pages) pages.style.setProperty("--reader-zoom", String(readerScale));
     if (zoomResetButton) zoomResetButton.textContent = `${Math.round(readerScale * 100)}%`;
     if (zoomOutButton) zoomOutButton.disabled = readerScale <= 0.7;
-    if (zoomInButton) zoomInButton.disabled = readerScale >= 2;
+    if (zoomInButton) zoomInButton.disabled = readerScale >= 2.6;
   };
 
-  const zoomReader = (step) => {
-    readerScale = Math.min(2, Math.max(0.7, Number((readerScale + step).toFixed(2))));
+  const zoomReaderTo = (nextScale) => {
+    readerScale = Math.min(2.6, Math.max(0.7, Number(nextScale.toFixed(2))));
     applyReaderZoom();
   };
+
+  const zoomReader = (step) => zoomReaderTo(readerScale + step);
 
   const resetReaderZoom = () => {
-    readerScale = 1;
-    applyReaderZoom();
+    zoomReaderTo(1);
+  };
+
+  const attachReaderZoomGestures = () => {
+    if (!pages) return;
+    pages.addEventListener(
+      "wheel",
+      (event) => {
+        if (!event.ctrlKey && !event.metaKey) return;
+        event.preventDefault();
+        const delta = event.deltaY < 0 ? 0.12 : -0.12;
+        zoomReader(delta);
+      },
+      { passive: false },
+    );
+
+    pages.addEventListener("dblclick", (event) => {
+      const page = event.target.closest?.(".reader-page");
+      if (!page) return;
+      event.preventDefault();
+      zoomReaderTo(readerScale > 1.15 ? 1 : 1.65);
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (!event.ctrlKey && !event.metaKey) return;
+      if (event.key === "+" || event.key === "=") {
+        event.preventDefault();
+        zoomReader(0.15);
+      }
+      if (event.key === "-") {
+        event.preventDefault();
+        zoomReader(-0.15);
+      }
+      if (event.key === "0") {
+        event.preventDefault();
+        resetReaderZoom();
+      }
+    });
   };
 
   const updateCurrentPage = (pageNumber, pageCount = currentPageTotal) => {
@@ -129,7 +174,10 @@
           .filter((entry) => entry.isIntersecting)
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
         const pageNumber = visible?.target?.dataset?.page;
-        if (pageNumber) updateCurrentPage(pageNumber);
+        if (pageNumber) {
+          updateCurrentPage(pageNumber);
+          loadCommentsForPage(Number(pageNumber)).catch(() => {});
+        }
       },
       {
         rootMargin: "-38% 0px -52% 0px",
@@ -137,6 +185,125 @@
       },
     );
     pages.querySelectorAll(".reader-page").forEach((page) => observer.observe(page));
+  };
+
+  const renderComments = (container, comments) => {
+    const list = container.querySelector("[data-reader-comments-list]");
+    if (!list) return;
+    list.replaceChildren();
+    if (!comments.length) {
+      const empty = document.createElement("p");
+      empty.className = "reader-comments-empty";
+      empty.textContent = "这一页还没有留言。";
+      list.append(empty);
+      return;
+    }
+    for (const comment of comments) {
+      const item = document.createElement("article");
+      item.className = "reader-comment";
+      const meta = document.createElement("p");
+      meta.className = "reader-comment-meta";
+      const date = comment.created_at ? new Date(comment.created_at) : null;
+      const time = date && Number.isFinite(date.getTime()) ? date.toLocaleString("zh-CN", { hour12: false }) : "";
+      meta.textContent = [comment.name || "读者", time].filter(Boolean).join(" · ");
+      const body = document.createElement("p");
+      body.textContent = comment.message || "";
+      item.append(meta, body);
+      list.append(item);
+    }
+  };
+
+  const loadCommentsForPage = async (pageNumber, force = false) => {
+    if (!pageNumber || (loadedCommentPages.has(pageNumber) && !force)) return;
+    const container = document.querySelector(`[data-reader-comments="${pageNumber}"]`);
+    if (!container) return;
+    const statusLine = container.querySelector("[data-reader-comments-status]");
+    if (statusLine) statusLine.textContent = "正在加载本页留言……";
+    const response = await fetch(readerCommentsUrl(pageNumber), { headers: { Accept: "application/json" } });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || "留言加载失败。");
+    renderComments(container, data.comments || []);
+    loadedCommentPages.add(pageNumber);
+    if (statusLine) statusLine.textContent = "";
+  };
+
+  const createCommentsSection = (pageNumber) => {
+    const section = document.createElement("section");
+    section.className = "reader-comments";
+    section.dataset.readerComments = String(pageNumber);
+
+    const summary = document.createElement("button");
+    summary.type = "button";
+    summary.className = "reader-comments-toggle";
+    summary.textContent = "查看/发表本页留言";
+
+    const body = document.createElement("div");
+    body.className = "reader-comments-body";
+    body.hidden = true;
+
+    const list = document.createElement("div");
+    list.className = "reader-comments-list";
+    list.dataset.readerCommentsList = "";
+
+    const form = document.createElement("form");
+    form.className = "reader-comments-form";
+    form.innerHTML = `
+      <label>
+        昵称
+        <input name="name" type="text" maxlength="40" placeholder="可不填">
+      </label>
+      <label>
+        留言
+        <textarea name="message" rows="3" maxlength="800" required placeholder="写下这一页的想法或问题"></textarea>
+      </label>
+      <button class="button secondary" type="submit">发表</button>
+    `;
+
+    const statusLine = document.createElement("p");
+    statusLine.className = "reader-comments-status";
+    statusLine.dataset.readerCommentsStatus = "";
+    statusLine.setAttribute("aria-live", "polite");
+
+    summary.addEventListener("click", () => {
+      body.hidden = !body.hidden;
+      if (!body.hidden) {
+        loadCommentsForPage(pageNumber).catch((error) => {
+          statusLine.textContent = error.message || "留言加载失败。";
+        });
+      }
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const submit = form.querySelector('button[type="submit"]');
+      if (submit) submit.disabled = true;
+      statusLine.textContent = "正在发表……";
+      const payload = Object.fromEntries(new FormData(form).entries());
+      try {
+        const response = await fetch(readerCommentsUrl(pageNumber), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.message || "发表失败。");
+        form.reset();
+        renderComments(section, data.comments || []);
+        loadedCommentPages.add(pageNumber);
+        statusLine.textContent = "已发表。";
+      } catch (error) {
+        statusLine.textContent = error.message || "发表失败。";
+      } finally {
+        if (submit) submit.disabled = false;
+      }
+    });
+
+    body.append(list, form, statusLine);
+    section.append(summary, body);
+    return section;
   };
 
   if (!endpoint || !validBookId || !token) {
@@ -180,6 +347,7 @@
     zoomOutButton?.addEventListener("click", () => zoomReader(-0.15));
     zoomResetButton?.addEventListener("click", resetReaderZoom);
     zoomInButton?.addEventListener("click", () => zoomReader(0.15));
+    attachReaderZoomGestures();
     applyReaderZoom();
 
     const fragment = document.createDocumentFragment();
@@ -236,7 +404,7 @@
       const caption = document.createElement("figcaption");
       caption.textContent = `第 ${index} / ${pageCount} 页`;
 
-      figure.append(image, errorBox, caption);
+      figure.append(image, errorBox, caption, createCommentsSection(index));
       fragment.append(figure);
     }
 

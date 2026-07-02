@@ -13,6 +13,9 @@
   const bookStatus = document.querySelector("#admin-book-status");
   const readingSummary = document.querySelector("#admin-reading-summary");
   const readingList = document.querySelector("#admin-reading-list");
+  const refreshComments = document.querySelector("#admin-refresh-comments");
+  const commentsSummary = document.querySelector("#admin-comments-summary");
+  const commentsList = document.querySelector("#admin-comments-list");
   const categoryList = document.querySelector("#admin-book-category-list");
   const newCategoryInput = document.querySelector("#admin-new-category");
   const addCategoryButton = document.querySelector("#admin-add-category");
@@ -208,6 +211,12 @@
 
   const findCatalogBook = (bookId) => catalog.find((book) => book.id === bookId);
 
+  const formatDate = (value) => {
+    const date = value ? new Date(value) : null;
+    if (!date || !Number.isFinite(date.getTime())) return "";
+    return date.toLocaleString("zh-CN", { hour12: false });
+  };
+
   const renderReadingList = () => {
     if (!readingList) return;
     readingList.replaceChildren();
@@ -236,6 +245,64 @@
       readingList.append(card);
     }
   };
+
+  const renderComments = (items) => {
+    if (!commentsList) return;
+    commentsList.replaceChildren();
+    setText(commentsSummary, items.length ? `共 ${items.length} 条页内留言。` : "目前还没有读者留言。");
+    if (!items.length) {
+      commentsList.append(createText("div", "empty-state", "目前还没有读者留言。"));
+      return;
+    }
+
+    for (const item of items.slice(0, 80)) {
+      const book = findCatalogBook(item.book_id) || { id: item.book_id, clean_title: item.book_id };
+      const card = document.createElement("article");
+      card.className = "admin-comment-card";
+
+      const title = document.createElement("a");
+      title.href = book.detail_url || `books/${encodeURIComponent(item.book_id)}.html`;
+      title.target = "_blank";
+      title.rel = "noopener";
+      title.textContent = `${book.clean_title || item.book_id} · 第 ${item.page} 页`;
+
+      const meta = createText("p", "meta", [item.name || "读者", formatDate(item.created_at)].filter(Boolean).join(" · "));
+      const message = createText("p", "admin-comment-message", item.message || "");
+
+      const actions = document.createElement("div");
+      actions.className = "admin-card-actions";
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "button secondary compact";
+      remove.textContent = "删除留言";
+      remove.addEventListener("click", async () => {
+        if (!window.confirm("确定删除这条留言吗？")) return;
+        remove.disabled = true;
+        try {
+          await requestAdmin(
+            `/admin/comments/${encodeURIComponent(item.book_id)}/pages/${encodeURIComponent(item.page)}/${encodeURIComponent(item.id)}`,
+            { method: "DELETE" },
+          );
+          setText(commentsSummary, "已删除，正在刷新留言列表……");
+          await loadComments();
+        } catch (error) {
+          setText(commentsSummary, error.message || "删除失败。");
+        } finally {
+          remove.disabled = false;
+        }
+      });
+
+      actions.append(remove);
+      card.append(title, meta, message, actions);
+      commentsList.append(card);
+    }
+  };
+
+  async function loadComments() {
+    setText(commentsSummary, "正在读取页内留言……");
+    const data = await requestAdmin("/admin/comments");
+    renderComments(data.items || []);
+  }
 
   const saveReadingStatus = async (book, status) => {
     const bookId = book.id;
@@ -452,6 +519,7 @@
       await loadCategories();
       await loadCatalog();
       await loadReadingStatuses();
+      await loadComments();
       await loadUploads();
       loginForm.hidden = true;
       panel.hidden = false;
@@ -463,6 +531,10 @@
 
   refreshUploads?.addEventListener("click", () => {
     loadUploads().catch((error) => setText(loginStatus, error.message || "刷新失败。"));
+  });
+
+  refreshComments?.addEventListener("click", () => {
+    loadComments().catch((error) => setText(commentsSummary, error.message || "刷新留言失败。"));
   });
 
   addBookForm?.addEventListener("submit", async (event) => {

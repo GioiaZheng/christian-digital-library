@@ -1187,14 +1187,16 @@ h3 {
 
 .admin-list,
 .admin-book-results,
-.admin-reading-list {
+.admin-reading-list,
+.admin-comments-list {
   display: grid;
   gap: 12px;
 }
 
 .admin-upload-card,
 .admin-book-result,
-.admin-reading-card {
+.admin-reading-card,
+.admin-comment-card {
   width: 100%;
   padding: 18px;
   border: 1px solid var(--line);
@@ -1222,11 +1224,13 @@ h3 {
 
 .admin-book-result strong,
 .admin-book-result span,
-.admin-reading-card a {
+.admin-reading-card a,
+.admin-comment-card a {
   display: block;
 }
 
-.admin-reading-card a {
+.admin-reading-card a,
+.admin-comment-card a {
   color: var(--green);
   font-family: var(--serif);
   font-size: 1.05rem;
@@ -1234,8 +1238,14 @@ h3 {
   text-decoration: none;
 }
 
-.admin-reading-card a:hover {
+.admin-reading-card a:hover,
+.admin-comment-card a:hover {
   text-decoration: underline;
+}
+
+.admin-comment-message {
+  margin: 8px 0 0;
+  white-space: pre-wrap;
 }
 
 .admin-card-actions,
@@ -1252,7 +1262,8 @@ h3 {
 
 .admin-reading-heading,
 .admin-add-heading,
-.admin-edit-heading {
+.admin-edit-heading,
+.admin-comments-heading {
   margin-top: 12px;
 }
 
@@ -1446,6 +1457,9 @@ h3 {
 }
 
 .reader-toolbar {
+  position: sticky;
+  top: 76px;
+  z-index: 24;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1470,6 +1484,14 @@ h3 {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
+}
+
+.reader-toolbar-hint {
+  flex-basis: 100%;
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 0.82rem;
 }
 
 .reader-text-button {
@@ -1541,6 +1563,7 @@ h3 {
   width: 100%;
   height: auto;
   border-radius: 16px 16px 0 0;
+  cursor: zoom-in;
 }
 
 .reader-page-error {
@@ -1571,6 +1594,81 @@ h3 {
   font-family: "Microsoft YaHei", sans-serif;
   font-size: 0.8rem;
   text-align: center;
+}
+
+.reader-comments {
+  border-top: 1px solid var(--line);
+  background: rgba(247, 244, 237, 0.62);
+}
+
+.reader-comments-toggle {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-family: "Microsoft YaHei", sans-serif;
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.reader-comments-body {
+  display: grid;
+  gap: 14px;
+  padding: 0 16px 16px;
+}
+
+.reader-comments-body[hidden] {
+  display: none;
+}
+
+.reader-comments-list {
+  display: grid;
+  gap: 10px;
+}
+
+.reader-comment {
+  padding: 12px;
+  border: 1px solid rgba(222, 217, 205, 0.9);
+  border-radius: 12px;
+  background: rgba(255, 252, 246, 0.82);
+}
+
+.reader-comment p {
+  margin: 0;
+}
+
+.reader-comment-meta,
+.reader-comments-empty,
+.reader-comments-status {
+  color: var(--muted);
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 0.86rem;
+}
+
+.reader-comments-form {
+  display: grid;
+  gap: 10px;
+}
+
+.reader-comments-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 0.88rem;
+}
+
+.reader-comments-form input,
+.reader-comments-form textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  padding: 10px 12px;
 }
 
 @media (max-width: 820px) {

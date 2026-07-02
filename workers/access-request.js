@@ -4,6 +4,8 @@ const DEFAULT_READER_PAGE_URL = "https://gioiazheng.github.io/christian-digital-
 const DEFAULT_READER_TOKEN_TTL_SECONDS = 4 * 60 * 60;
 const BOOK_ID_PATTERN = /^cdl-\d{6}$/;
 const READER_PATH_PATTERN = /^\/reader\/(cdl-\d{6})\/(manifest\.json|page-\d{4}\.(?:webp|jpg|jpeg|png))$/;
+const READER_COMMENTS_PATH_PATTERN = /^\/reader-comments\/(cdl-\d{6})\/pages\/([1-9]\d*)$/;
+const READER_COMMENT_PREFIX = "metadata/reader-comments/";
 const ALLOWED_FILE_EXTENSIONS = new Set(["zip", "pdf", "epub", "mobi"]);
 const ALLOWED_ACCESS_ACTIONS = new Set(["download", "read"]);
 
@@ -32,6 +34,15 @@ function jsonResponse(request, env, status, payload) {
 
 function cleanText(value, maxLength) {
   return String(value || "").trim().replace(/\s+/g, " ").slice(0, maxLength);
+}
+
+function cleanMultilineText(value, maxLength) {
+  return String(value || "")
+    .trim()
+    .replace(/\r\n?/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .slice(0, maxLength);
 }
 
 function allowedOrigin(request, env) {
@@ -113,6 +124,10 @@ function readerManifestKey(bookId) {
 
 function readerObjectKey(bookId, filename) {
   return `reader/${bookId}/${filename}`;
+}
+
+function readerCommentsKey(bookId, pageNumber) {
+  return `${READER_COMMENT_PREFIX}${bookId}/page-${pageNumber}.json`;
 }
 
 function readerTokenTtl(env) {
@@ -236,6 +251,85 @@ async function handleReaderRequest(request, env, url) {
   return new Response(object.body, { status: 200, headers });
 }
 
+async function loadReaderComments(env, bookId, pageNumber) {
+  const object = await env.BOOK_FILES.get(readerCommentsKey(bookId, pageNumber));
+  if (!object) return { comments: [] };
+  const stored = await object.json().catch(() => ({}));
+  const comments = Array.isArray(stored.comments) ? stored.comments : [];
+  return { comments };
+}
+
+function publicReaderComment(comment) {
+  return {
+    id: cleanText(comment?.id, 80),
+    book_id: cleanText(comment?.book_id, 32),
+    page: Number(comment?.page || 0),
+    name: cleanText(comment?.name, 40) || "读者",
+    message: cleanMultilineText(comment?.message, 800),
+    created_at: cleanText(comment?.created_at, 40),
+  };
+}
+
+async function handleReaderComments(request, env, url) {
+  const match = url.pathname.match(READER_COMMENTS_PATH_PATTERN);
+  if (!match) {
+    return jsonResponse(request, env, 404, { message: "评论区不存在。" });
+  }
+
+  const [, bookId, pageText] = match;
+  const pageNumber = Number(pageText);
+  const token = url.searchParams.get("token") || "";
+  if (!(await validateReaderToken(bookId, token, env))) {
+    return jsonResponse(request, env, 403, { message: "阅读访问已过期，请回到书目页重新输入访问码。" });
+  }
+
+  if (!Number.isInteger(pageNumber) || pageNumber < 1 || pageNumber > 99999) {
+    return jsonResponse(request, env, 400, { message: "页码不正确。" });
+  }
+
+  const stored = await loadReaderComments(env, bookId, pageNumber);
+
+  if (request.method === "GET") {
+    return jsonResponse(request, env, 200, {
+      comments: stored.comments.map(publicReaderComment).filter((comment) => comment.id && comment.message),
+    });
+  }
+
+  if (request.method !== "POST") {
+    return jsonResponse(request, env, 405, { message: "评论区只接受查看和提交。" });
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const message = cleanMultilineText(body.message, 800);
+  if (message.length < 2) {
+    return jsonResponse(request, env, 400, { message: "请先写一点内容再提交。" });
+  }
+
+  const now = new Date().toISOString();
+  const comment = {
+    id: crypto.randomUUID(),
+    book_id: bookId,
+    page: pageNumber,
+    name: cleanText(body.name, 40) || "读者",
+    message,
+    created_at: now,
+  };
+  const comments = [...stored.comments.map(publicReaderComment).filter((item) => item.id && item.message), comment]
+    .slice(-200);
+
+  await env.BOOK_FILES.put(
+    readerCommentsKey(bookId, pageNumber),
+    JSON.stringify({ book_id: bookId, page: pageNumber, comments, updated_at: now }, null, 2),
+    {
+      httpMetadata: {
+        contentType: "application/json; charset=utf-8",
+      },
+    },
+  );
+
+  return jsonResponse(request, env, 201, { item: publicReaderComment(comment), comments });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -245,6 +339,10 @@ export default {
 
     if (!allowedOrigin(request, env)) {
       return jsonResponse(request, env, 403, { message: "来源不允许。" });
+    }
+
+    if (url.pathname.startsWith("/reader-comments/")) {
+      return handleReaderComments(request, env, url);
     }
 
     if (request.method === "GET" || request.method === "HEAD") {
