@@ -107,6 +107,7 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("category: categories[0]", worker_source)
         self.assertIn("categories,", worker_source)
         self.assertIn("translator: cleanText", worker_source)
+        self.assertIn("author_bio: cleanText", worker_source)
 
         admin_source = (ROOT / "public" / "assets" / "admin.js").read_text(
             encoding="utf-8"
@@ -117,6 +118,7 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("selectedCategories()", admin_source)
         self.assertIn("payload.categories = categories", admin_source)
         self.assertIn("payload.tags = tags", admin_source)
+        self.assertIn("author_bio", admin_source)
         self.assertIn("已保存并上线", admin_source)
 
     def test_public_catalog_overrides_are_available_without_secrets(self) -> None:
@@ -133,6 +135,7 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("applyToBooks", override_source)
         self.assertIn("getBookOverride", override_source)
         self.assertIn('"translator"', override_source)
+        self.assertIn('"author_bio"', override_source)
         self.assertIn("/catalog-overrides", override_source)
         self.assertNotIn("ADMIN_CODE", override_source)
         self.assertNotIn("ACCESS_CODE", override_source)

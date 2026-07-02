@@ -40,6 +40,7 @@ def create_sample_project(parent: Path) -> Path:
         "id": "sample-book",
         "clean_title": "示例书目",
         "author": "示例作者",
+        "author_bio": "示例作者简介。",
         "translator": "示例译者",
         "publisher": "",
         "year": "2024",
@@ -97,9 +98,11 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertTrue((output / "books" / "sample-book.html").is_file())
             self.assertEqual(1, len(catalog))
             self.assertEqual(
-                set(GENERATOR.BOOK_FIELDS) | {"category_name", "detail_url"},
+                set(GENERATOR.BOOK_FIELDS) | {"category_name", "detail_url", "author_url"},
                 set(catalog[0]),
             )
+            self.assertEqual("示例作者简介。", catalog[0]["author_bio"])
+            self.assertRegex(catalog[0]["author_url"], r"^authors/.+\.html$")
             detail = (output / "books" / "sample-book.html").read_text(
                 encoding="utf-8"
             )
@@ -117,6 +120,10 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn('value="download">下载文件', detail)
             self.assertIn('data-book-detail-id="sample-book"', detail)
             self.assertIn('data-live-field="clean_title"', detail)
+            self.assertIn('data-live-field="author_bio"', detail)
+            self.assertIn("作者简介", detail)
+            self.assertIn("示例作者简介。", detail)
+            self.assertRegex(detail, r'href="\.\./authors/[^"]+\.html"')
             self.assertIn("data-live-metadata='author'", detail)
             self.assertIn("data-live-metadata='translator'", detail)
             self.assertIn("data-live-tags", detail)
@@ -125,6 +132,14 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("../assets/book-live-overrides.js", detail)
             self.assertIn("../assets/access.js", detail)
             self.assertIn("../assets/image-viewer.js", detail)
+
+            author_slug = GENERATOR.author_slug("示例作者")
+            author_page = output / "authors" / f"{author_slug}.html"
+            self.assertTrue(author_page.is_file())
+            author_html = author_page.read_text(encoding="utf-8")
+            self.assertIn("示例作者", author_html)
+            self.assertIn("示例作者简介。", author_html)
+            self.assertIn("示例书目", author_html)
 
     def test_preview_heading_uses_actual_page_count(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -189,6 +204,8 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn('id="admin-add-book-form"', admin)
             self.assertIn('id="admin-add-title"', admin)
             self.assertIn('id="admin-add-author"', admin)
+            self.assertIn('id="admin-book-author-bio"', admin)
+            self.assertIn("作者简介", admin)
             self.assertIn('id="admin-add-translator"', admin)
             self.assertIn('id="admin-add-file"', admin)
             self.assertIn("单个文件最大 100 MB", admin)
@@ -222,7 +239,7 @@ class CatalogGenerationTests(unittest.TestCase):
             ).read_text(encoding="utf-8")
             self.assertIn('const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#"', search_source)
             self.assertIn("is-active", search_source)
-            self.assertIn("card-status", search_source)
+            self.assertNotIn("card-status", search_source)
 
     def test_homepage_contains_daily_recommendations(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

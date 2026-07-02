@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import html
 import json
 import re
@@ -21,6 +22,7 @@ BOOK_FIELDS = [
     "id",
     "clean_title",
     "author",
+    "author_bio",
     "translator",
     "publisher",
     "year",
@@ -48,12 +50,35 @@ def escape(value: Any) -> str:
     return html.escape(str(value or ""), quote=True)
 
 
+def author_slug(author: str) -> str:
+    normalized = re.sub(r"\s+", " ", str(author or "").strip())
+    if not normalized:
+        return ""
+    ascii_part = re.sub(r"[^a-z0-9]+", "-", normalized.lower()).strip("-")
+    digest = hashlib.sha1(normalized.encode("utf-8")).hexdigest()[:10]
+    return f"{ascii_part or 'author'}-{digest}"
+
+
+def author_href(author: str, root_prefix: str = ".") -> str:
+    slug = author_slug(author)
+    return f"{root_prefix}/authors/{slug}.html" if slug else ""
+
+
+def render_author_link(author: str, root_prefix: str = ".") -> str:
+    name = str(author or "").strip()
+    href = author_href(name, root_prefix)
+    if not href:
+        return escape(name or "作者信息整理中")
+    return f'<a class="author-link" href="{escape(href)}">{escape(name)}</a>'
+
+
 def book_filter_text(book: dict[str, Any], category: dict[str, str]) -> str:
     return " ".join(
         str(part or "")
         for part in (
             book["clean_title"],
             book["author"],
+            book["author_bio"],
             book["translator"],
             book["publisher"],
             book["year"],
@@ -193,20 +218,10 @@ def render_layout(
 def render_book_card(
     book: dict[str, Any], categories: dict[str, dict[str, str]], link_prefix: str = ""
 ) -> str:
-    author = book["author"] or "作者信息整理中"
-    translator = f"译者：{book['translator']}" if book["translator"] else ""
-    byline = " · ".join(part for part in (author, translator, book["year"]) if part)
-    has_preview = bool(book.get("preview_base_url")) and int(book.get("preview_page_count") or 0) > 0
-    has_reader = bool(book.get("cover_image_url")) and has_preview
-    status_parts = []
-    if book.get("cover_image_url"):
-        status_parts.append("有封面")
-    if has_preview:
-        status_parts.append("可预览")
-    status_parts.append("可在线阅读" if has_reader else "阅读版生成中")
-    if book.get("access_required"):
-        status_parts.append("需访问码")
-    status_text = " · ".join(status_parts)
+    author = render_author_link(book["author"], root_prefix=link_prefix.rstrip("/") or ".")
+    translator = f"译者：{escape(book['translator'])}" if book["translator"] else ""
+    year = escape(book["year"]) if book["year"] else ""
+    byline = " · ".join(part for part in (author, translator, year) if part)
     description = (
         f'<p class="description">{escape(book["description"])}</p>'
         if book["description"]
@@ -217,9 +232,8 @@ def render_book_card(
     return f"""
         <article class="card" data-catalog-book-id="{escape(book['id'])}" data-filter-text="{escape(filter_text)}">
           <h3><a href="{link_prefix}books/{escape(book['id'])}.html" data-card-title>{escape(book['clean_title'])}</a></h3>
-          <p class="meta" data-card-byline>{escape(byline)}</p>
+          <p class="meta" data-card-byline>{byline}</p>
           {description.replace('<p class="description">', '<p class="description" data-card-description>')}
-          <p class="card-status">{escape(status_text)}</p>
           <div class="card-footer">
             <span class="badge" data-card-category>{escape(category['name'])}</span>
             <span class="meta">查看书目 →</span>
@@ -466,6 +480,67 @@ def render_category_detail(
     )
 
 
+def author_records(books: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    records: dict[str, dict[str, Any]] = {}
+    for book in books:
+        author = str(book.get("author") or "").strip()
+        if not author:
+            continue
+        record = records.setdefault(
+            author,
+            {
+                "name": author,
+                "slug": author_slug(author),
+                "bio": "",
+                "books": [],
+            },
+        )
+        if not record["bio"] and book.get("author_bio"):
+            record["bio"] = str(book["author_bio"]).strip()
+        record["books"].append(book)
+    return sorted(records.values(), key=lambda item: sort_title(item["name"]).casefold())
+
+
+def render_author_page(
+    template: Template,
+    author: dict[str, Any],
+    category_map: dict[str, dict[str, str]],
+) -> str:
+    books = sorted(author["books"], key=book_sort_key)
+    cards = "".join(render_book_card(book, category_map, link_prefix="../") for book in books)
+    bio = author["bio"] or "作者介绍待补充。"
+    content = f"""
+    <header class="page-hero"><div class="shell">
+      <nav class="breadcrumbs" aria-label="面包屑"><a href="../catalog.html">馆藏目录</a> / 作者</nav>
+      <p class="eyebrow">作者</p><h1>{escape(author['name'])}</h1>
+      <p class="lead">本站收录 {len(books)} 本相关作品。</p>
+    </div></header>
+    <section class="section"><div class="shell author-layout">
+      <aside class="author-profile-card">
+        <h2>作者简介</h2>
+        <p>{escape(bio)}</p>
+      </aside>
+      <div>
+        <div class="section-heading compact">
+          <div><p class="eyebrow">本站作品</p><h2>{escape(author['name'])} 的作品</h2></div>
+          <a href="../catalog.html">返回目录</a>
+        </div>
+        <div class="grid">{cards or '<div class="empty-state">暂无作品。</div>'}</div>
+      </div>
+    </div></section>
+    <script src="../assets/upload-config.js" defer></script>
+    <script src="../assets/catalog-overrides.js" defer></script>
+    <script src="../assets/category-filter.js" defer></script>"""
+    return render_layout(
+        template,
+        title=f"{author['name']}｜作者｜基督教数字图书馆",
+        description=f"{author['name']} 的作者介绍与本站收录作品。",
+        content=content,
+        active="",
+        root_prefix="..",
+    )
+
+
 def render_preview_section(book: dict[str, Any]) -> str:
     page_count = int(book.get("preview_page_count") or 0)
     base_url = str(book.get("preview_base_url") or "").strip().rstrip("/")
@@ -588,7 +663,8 @@ def render_book_detail(
     }
     metadata = "".join(
         f'<div class="metadata-row"><dt>{escape(label)}</dt><dd'
-        f'{f" data-live-metadata={metadata_keys[label]!r}" if label in metadata_keys else ""}>{escape(value)}</dd></div>'
+        f'{f" data-live-metadata={metadata_keys[label]!r}" if label in metadata_keys else ""}>'
+        f'{render_author_link(book["author"], "..") if label == "作者" and book["author"] else escape(value)}</dd></div>'
         for label, value in metadata_items
     )
     tags = "".join(f'<span class="tag">{escape(tag)}</span>' for tag in book["tags"])
@@ -605,7 +681,7 @@ def render_book_detail(
         <nav class="breadcrumbs" aria-label="面包屑"><a href="../categories.html">馆藏分类</a> / <a href="../categories/{escape(category['id'])}.html">{escape(category['name'])}</a> / 当前书目</nav>
         <p class="eyebrow">书目编号 · {escape(book['id'])}</p>
         <h1 data-live-field="clean_title">{escape(book['clean_title'])}</h1>
-        <p class="lead" data-live-field="author">{escape(book['author'] or '作者信息整理中')}</p>
+        <p class="lead" data-live-field="author">{render_author_link(book['author'], '..') if book['author'] else '作者信息整理中'}</p>
       </div>
       <div class="book-hero-cover">
         {render_cover_section(book)}
@@ -614,6 +690,7 @@ def render_book_detail(
     <section class="section"><div class="shell book-layout">
       <div class="book-main">
         <section class="book-section"><h2>内容简介</h2><p data-live-field="description">{escape(book['description'] or '简介待补充。')}</p></section>
+        <section class="book-section author-bio-section"><h2>作者简介</h2><p data-live-field="author_bio">{escape(book['author_bio'] or '作者介绍待补充。')}</p></section>
         <p class="catalog-note">本馆目录仍在整理中，书名与分类会持续校对。</p>
         {render_preview_section(book)}
         {toc_section}
@@ -780,6 +857,10 @@ def render_admin(template: Template) -> str:
             <input id="admin-book-author" name="author" type="text">
           </div>
           <div class="field">
+            <label for="admin-book-author-bio">作者简介</label>
+            <textarea id="admin-book-author-bio" name="author_bio" rows="4"></textarea>
+          </div>
+          <div class="field">
             <label for="admin-book-translator">译者</label>
             <input id="admin-book-translator" name="translator" type="text">
           </div>
@@ -838,6 +919,7 @@ def public_catalog(
         item = {key: book[key] for key in BOOK_FIELDS}
         item["category_name"] = category_map[book["category"]]["name"]
         item["detail_url"] = f"books/{book['id']}.html"
+        item["author_url"] = author_href(book["author"], ".").removeprefix("./")
         result.append(item)
     return result
 
@@ -879,6 +961,11 @@ def build_site(root: Path = ROOT, output: Path | None = None) -> dict[str, int]:
         write_text(
             output / "books" / f"{book['id']}.html",
             render_book_detail(template, book, category_map[book["category"]]),
+        )
+    for author in author_records(books):
+        write_text(
+            output / "authors" / f"{author['slug']}.html",
+            render_author_page(template, author, category_map),
         )
 
     write_text(
