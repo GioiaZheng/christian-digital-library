@@ -803,6 +803,65 @@ h3 {
   font-size: 1.5rem;
 }
 
+.book-opinions {
+  display: grid;
+  gap: 16px;
+}
+
+.book-opinions-list {
+  display: grid;
+  gap: 12px;
+}
+
+.book-opinion-card {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.78);
+}
+
+.book-opinion-card p {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.8;
+}
+
+.book-opinion-meta {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 0.82rem;
+}
+
+.book-opinions-form {
+  display: grid;
+  gap: 10px;
+}
+
+.book-opinions-form label {
+  color: var(--muted);
+  font-family: "Microsoft YaHei", sans-serif;
+  font-weight: 700;
+}
+
+.book-opinions-form textarea {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+  padding: 14px 16px;
+  border: 1px solid rgba(23, 63, 53, 0.28);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.84);
+  color: var(--ink);
+  font: inherit;
+}
+
+.book-opinions-form textarea:focus {
+  border-color: var(--green);
+  outline: 3px solid rgba(23, 63, 53, 0.12);
+}
+
 .catalog-note {
   padding: 12px 14px;
   border-left: 3px solid var(--gold);
