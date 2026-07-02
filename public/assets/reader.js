@@ -9,6 +9,7 @@
   const pages = document.querySelector("[data-reader-pages]");
   const toolbar = document.querySelector("[data-reader-toolbar]");
   const detailLink = document.querySelector("[data-reader-detail]");
+  const detailFallbackLink = document.querySelector("[data-reader-detail-fallback]");
   const backButton = document.querySelector("[data-reader-back]");
   const jumpForm = document.querySelector("[data-reader-jump]");
   const pageInput = document.querySelector("[data-reader-page-input]");
@@ -29,6 +30,25 @@
   const paddedPage = (index) => String(index).padStart(4, "0");
 
   const pageId = (index) => `page-${index}`;
+
+  const tokenExpiry = () => {
+    const expiresAt = Number(String(token || "").split(".")[1]);
+    if (!Number.isFinite(expiresAt)) return "";
+    const date = new Date(expiresAt * 1000);
+    if (!Number.isFinite(date.getTime())) return "";
+    return date.toLocaleString("zh-CN", {
+      hour12: false,
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const statusWithExpiry = (message) => {
+    const expiry = tokenExpiry();
+    return expiry ? `${message} 阅读链接有效至 ${expiry}。` : message;
+  };
 
   const readerUrl = (filename) => {
     const url = new URL(`${endpoint.replace(/\/+$/, "")}/reader/${bookId}/${filename}`);
@@ -67,8 +87,14 @@
     if (nextPageButton) nextPageButton.disabled = total ? safePage >= total : true;
   };
 
-  if (detailLink && validBookId) {
-    detailLink.href = `books/${bookId}.html`;
+  const detailHref = validBookId ? `books/${bookId}.html` : "index.html";
+
+  if (detailLink) {
+    detailLink.href = detailHref;
+  }
+
+  if (detailFallbackLink) {
+    detailFallbackLink.href = detailHref;
   }
 
   if (backButton) {
@@ -214,7 +240,7 @@
     }
 
     pages.replaceChildren(fragment);
-    setStatus(`共 ${pageCount} 页。向下滑动阅读。`);
+    setStatus(statusWithExpiry(`共 ${pageCount} 页。向下滑动阅读。`));
     watchCurrentPage();
 
     const hashPage = /^#page-(\d+)$/.exec(window.location.hash || "");

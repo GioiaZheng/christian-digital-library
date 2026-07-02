@@ -25,6 +25,7 @@ function jsonResponse(request, env, status, payload) {
     headers: {
       ...corsHeaders(request, env),
       "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
     },
   });
 }
@@ -302,7 +303,7 @@ export default {
       return jsonResponse(request, env, 404, { message: "文件暂不可用。" });
     }
 
-    const extension = extensionOf(record.key) || "zip";
+    const extension = extensionOf(record.key) || "pdf";
     const filename = `${safeDownloadName(record.title, bookId)}.${extension}`;
     const headers = new Headers(corsHeaders(request, env));
     headers.set("Cache-Control", "private, max-age=0, no-store");
