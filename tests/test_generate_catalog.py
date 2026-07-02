@@ -113,6 +113,7 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertLess(detail.index("book-hero-cover"), detail.index("book-layout"))
             self.assertIn("封面待生成", detail)
             self.assertIn("本馆目录仍在整理中", detail)
+            self.assertNotIn("书名与分类会持续校对", detail)
             self.assertIn("下载或阅读全文", detail)
             self.assertIn("访问码", detail)
             self.assertIn('data-access-form', detail)
