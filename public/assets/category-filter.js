@@ -6,43 +6,57 @@
 
   if (!input || !results || !summary || !emptyState) return;
 
-  const cards = Array.from(results.querySelectorAll(".card"));
-  const total = Number(results.dataset.categoryTotal || cards.length);
+  const pageCategory = String(results.dataset.categoryId || "").trim();
   const normalize = (value) => String(value || "").trim().toLocaleLowerCase("zh-CN");
+  let categoryBooks = [];
 
-  const updateCard = (card, override) => {
-    if (!override) return;
-    const title = card.querySelector("[data-card-title]");
-    const byline = card.querySelector("[data-card-byline]");
-    const description = card.querySelector("[data-card-description]");
-    const category = card.querySelector("[data-card-category]");
-    if (title && override.clean_title) title.textContent = override.clean_title;
-    if (byline) byline.textContent = [override.author || "作者待核", override.year].filter(Boolean).join(" · ");
-    if (description && override.description) description.textContent = override.description;
-    if (category && (override.category_name || override.category)) {
-      category.textContent = override.category_name || override.category;
-    }
-    card.dataset.filterText = [
-      override.clean_title,
-      override.author,
-      override.publisher,
-      override.description,
-      override.category_name,
-      ...(override.tags || []),
+  const createText = (tag, className, text) => {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    element.textContent = text;
+    return element;
+  };
+
+  const bookInCategory = (book) => {
+    const categories = Array.isArray(book.categories) && book.categories.length ? book.categories : [book.category];
+    return categories.map(String).includes(pageCategory);
+  };
+
+  const renderBook = (book) => {
+    const article = document.createElement("article");
+    article.className = "card";
+    article.dataset.catalogBookId = book.id;
+    article.dataset.filterText = [
+      book.clean_title,
+      book.author,
+      book.publisher,
+      book.description,
+      book.category_name,
+      ...(book.category_names || []),
+      ...(book.tags || []),
     ]
       .filter(Boolean)
       .join(" ");
-  };
 
-  const applyLiveOverrides = async () => {
-    if (!window.CDL_CATALOG_OVERRIDES?.getBookOverride) return;
-    await Promise.all(
-      cards.map(async (card) => {
-        const bookId = card.dataset.catalogBookId;
-        if (!bookId) return;
-        updateCard(card, await window.CDL_CATALOG_OVERRIDES.getBookOverride(bookId));
-      }),
-    );
+    const title = document.createElement("h3");
+    const link = document.createElement("a");
+    link.href = `../${book.detail_url || `books/${book.id}.html`}`;
+    link.textContent = book.clean_title || book.id;
+    title.append(link);
+    article.append(title);
+
+    const bylineParts = [book.author || "作者待核", book.year].filter(Boolean);
+    article.append(createText("p", "meta", bylineParts.join(" · ")));
+    if (book.description) {
+      article.append(createText("p", "description", book.description));
+    }
+
+    const footer = document.createElement("div");
+    footer.className = "card-footer";
+    footer.append(createText("span", "badge", book.category_name || "其他"));
+    footer.append(createText("span", "meta", "查看书目 →"));
+    article.append(footer);
+    return article;
   };
 
   const setQueryString = () => {
@@ -59,43 +73,65 @@
 
   const render = () => {
     const words = normalize(input.value).split(/\s+/).filter(Boolean);
-    let visible = 0;
-
-    cards.forEach((card) => {
-      const haystack = normalize(card.dataset.filterText || card.textContent);
-      const matched = words.every((word) => haystack.includes(word));
-      card.hidden = !matched;
-      if (matched) visible += 1;
+    const matched = categoryBooks.filter((book) => {
+      if (!words.length) return true;
+      const haystack = normalize([
+        book.clean_title,
+        book.author,
+        book.publisher,
+        book.description,
+        book.category_name,
+        ...(book.category_names || []),
+        ...(book.tags || []),
+      ].join(" "));
+      return words.every((word) => haystack.includes(word));
     });
 
+    results.replaceChildren();
+    matched.forEach((book) => results.append(renderBook(book)));
+
     if (words.length) {
-      summary.textContent = `共 ${total} 条书目，筛选出 ${visible} 条`;
+      summary.textContent = `共 ${categoryBooks.length} 条书目，筛选出 ${matched.length} 条`;
     } else {
-      summary.textContent = `共 ${total} 条书目`;
+      summary.textContent = `共 ${categoryBooks.length} 条书目`;
     }
-    emptyState.hidden = visible !== 0;
+    emptyState.hidden = matched.length !== 0;
     setQueryString();
   };
 
-  const setupAndRender = () => {
-    const params = new URLSearchParams(location.search);
-    input.value = params.get("q") || "";
-    input.addEventListener("input", render);
-    if (!cards.length) {
-      input.disabled = true;
-      emptyState.hidden = true;
-      return;
-    }
+  const fallbackToStaticCards = () => {
+    const cards = Array.from(results.querySelectorAll(".card"));
+    categoryBooks = cards.map((card) => ({
+      id: card.dataset.catalogBookId || "",
+      clean_title: card.querySelector("[data-card-title]")?.textContent || card.querySelector("h3")?.textContent || "",
+      author: card.querySelector("[data-card-byline]")?.textContent || "",
+      category_name: card.querySelector("[data-card-category]")?.textContent || "",
+      description: card.querySelector("[data-card-description]")?.textContent || "",
+      detail_url: card.querySelector("a")?.getAttribute("href")?.replace(/^\.\.\//, "") || "",
+    }));
     render();
   };
 
   const start = async () => {
-    await applyLiveOverrides();
-    setupAndRender();
+    const params = new URLSearchParams(location.search);
+    input.value = params.get("q") || "";
+    input.addEventListener("input", render);
+
+    try {
+      const response = await fetch("../catalog.json", { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const catalog = await response.json();
+      const books = window.CDL_CATALOG_OVERRIDES?.applyToBooks
+        ? await window.CDL_CATALOG_OVERRIDES.applyToBooks(catalog)
+        : catalog;
+      categoryBooks = books.filter(bookInCategory);
+      results.dataset.categoryTotal = String(categoryBooks.length);
+      render();
+    } catch (error) {
+      console.warn("分类页实时书目资料暂时无法读取，使用静态内容。", error);
+      fallbackToStaticCards();
+    }
   };
 
-  start().catch((error) => {
-    console.warn("分类页实时书目资料暂时无法读取。", error);
-    setupAndRender();
-  });
+  start();
 })();

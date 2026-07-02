@@ -118,7 +118,11 @@
     const query = normalize(searchInput.value);
     const category = categorySelect.value;
     return allBooks
-      .filter((book) => !category || book.category === category)
+      .filter((book) => {
+        if (!category) return true;
+        const categories = Array.isArray(book.categories) && book.categories.length ? book.categories : [book.category];
+        return categories.map(String).includes(category);
+      })
       .filter((book) => {
         if (!query) return true;
         const haystack = normalize([

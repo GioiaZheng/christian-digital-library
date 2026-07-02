@@ -3,12 +3,12 @@
   const categoryNames = {
     "bible-study": "圣经研究",
     theology: "神学与教义",
-    history: "教会历史",
-    spirituality: "灵修与门徒训练",
-    family: "婚姻家庭",
-    society: "文化与社会",
-    ministry: "事奉与宣教",
-    biography: "传记与见证",
+    "church-history": "教会历史",
+    "spiritual-life": "灵修与门徒训练",
+    pastoral: "讲道与牧养",
+    missions: "宣教与福音",
+    "family-ministry": "婚姻家庭",
+    "culture-society": "文化与社会",
     reference: "工具书与参考",
     other: "其他",
   };
@@ -29,12 +29,14 @@
   };
 
   const categoryLabel = (category) => categoryNames[category] || category || "其他";
+  const categoryLabels = (categories) => cleanList(categories).map(categoryLabel);
 
   const normalizeOverride = (item) => {
     if (!item || !/^cdl-\d{6}$/.test(String(item.id || ""))) return null;
     const categories = cleanList(item.categories || item.category);
     const tags = cleanList(item.tags);
     const category = categories[0] || String(item.category || "").trim();
+    const names = categoryLabels(categories.length ? categories : [category]);
     return {
       ...item,
       id: String(item.id),
@@ -44,7 +46,8 @@
       year: String(item.year || "").trim(),
       category,
       categories,
-      category_name: categoryLabel(category),
+      category_name: names[0] || categoryLabel(category),
+      category_names: names,
       tags,
       description: String(item.description || "").trim(),
       updated_at: String(item.updated_at || "").trim(),
@@ -80,6 +83,7 @@
       next.category_name = override.category_name || categoryLabel(override.category);
     }
     if (override.categories?.length) next.categories = override.categories;
+    if (override.category_names?.length) next.category_names = override.category_names;
     if (override.tags?.length) next.tags = override.tags;
     return next;
   };

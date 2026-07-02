@@ -13,11 +13,15 @@
   const bookStatus = document.querySelector("#admin-book-status");
   const readingSummary = document.querySelector("#admin-reading-summary");
   const readingList = document.querySelector("#admin-reading-list");
+  const categoryList = document.querySelector("#admin-book-category-list");
+  const newCategoryInput = document.querySelector("#admin-new-category");
+  const addCategoryButton = document.querySelector("#admin-add-category");
 
   if (!loginForm || !panel || !endpoint) return;
 
   let adminCode = "";
   let catalog = [];
+  let categories = [];
   let readingStatuses = new Map();
   const readingStatusOptions = [
     { value: "want_to_read", label: "想读" },
@@ -68,6 +72,77 @@
       });
   };
 
+  const normalizeCategoryKey = (value) => String(value || "").trim().toLocaleLowerCase("zh-CN");
+
+  const categoryLabel = (categoryValue) => {
+    const value = String(categoryValue || "").trim();
+    const matched = categories.find((category) => category.id === value || category.name === value);
+    return matched?.name || value || "其他";
+  };
+
+  const normalizeCategories = (values) => {
+    const source = Array.isArray(values) ? values : splitList(values);
+    const seen = new Set();
+    const result = [];
+    for (const raw of source) {
+      const value = String(raw || "").trim();
+      if (!value) continue;
+      const matched = categories.find((category) => category.id === value || category.name === value);
+      const normalized = matched?.id || value;
+      const key = normalizeCategoryKey(matched?.name || normalized);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      result.push(normalized);
+    }
+    return result;
+  };
+
+  const ensureCategoryOption = (value) => {
+    const name = String(value || "").trim();
+    if (!name) return null;
+    const matched = categories.find(
+      (category) => category.id === name || normalizeCategoryKey(category.name) === normalizeCategoryKey(name),
+    );
+    if (matched) return matched;
+    const custom = { id: name, name, description: "" };
+    categories.push(custom);
+    renderCategoryCheckboxes();
+    return custom;
+  };
+
+  const selectedCategories = () => {
+    if (!categoryList) return [];
+    return Array.from(categoryList.querySelectorAll("input[type='checkbox']:checked")).map((input) => input.value);
+  };
+
+  const setSelectedCategories = (values) => {
+    const normalized = normalizeCategories(values);
+    for (const value of normalized) ensureCategoryOption(value);
+    const selected = new Set(normalized);
+    categoryList?.querySelectorAll("input[type='checkbox']").forEach((input) => {
+      input.checked = selected.has(input.value);
+    });
+  };
+
+  function renderCategoryCheckboxes() {
+    if (!categoryList) return;
+    const selected = new Set(selectedCategories());
+    categoryList.replaceChildren();
+    categories.forEach((category) => {
+      const label = document.createElement("label");
+      label.className = "checkbox-option";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.name = "categories";
+      input.value = category.id;
+      input.checked = selected.has(category.id);
+      const span = document.createElement("span");
+      span.textContent = category.name;
+      label.append(input, span);
+      categoryList.append(label);
+    });
+  }
+
   const extensionOf = (filename) => {
     const match = /\.([A-Za-z0-9]+)$/.exec(String(filename || ""));
     return match ? match[1].toLowerCase() : "";
@@ -95,6 +170,15 @@
     if (!response.ok) throw new Error("无法读取公开书目。");
     catalog = await response.json();
     return catalog;
+  };
+
+  const loadCategories = async () => {
+    if (categories.length) return categories;
+    const response = await fetch("categories.json");
+    if (!response.ok) throw new Error("无法读取分类列表。");
+    categories = await response.json();
+    renderCategoryCheckboxes();
+    return categories;
   };
 
   const statusLabel = (status) => {
@@ -269,11 +353,9 @@
     bookForm.elements.namedItem("author").value = book.author || "";
     bookForm.elements.namedItem("publisher").value = book.publisher || "";
     bookForm.elements.namedItem("year").value = book.year || "";
-    bookForm.elements.namedItem("categories").value = (
-      Array.isArray(book.categories) && book.categories.length ? book.categories : [book.category || book.category_name]
-    )
-      .filter(Boolean)
-      .join("、");
+    setSelectedCategories(
+      Array.isArray(book.categories) && book.categories.length ? book.categories : [book.category || book.category_name],
+    );
     bookForm.elements.namedItem("tags").value = Array.isArray(book.tags) ? book.tags.join("、") : String(book.tags || "");
     bookForm.elements.namedItem("description").value = book.description || "";
     setText(bookStatus, `正在修改：${book.id}`);
@@ -285,11 +367,13 @@
     if (index < 0 || !override) return;
     const current = catalog[index];
     const category = override.category || current.category;
+    const categories = normalizeCategories(override.categories || category);
     catalog[index] = {
       ...current,
       ...override,
-      category,
-      category_name: current.category === category ? current.category_name : override.category_name || category,
+      category: categories[0] || category,
+      categories,
+      category_name: categoryLabel(categories[0] || category),
       detail_url: current.detail_url,
     };
   };
@@ -345,6 +429,7 @@
       return;
     }
     try {
+      await loadCategories();
       await loadCatalog();
       await loadReadingStatuses();
       await loadUploads();
@@ -391,12 +476,23 @@
     renderBookResults().catch((error) => setText(bookStatus, error.message || "搜索失败。"));
   });
 
+  addCategoryButton?.addEventListener("click", () => {
+    const category = ensureCategoryOption(newCategoryInput?.value);
+    if (!category) {
+      setText(bookStatus, "请输入要新增的分类名称。");
+      return;
+    }
+    setSelectedCategories([...selectedCategories(), category.id]);
+    if (newCategoryInput) newCategoryInput.value = "";
+    setText(bookStatus, `已加入分类：${category.name}`);
+  });
+
   bookForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const payload = Object.fromEntries(new FormData(bookForm).entries());
     const bookId = payload.id;
     delete payload.id;
-    const categories = splitList(payload.categories);
+    const categories = normalizeCategories(selectedCategories());
     const tags = splitList(payload.tags);
     if (!categories.length) {
       setText(bookStatus, "请至少填写一个分类。");

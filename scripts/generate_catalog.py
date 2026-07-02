@@ -428,7 +428,7 @@ def render_category_detail(
         </div>
       </div>
       <p id="category-result-summary" class="result-summary" aria-live="polite">共 {len(books)} 条书目</p>
-      <div id="category-results" class="grid" data-category-total="{len(books)}">{cards}</div>
+      <div id="category-results" class="grid" data-category-id="{escape(category['id'])}" data-category-total="{len(books)}">{cards}</div>
       <div id="category-empty-state" class="empty-state" hidden>没有找到匹配的书目，请尝试缩短关键词。</div>
     </div></section>
     <script src="../assets/upload-config.js" defer></script>
@@ -749,9 +749,16 @@ def render_admin(template: Template) -> str:
             <input id="admin-book-year" name="year" type="text">
           </div>
           <div class="field">
-            <label for="admin-book-category">分类（可多个）</label>
-            <input id="admin-book-category" name="categories" type="text" required placeholder="例如：圣经研究、神学与教义">
-            <p class="field-help">可用顿号、逗号或分号分隔；至少填写一个。</p>
+            <span class="field-label">分类（可多个）</span>
+            <div id="admin-book-category-list" class="checkbox-grid" role="group" aria-label="分类"></div>
+            <div class="inline-add-field">
+              <label for="admin-new-category">新增分类</label>
+              <div>
+                <input id="admin-new-category" type="text" autocomplete="off" placeholder="输入新分类名称">
+                <button id="admin-add-category" class="button secondary compact" type="button">加入</button>
+              </div>
+            </div>
+            <p class="field-help">从已有分类中勾选；确实没有合适分类时，再新增一个。至少选择一个分类。</p>
           </div>
           <div class="field">
             <label for="admin-book-tags">标签（可多个）</label>
