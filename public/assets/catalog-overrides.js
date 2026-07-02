@@ -14,6 +14,8 @@
   };
 
   let cachedOverrides = null;
+  let refreshPromise = null;
+  const storageKey = "cdl.catalogOverrides.v1";
 
   const cleanList = (value) => {
     const source = Array.isArray(value) ? value : String(value || "").split(/[、,，;；\n]+/);
@@ -56,22 +58,67 @@
     };
   };
 
-  const loadOverrides = async () => {
-    if (cachedOverrides) return cachedOverrides;
-    if (!endpoint) {
-      cachedOverrides = new Map();
-      return cachedOverrides;
-    }
-    const response = await fetch(`${endpoint}/catalog-overrides`, { cache: "no-store" });
-    if (!response.ok) throw new Error(`catalog-overrides HTTP ${response.status}`);
-    const data = await response.json();
-    cachedOverrides = new Map(
-      (data.items || [])
+  const mapFromItems = (items) =>
+    new Map(
+      (items || [])
         .map(normalizeOverride)
         .filter(Boolean)
         .map((item) => [item.id, item]),
     );
-    return cachedOverrides;
+
+  const readCachedOverrides = () => {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (!Array.isArray(data.items)) return null;
+      return mapFromItems(data.items);
+    } catch (error) {
+      console.warn("本地书目缓存暂时无法读取。", error);
+      return null;
+    }
+  };
+
+  const writeCachedOverrides = (items) => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({ items, cached_at: new Date().toISOString() }));
+    } catch (error) {
+      console.warn("本地书目缓存暂时无法写入。", error);
+    }
+  };
+
+  const refreshOverrides = async () => {
+    if (!endpoint) return new Map();
+    if (refreshPromise) return refreshPromise;
+    refreshPromise = (async () => {
+      const response = await fetch(`${endpoint}/catalog-overrides`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`catalog-overrides HTTP ${response.status}`);
+      const data = await response.json();
+      const items = data.items || [];
+      cachedOverrides = mapFromItems(items);
+      writeCachedOverrides(items);
+      return cachedOverrides;
+    })();
+    try {
+      return await refreshPromise;
+    } finally {
+      refreshPromise = null;
+    }
+  };
+
+  const loadOverrides = async () => {
+    if (cachedOverrides) return cachedOverrides;
+    const localOverrides = readCachedOverrides();
+    if (localOverrides) {
+      cachedOverrides = localOverrides;
+      refreshOverrides().catch((error) => console.warn("书目实时覆盖资料暂时无法刷新。", error));
+      return cachedOverrides;
+    }
+    if (!endpoint) {
+      cachedOverrides = new Map();
+      return cachedOverrides;
+    }
+    return refreshOverrides();
   };
 
   const applyOverride = (book, override) => {
