@@ -33,6 +33,20 @@
     if (target) target.textContent = value;
   };
 
+  const setStatusWithPublicLink = (target, message, bookId) => {
+    if (!target) return;
+    target.replaceChildren();
+    target.append(document.createTextNode(message));
+    if (!bookId) return;
+    target.append(document.createTextNode(" "));
+    const link = document.createElement("a");
+    link.href = `books/${encodeURIComponent(bookId)}.html`;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.textContent = "查看公开页面 →";
+    target.append(link);
+  };
+
   const adminUrl = (path) => `${endpoint}${path}`;
 
   const requestAdmin = async (path, options = {}) => {
@@ -216,7 +230,7 @@
       title.target = "_blank";
       title.rel = "noreferrer";
       title.textContent = book.clean_title || item.id;
-      const meta = createText("p", "meta", [book.author || "作者待核", item.label || statusLabel(item.status)].join(" · "));
+      const meta = createText("p", "meta", [book.author || "作者信息整理中", item.label || statusLabel(item.status)].join(" · "));
       const actions = createReadingActions(book);
       card.append(title, meta, actions);
       readingList.append(card);
@@ -296,7 +310,7 @@
       const meta = createText(
         "p",
         "meta",
-        [item.author || "作者待核", item.filename || "未命名文件", item.status || "pending"].join(" · "),
+        [item.author || "作者信息整理中", item.filename || "未命名文件", item.status || "pending"].join(" · "),
       );
       const actions = document.createElement("div");
       actions.className = "admin-card-actions";
@@ -413,7 +427,7 @@
       const status = readingStatuses.get(book.id);
       button.querySelector("span").textContent = [
         book.id,
-        book.author || "作者待核",
+        book.author || "作者信息整理中",
         book.translator ? `译者：${book.translator}` : "",
         status?.label ? `已标记：${status.label}` : "",
       ]
@@ -511,13 +525,15 @@
     payload.category = categories[0];
     payload.tags = tags;
     try {
+      setText(bookStatus, "正在保存……");
       const data = await requestAdmin(`/admin/books/${encodeURIComponent(bookId)}`, {
         method: "PATCH",
         body: JSON.stringify(payload),
       });
       applySavedBook(bookId, data.item);
+      setText(bookStatus, "已保存到后台，正在同步公开列表……");
       await renderBookResults();
-      setText(bookStatus, "已保存并上线。当前后台列表已更新；公开页面刷新后即可看到最新资料。");
+      setStatusWithPublicLink(bookStatus, "已保存并上线。公开页面刷新后即可看到最新资料。", bookId);
     } catch (error) {
       setText(bookStatus, error.message || "保存失败。");
     }

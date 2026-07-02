@@ -203,7 +203,7 @@ h1 {
 
 .hero-title {
   max-width: none;
-  font-size: clamp(2.7rem, 5.8vw, 5rem);
+  font-size: clamp(2.7rem, 5.2vw, 4.6rem);
   line-height: 1.18;
 }
 
@@ -231,6 +231,13 @@ h3 {
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 30px;
+}
+
+.section-actions {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .button {
@@ -266,6 +273,16 @@ h3 {
   min-height: 34px;
   padding: 7px 13px;
   font-size: 0.88rem;
+}
+
+.plain-list {
+  margin: 18px 0 0;
+  padding-left: 1.2em;
+  color: var(--muted);
+}
+
+.plain-list li {
+  margin-bottom: 6px;
 }
 
 .button.ghost {
@@ -416,6 +433,52 @@ h3 {
   color: var(--muted);
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+}
+
+.card-status {
+  margin: 8px 0 18px;
+  color: #98620f;
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 0.78rem;
+}
+
+.skeleton-card {
+  min-height: 170px;
+  pointer-events: none;
+}
+
+.skeleton-card span {
+  display: block;
+  height: 14px;
+  margin-bottom: 14px;
+  border-radius: 999px;
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
+  background: linear-gradient(90deg, rgba(226, 216, 196, 0.45), rgba(226, 216, 196, 0.95), rgba(226, 216, 196, 0.45));
+  background-size: 220% 100%;
+}
+
+.skeleton-card span:first-child {
+  width: 72%;
+  height: 22px;
+}
+
+.skeleton-card span:nth-child(2) {
+  width: 46%;
+}
+
+.skeleton-card span:nth-child(3) {
+  width: 58%;
+  margin-top: auto;
+}
+
+@keyframes skeleton-pulse {
+  from {
+    background-position: 220% 0;
+  }
+
+  to {
+    background-position: -220% 0;
+  }
 }
 
 .card-footer {
@@ -584,6 +647,14 @@ h3 {
   transform: translateY(-50%);
 }
 
+.alphabet-index::before {
+  color: var(--muted);
+  content: "定位";
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 0.65rem;
+  text-align: center;
+}
+
 .alphabet-index button {
   width: 28px;
   height: 24px;
@@ -599,7 +670,8 @@ h3 {
 }
 
 .alphabet-index button:hover,
-.alphabet-index button:focus-visible {
+.alphabet-index button:focus-visible,
+.alphabet-index button.is-active {
   background: var(--green);
   color: white;
 }
@@ -698,6 +770,15 @@ h3 {
 
 .book-section h2 {
   font-size: 1.5rem;
+}
+
+.catalog-note {
+  padding: 12px 14px;
+  border-left: 3px solid var(--gold);
+  background: rgba(202, 136, 31, 0.08);
+  color: var(--muted);
+  font-family: "Microsoft YaHei", sans-serif;
+  font-size: 0.9rem;
 }
 
 .metadata-list {
@@ -1509,7 +1590,7 @@ h3 {
   }
 
   .hero-title {
-    font-size: clamp(2rem, 10.5vw, 3.6rem);
+    font-size: clamp(1.85rem, 9vw, 3.1rem);
   }
 
   .stats,
@@ -1563,13 +1644,29 @@ h3 {
   }
 
   .alphabet-index {
-    right: 4px;
+    top: auto;
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    display: flex;
+    overflow-x: auto;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(255, 253, 248, 0.94);
+    transform: none;
+  }
+
+  .alphabet-index::before {
+    display: none;
   }
 
   .alphabet-index button {
-    width: 24px;
-    height: 21px;
+    flex: 0 0 auto;
+    width: 27px;
+    height: 24px;
     font-size: 0.68rem;
+    box-shadow: none;
   }
 }
 

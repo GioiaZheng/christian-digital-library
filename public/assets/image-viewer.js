@@ -114,8 +114,8 @@
     prevButton.disabled = !hasMany;
     nextButton.disabled = !hasMany;
     counter.textContent = hasMany
-      ? `${state.index + 1} / ${state.items.length} · 左右切换`
-      : "按 Esc 关闭";
+      ? `${state.index + 1} / ${state.items.length} · ← → 切页 · 滚轮/按钮缩放 · 拖动画面移动 · 点空白关闭`
+      : "滚轮/按钮缩放 · 拖动画面移动 · 点空白关闭";
     resetZoom();
   };
 
@@ -157,6 +157,16 @@
   zoomOutButton?.addEventListener("click", () => zoom(-0.2));
   zoomResetButton?.addEventListener("click", resetZoom);
   zoomInButton?.addEventListener("click", () => zoom(0.2));
+
+  stage.addEventListener(
+    "wheel",
+    (event) => {
+      if (!viewer.classList.contains("is-open")) return;
+      event.preventDefault();
+      zoom(event.deltaY < 0 ? 0.2 : -0.2);
+    },
+    { passive: false },
+  );
 
   image.addEventListener("pointerdown", (event) => {
     if (state.scale <= 1) return;

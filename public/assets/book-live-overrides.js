@@ -30,12 +30,12 @@
     if (!override) return;
 
     setText("[data-live-field='clean_title']", override.clean_title);
-    setText("[data-live-field='author']", override.author || "作者信息待核实");
-    setText("[data-live-field='description']", override.description || "暂无内容简介。");
-    setMetadata("author", override.author || "待核实");
-    setMetadata("translator", override.translator || "待核实");
-    setMetadata("publisher", override.publisher || "待核实");
-    setMetadata("year", override.year || "待核实");
+    setText("[data-live-field='author']", override.author || "作者信息整理中");
+    setText("[data-live-field='description']", override.description || "简介待补充。");
+    setMetadata("author", override.author || "作者信息整理中");
+    setMetadata("translator", override.translator || "译者信息整理中");
+    setMetadata("publisher", override.publisher || "出版信息整理中");
+    setMetadata("year", override.year || "出版信息整理中");
     setMetadata("category", override.category_name || override.category);
     renderTags(override.tags);
 

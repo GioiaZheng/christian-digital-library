@@ -109,6 +109,7 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("book-cover-card", detail)
             self.assertLess(detail.index("book-hero-cover"), detail.index("book-layout"))
             self.assertIn("封面待生成", detail)
+            self.assertIn("本馆目录仍在整理中", detail)
             self.assertIn("下载或阅读全文", detail)
             self.assertIn("访问码", detail)
             self.assertIn('data-access-form', detail)
@@ -164,7 +165,8 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn('name="translator"', about)
             self.assertIn('name="file"', about)
             self.assertIn('data-max-bytes="104857600"', about)
-            self.assertIn("不要上传 ZIP", about)
+            self.assertIn("不支持：ZIP", about)
+            self.assertIn("单个文件最大：100 MB", about)
             self.assertIn('accept=".pdf,.epub,.mobi', about)
             self.assertNotIn('accept=".zip', about)
             self.assertNotIn('name="upload_code"', about)
@@ -181,6 +183,7 @@ class CatalogGenerationTests(unittest.TestCase):
             admin = (output / "admin.html").read_text(encoding="utf-8")
 
             self.assertIn("管理馆藏", admin)
+            self.assertIn("审核上传、修改书目资料、添加书籍、标记想读/读完", admin)
             self.assertIn('name="admin_code"', admin)
             self.assertIn("assets/admin.js", admin)
             self.assertIn('id="admin-add-book-form"', admin)
@@ -214,6 +217,12 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("assets/catalog-overrides.js", catalog)
             self.assertNotIn("显示更多", catalog)
             self.assertNotIn('id="load-more"', catalog)
+            search_source = (
+                project / "public" / "assets" / "search.js"
+            ).read_text(encoding="utf-8")
+            self.assertIn('const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#"', search_source)
+            self.assertIn("is-active", search_source)
+            self.assertIn("card-status", search_source)
 
     def test_homepage_contains_daily_recommendations(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -228,6 +237,8 @@ class CatalogGenerationTests(unittest.TestCase):
             )
             self.assertIn("每日推荐", home)
             self.assertIn('id="daily-recommendations"', home)
+            self.assertIn('id="daily-refresh"', home)
+            self.assertIn("skeleton-card", home)
             self.assertIn("assets/upload-config.js", home)
             self.assertIn("assets/catalog-overrides.js", home)
             self.assertIn("assets/daily-recommendations.js", home)
@@ -239,6 +250,8 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("canUseReadingFlow", daily_source)
             self.assertIn("recommendationRank", daily_source)
             self.assertIn("reader_ready", daily_source)
+            self.assertIn("今日推荐暂时加载失败，可先进入完整目录。", daily_source)
+            self.assertIn("renderPickedBooks", daily_source)
 
     def test_category_detail_page_contains_filter_controls(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

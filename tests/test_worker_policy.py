@@ -178,6 +178,8 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("--reader-zoom", reader_js)
         self.assertIn("tokenExpiry", reader_js)
         self.assertIn("statusWithExpiry", reader_js)
+        self.assertIn("网络慢时可稍等再试", reader_js)
+        self.assertIn("第 ${safePage} / ${total} 页", reader_js)
         self.assertNotIn("ACCESS_CODE", reader_js)
         self.assertNotIn("raw/", reader_js)
 
@@ -193,6 +195,8 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("translate3d(${state.panX}px, ${state.panY}px, 0) scale", source)
         self.assertIn("setPointerCapture", source)
         self.assertIn("is-pannable", source)
+        self.assertIn("滚轮/按钮缩放", source)
+        self.assertIn("wheel", source)
         self.assertIn("event.target === stage", source)
         self.assertNotIn("ACCESS_CODE", source)
         self.assertNotIn("raw/", source)
@@ -204,6 +208,13 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertNotIn("ACCESS_CODE", public_config)
         self.assertNotIn("access_code", public_config)
         self.assertNotIn("raw/", public_config)
+
+    def test_admin_save_feedback_links_to_public_page(self) -> None:
+        source = (ROOT / "public" / "assets" / "admin.js").read_text(encoding="utf-8")
+        self.assertIn("setStatusWithPublicLink", source)
+        self.assertIn("正在保存", source)
+        self.assertIn("已保存到后台", source)
+        self.assertIn("查看公开页面", source)
 
 
 if __name__ == "__main__":

@@ -85,6 +85,7 @@
     if (pageInput) pageInput.value = String(safePage);
     if (prevPageButton) prevPageButton.disabled = safePage <= 1;
     if (nextPageButton) nextPageButton.disabled = total ? safePage >= total : true;
+    if (total) setStatus(statusWithExpiry(`第 ${safePage} / ${total} 页。向下滑动阅读。`));
   };
 
   const detailHref = validBookId ? `books/${bookId}.html` : "index.html";
@@ -227,7 +228,7 @@
         figure.classList.add("is-error");
         image.hidden = true;
         errorBox.hidden = false;
-        setStatus(`第 ${index} 页加载失败，可以点“重试本页”。`);
+        setStatus(`第 ${index} 页加载失败。网络慢时可稍等再试，也可以点“重试本页”。`);
       });
 
       errorBox.append(errorText, retryButton);
@@ -240,7 +241,7 @@
     }
 
     pages.replaceChildren(fragment);
-    setStatus(statusWithExpiry(`共 ${pageCount} 页。向下滑动阅读。`));
+    setStatus(statusWithExpiry(`第 1 / ${pageCount} 页。向下滑动阅读。`));
     watchCurrentPage();
 
     const hashPage = /^#page-(\d+)$/.exec(window.location.hash || "");
