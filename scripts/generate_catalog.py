@@ -193,9 +193,20 @@ def render_layout(
 def render_book_card(
     book: dict[str, Any], categories: dict[str, dict[str, str]], link_prefix: str = ""
 ) -> str:
-    author = book["author"] or "作者待核"
+    author = book["author"] or "作者信息整理中"
     translator = f"译者：{book['translator']}" if book["translator"] else ""
     byline = " · ".join(part for part in (author, translator, book["year"]) if part)
+    has_preview = bool(book.get("preview_base_url")) and int(book.get("preview_page_count") or 0) > 0
+    has_reader = bool(book.get("cover_image_url")) and has_preview
+    status_parts = []
+    if book.get("cover_image_url"):
+        status_parts.append("有封面")
+    if has_preview:
+        status_parts.append("可预览")
+    status_parts.append("可在线阅读" if has_reader else "阅读版生成中")
+    if book.get("access_required"):
+        status_parts.append("需访问码")
+    status_text = " · ".join(status_parts)
     description = (
         f'<p class="description">{escape(book["description"])}</p>'
         if book["description"]
@@ -208,6 +219,7 @@ def render_book_card(
           <h3><a href="{link_prefix}books/{escape(book['id'])}.html" data-card-title>{escape(book['clean_title'])}</a></h3>
           <p class="meta" data-card-byline>{escape(byline)}</p>
           {description.replace('<p class="description">', '<p class="description" data-card-description>')}
+          <p class="card-status">{escape(status_text)}</p>
           <div class="card-footer">
             <span class="badge" data-card-category>{escape(category['name'])}</span>
             <span class="meta">查看书目 →</span>
@@ -292,10 +304,17 @@ def render_home(
       <div class="shell">
         <div class="section-heading">
           <div><p class="eyebrow">每日推荐</p><h2>今天可以读这几本</h2></div>
-          <a href="catalog.html">进入完整目录</a>
+          <div class="section-actions">
+            <button id="daily-refresh" class="button secondary compact" type="button">换一批</button>
+            <a href="catalog.html">进入完整目录</a>
+          </div>
         </div>
-        <div id="daily-recommendations" class="grid" aria-live="polite">
-          <div class="empty-state">正在为今天挑选书目……</div>
+        <div id="daily-recommendations" class="grid" aria-live="polite" aria-busy="true">
+          <article class="card skeleton-card" aria-hidden="true"><span></span><span></span><span></span></article>
+          <article class="card skeleton-card" aria-hidden="true"><span></span><span></span><span></span></article>
+          <article class="card skeleton-card" aria-hidden="true"><span></span><span></span><span></span></article>
+          <article class="card skeleton-card" aria-hidden="true"><span></span><span></span><span></span></article>
+          <article class="card skeleton-card" aria-hidden="true"><span></span><span></span><span></span></article>
         </div>
       </div>
     </section>
@@ -552,13 +571,13 @@ def render_book_detail(
     category: dict[str, str],
 ) -> str:
     metadata_items = [
-        ("作者", book["author"] or "待核实"),
-        ("译者", book["translator"] or "待核实"),
-        ("出版社", book["publisher"] or "待核实"),
-        ("年份", book["year"] or "待核实"),
-        ("语言", book["language"] or "待核实"),
+        ("作者", book["author"] or "作者信息整理中"),
+        ("译者", book["translator"] or "译者信息整理中"),
+        ("出版社", book["publisher"] or "出版信息整理中"),
+        ("年份", book["year"] or "出版信息整理中"),
+        ("语言", book["language"] or "中文"),
         ("分类", category["name"]),
-        ("版权状态", book["copyright_status"]),
+        ("版权状态", book["copyright_status"] or "版权信息整理中"),
     ]
     metadata_keys = {
         "作者": "author",
@@ -577,7 +596,7 @@ def render_book_detail(
     toc_section = (
         f'<section class="book-section"><h2>目录</h2><ol class="toc">{toc}</ol></section>'
         if toc
-        else '<section class="book-section"><h2>目录</h2><p class="meta">目录信息尚待整理。</p></section>'
+        else '<section class="book-section"><h2>目录</h2><p class="meta">目录待补充。</p></section>'
     )
     availability = "当前书目用于馆藏查询，文件访问按实际授权情况提供。"
     content = f"""
@@ -586,7 +605,7 @@ def render_book_detail(
         <nav class="breadcrumbs" aria-label="面包屑"><a href="../categories.html">馆藏分类</a> / <a href="../categories/{escape(category['id'])}.html">{escape(category['name'])}</a> / 当前书目</nav>
         <p class="eyebrow">书目编号 · {escape(book['id'])}</p>
         <h1 data-live-field="clean_title">{escape(book['clean_title'])}</h1>
-        <p class="lead" data-live-field="author">{escape(book['author'] or '作者信息待核实')}</p>
+        <p class="lead" data-live-field="author">{escape(book['author'] or '作者信息整理中')}</p>
       </div>
       <div class="book-hero-cover">
         {render_cover_section(book)}
@@ -594,7 +613,8 @@ def render_book_detail(
     </div></header>
     <section class="section"><div class="shell book-layout">
       <div class="book-main">
-        <section class="book-section"><h2>内容简介</h2><p data-live-field="description">{escape(book['description'] or '暂无内容简介。')}</p></section>
+        <section class="book-section"><h2>内容简介</h2><p data-live-field="description">{escape(book['description'] or '简介待补充。')}</p></section>
+        <p class="catalog-note">本馆目录仍在整理中，书名与分类会持续校对。</p>
         {render_preview_section(book)}
         {toc_section}
         <section class="book-section"><h2>主题标签</h2><div class="tags" data-live-tags>{tags or '<span class="meta">暂无标签</span>'}</div></section>
@@ -639,7 +659,12 @@ def render_about(template: Template) -> str:
         <div>
           <p class="eyebrow">上传申请</p>
           <h2>提交书籍资料</h2>
-          <p class="description">你可以提交书名、作者、译者和整理后的文件。提交后会进入待审核区，不会自动公开显示，也不会自动开放下载。请上传 PDF、EPUB 或 MOBI，不要上传 ZIP。</p>
+          <p class="description">你可以提交书名、作者、译者和整理后的文件。提交后会进入待审核区，不会自动公开显示，也不会自动开放下载。</p>
+          <ul class="plain-list">
+            <li>支持：PDF / EPUB / MOBI</li>
+            <li>不支持：ZIP</li>
+            <li>单个文件最大：100 MB</li>
+          </ul>
         </div>
         <form id="upload-request-form" class="upload-form" enctype="multipart/form-data" data-upload-endpoint="" data-max-bytes="104857600">
           <div class="field">
@@ -657,6 +682,7 @@ def render_about(template: Template) -> str:
           <div class="field">
             <label for="upload-file">文件</label>
             <input id="upload-file" name="file" type="file" accept=".pdf,.epub,.mobi,application/pdf,application/epub+zip,application/x-mobipocket-ebook" required>
+            <p class="field-help">请上传整理后的 PDF、EPUB 或 MOBI，单个文件最大 100 MB。</p>
           </div>
           <button class="button" type="submit">提交审核</button>
           <p id="upload-request-status" class="form-status" aria-live="polite">上传入口正在接入中。</p>
@@ -685,7 +711,7 @@ def render_admin(template: Template) -> str:
         <div>
           <p class="eyebrow">登录</p>
           <h2>管理员入口</h2>
-          <p class="description">请输入管理员密码。密码只发给后台 Worker 验证，不写入网页。</p>
+          <p class="description">请输入管理员密码。登录后可审核上传、修改书目资料、添加书籍、标记想读/读完。密码只发给后台 Worker 验证，不写入网页。</p>
         </div>
         <div class="field">
           <label for="admin-code">管理员密码</label>

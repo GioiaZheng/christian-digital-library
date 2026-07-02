@@ -1,6 +1,9 @@
 (() => {
   const container = document.querySelector("#daily-recommendations");
+  const refreshButton = document.querySelector("#daily-refresh");
   if (!container) return;
+  let dailyBooks = [];
+  let rotation = 0;
 
   const todayKey = () => {
     const now = new Date();
@@ -74,9 +77,15 @@
       createText(
         "p",
         "meta",
-        [book.author || "作者待核", book.translator ? `译者：${book.translator}` : ""].filter(Boolean).join(" · "),
+        [book.author || "作者信息整理中", book.translator ? `译者：${book.translator}` : ""].filter(Boolean).join(" · "),
       ),
     );
+    const statusParts = [];
+    if (book.cover_image_url) statusParts.push("有封面");
+    if (book.preview_base_url && Number(book.preview_page_count || 0) > 0) statusParts.push("可预览");
+    statusParts.push(book.preview_base_url ? "可在线阅读" : "阅读版生成中");
+    if (book.access_required !== false) statusParts.push("需访问码");
+    article.append(createText("p", "card-status", statusParts.join(" · ")));
     const footer = document.createElement("div");
     footer.className = "card-footer";
     footer.append(createText("span", "badge", book.category_name || "馆藏"));
@@ -85,8 +94,8 @@
     return article;
   };
 
-  const pickDailyBooks = (books) => {
-    const random = randomFromSeed(hashSeed(todayKey()));
+  const pickDailyBooks = (books, offset = 0) => {
+    const random = randomFromSeed(hashSeed(`${todayKey()}-${offset}`));
     const picked = [];
 
     for (const rank of [3, 2, 1]) {
@@ -100,6 +109,17 @@
     return picked;
   };
 
+  const renderPickedBooks = () => {
+    const picked = pickDailyBooks(dailyBooks, rotation);
+    container.replaceChildren();
+    container.setAttribute("aria-busy", "false");
+    if (!picked.length) {
+      container.append(createText("div", "empty-state", "今日推荐正在整理中，可先进入完整目录。"));
+      return;
+    }
+    picked.forEach((book) => container.append(renderBook(book)));
+  };
+
   const start = async () => {
     try {
       const response = await fetch("catalog.json");
@@ -108,18 +128,26 @@
       const books = window.CDL_CATALOG_OVERRIDES?.applyToBooks
         ? await window.CDL_CATALOG_OVERRIDES.applyToBooks(catalog)
         : catalog;
-      const picked = pickDailyBooks(books);
-      container.replaceChildren();
-      if (!picked.length) {
-        container.append(createText("div", "empty-state", "今日推荐正在整理中。"));
-        return;
-      }
-      picked.forEach((book) => container.append(renderBook(book)));
+      dailyBooks = books;
+      renderPickedBooks();
     } catch (error) {
-      container.replaceChildren(createText("div", "empty-state", "今日推荐暂时无法加载。"));
+      container.setAttribute("aria-busy", "false");
+      const fallback = document.createElement("div");
+      fallback.className = "empty-state";
+      fallback.append(createText("p", "", "今日推荐暂时加载失败，可先进入完整目录。"));
+      const link = document.createElement("a");
+      link.href = "catalog.html";
+      link.textContent = "进入完整目录 →";
+      fallback.append(link);
+      container.replaceChildren(fallback);
       console.error(error);
     }
   };
+
+  refreshButton?.addEventListener("click", () => {
+    rotation += 1;
+    renderPickedBooks();
+  });
 
   start();
 })();

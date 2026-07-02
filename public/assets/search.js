@@ -9,7 +9,7 @@
   if (!searchInput || !categorySelect || !results || !summary || !sentinel) return;
 
   const pageSize = 48;
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#".split("");
   const chineseInitialLetters = "ABCDEFGHJKLMNOPQRSTWXYZ".split("");
   const chineseBoundaries = "阿八嚓咑妸发旮哈讥咔垃妈拏噢妑七呥仨他哇夕丫帀".split("");
   const pinyinCollator = new Intl.Collator("zh-CN-u-co-pinyin");
@@ -18,6 +18,8 @@
   let allBooks = [];
   let filteredBooks = [];
   let isRendering = false;
+  let activeInitial = "";
+  let alphabetObserver = null;
 
   const normalize = (value) => String(value || "").trim().toLocaleLowerCase("zh-CN");
   const sortTitle = (value) =>
@@ -74,7 +76,7 @@
     article.append(title);
 
     const bylineParts = [
-      book.author || "作者待核",
+      book.author || "作者信息整理中",
       book.translator ? `译者：${book.translator}` : "",
       book.year,
     ].filter(Boolean);
@@ -82,6 +84,12 @@
     if (book.description) {
       article.append(createText("p", "description", book.description));
     }
+    const statusParts = [];
+    if (book.cover_image_url) statusParts.push("有封面");
+    if (book.preview_base_url && Number(book.preview_page_count || 0) > 0) statusParts.push("可预览");
+    statusParts.push(book.preview_base_url ? "可在线阅读" : "阅读版生成中");
+    if (book.access_required !== false) statusParts.push("需访问码");
+    article.append(createText("p", "card-status", statusParts.join(" · ")));
 
     const footer = document.createElement("div");
     footer.className = "card-footer";
@@ -108,6 +116,8 @@
       button.type = "button";
       button.textContent = letter;
       button.disabled = !present.has(letter);
+      button.dataset.letter = letter;
+      button.classList.toggle("is-active", activeInitial === letter);
       button.addEventListener("click", () => {
         const firstIndex = filteredBooks.findIndex((book) => initialOfTitle(book.clean_title) === letter);
         if (firstIndex < 0) return;
@@ -116,6 +126,34 @@
       });
       alphabetIndex.append(button);
     }
+  };
+
+  const updateActiveAlphabet = (letter) => {
+    if (!letter || activeInitial === letter) return;
+    activeInitial = letter;
+    alphabetIndex?.querySelectorAll("button").forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.letter === letter);
+    });
+  };
+
+  const watchAlphabetSections = () => {
+    alphabetObserver?.disconnect();
+    if (!("IntersectionObserver" in window)) return;
+    alphabetObserver = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (visible?.target?.dataset?.catalogInitial) {
+          updateActiveAlphabet(visible.target.dataset.catalogInitial);
+        }
+      },
+      {
+        rootMargin: "-22% 0px -68% 0px",
+        threshold: [0, 0.1, 0.25],
+      },
+    );
+    results.querySelectorAll("[data-catalog-initial]").forEach((card) => alphabetObserver.observe(card));
   };
 
   const filterBooks = () => {
@@ -168,6 +206,7 @@
       const target = results.querySelector(`[data-catalog-book-id="${CSS.escape(options.scrollToBookId)}"]`);
       target?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
+    watchAlphabetSections();
     isRendering = false;
   };
 

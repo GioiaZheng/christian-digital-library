@@ -47,7 +47,7 @@
     article.append(title);
 
     const bylineParts = [
-      book.author || "作者待核",
+      book.author || "作者信息整理中",
       book.translator ? `译者：${book.translator}` : "",
       book.year,
     ].filter(Boolean);
@@ -55,6 +55,12 @@
     if (book.description) {
       article.append(createText("p", "description", book.description));
     }
+    const statusParts = [];
+    if (book.cover_image_url) statusParts.push("有封面");
+    if (book.preview_base_url && Number(book.preview_page_count || 0) > 0) statusParts.push("可预览");
+    statusParts.push(book.preview_base_url ? "可在线阅读" : "阅读版生成中");
+    if (book.access_required !== false) statusParts.push("需访问码");
+    article.append(createText("p", "card-status", statusParts.join(" · ")));
 
     const footer = document.createElement("div");
     footer.className = "card-footer";
