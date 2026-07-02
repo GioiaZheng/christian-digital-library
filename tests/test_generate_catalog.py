@@ -234,6 +234,24 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertNotIn("ACCESS_CODE", admin)
             self.assertNotIn("ADMIN_CODE", admin)
 
+    def test_generated_site_publishes_category_metadata_for_admin(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = create_sample_project(Path(directory))
+            output = project / "site"
+            GENERATOR.build_site(project, output)
+
+            categories = json.loads((output / "categories.json").read_text(encoding="utf-8"))
+            self.assertTrue(categories)
+            self.assertEqual({"id", "name", "description"}, set(categories[0]))
+            self.assertIn(
+                {
+                    "id": "theology",
+                    "name": "神学与教义",
+                    "description": "系统神学、教义研究、护教学与神学思想。",
+                },
+                categories,
+            )
+
     def test_catalog_uses_infinite_scroll_and_alphabet_index(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = create_sample_project(Path(directory))

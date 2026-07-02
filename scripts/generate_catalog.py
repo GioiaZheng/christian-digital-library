@@ -1002,6 +1002,17 @@ def public_catalog(
     return result
 
 
+def public_categories(categories: list[dict[str, str]]) -> list[dict[str, str]]:
+    return [
+        {
+            "id": category["id"],
+            "name": category["name"],
+            "description": category["description"],
+        }
+        for category in categories
+    ]
+
+
 def write_text(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content.rstrip() + "\n", encoding="utf-8", newline="\n")
@@ -1049,6 +1060,10 @@ def build_site(root: Path = ROOT, output: Path | None = None) -> dict[str, int]:
     write_text(
         output / "catalog.json",
         json.dumps(public_catalog(books, category_map), ensure_ascii=False, indent=2),
+    )
+    write_text(
+        output / "categories.json",
+        json.dumps(public_categories(categories), ensure_ascii=False, indent=2),
     )
     write_text(output / ".nojekyll", "")
     return {"books": len(books), "categories": len(categories)}
