@@ -32,6 +32,7 @@
     setText("[data-live-field='clean_title']", override.clean_title);
     setText("[data-live-field='author']", override.author || "作者信息整理中");
     setText("[data-live-field='description']", override.description || "简介待补充。");
+    setText("[data-live-field='author_bio']", override.author_bio || "作者介绍待补充。");
     setMetadata("author", override.author || "作者信息整理中");
     setMetadata("translator", override.translator || "译者信息整理中");
     setMetadata("publisher", override.publisher || "出版信息整理中");

@@ -37,6 +37,24 @@
     return element;
   };
 
+  const appendAuthorByline = (container, book) => {
+    const meta = document.createElement("p");
+    meta.className = "meta";
+    if (book.author && book.author_url) {
+      const link = document.createElement("a");
+      link.className = "author-link";
+      link.href = book.author_url;
+      link.textContent = book.author;
+      meta.append(link);
+    } else {
+      meta.append(document.createTextNode(book.author || "作者信息整理中"));
+    }
+    if (book.translator) {
+      meta.append(document.createTextNode(` · 译者：${book.translator}`));
+    }
+    container.append(meta);
+  };
+
   const goodRecommendation = (book) => {
     const title = String(book.clean_title || "").trim();
     if (!title || /^[0-9A-Za-z]{3,}/.test(title)) return false;
@@ -73,19 +91,7 @@
     title.append(link);
     article.append(title);
 
-    article.append(
-      createText(
-        "p",
-        "meta",
-        [book.author || "作者信息整理中", book.translator ? `译者：${book.translator}` : ""].filter(Boolean).join(" · "),
-      ),
-    );
-    const statusParts = [];
-    if (book.cover_image_url) statusParts.push("有封面");
-    if (book.preview_base_url && Number(book.preview_page_count || 0) > 0) statusParts.push("可预览");
-    statusParts.push(book.preview_base_url ? "可在线阅读" : "阅读版生成中");
-    if (book.access_required !== false) statusParts.push("需访问码");
-    article.append(createText("p", "card-status", statusParts.join(" · ")));
+    appendAuthorByline(article, book);
     const footer = document.createElement("div");
     footer.className = "card-footer";
     footer.append(createText("span", "badge", book.category_name || "馆藏"));

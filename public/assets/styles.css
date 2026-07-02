@@ -426,6 +426,18 @@ h3 {
   font-size: 0.87rem;
 }
 
+.author-link {
+  color: var(--green);
+  text-decoration-color: rgba(23, 63, 53, 0.35);
+  text-underline-offset: 0.18em;
+}
+
+.author-link:hover,
+.author-link:focus-visible {
+  color: var(--gold);
+  text-decoration-color: currentColor;
+}
+
 .card .description {
   display: -webkit-box;
   overflow: hidden;
@@ -433,13 +445,6 @@ h3 {
   color: var(--muted);
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
-}
-
-.card-status {
-  margin: 8px 0 18px;
-  color: #98620f;
-  font-family: "Microsoft YaHei", sans-serif;
-  font-size: 0.78rem;
 }
 
 .skeleton-card {
@@ -693,6 +698,32 @@ h3 {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(260px, 0.7fr);
   gap: 48px;
+}
+
+.author-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.48fr) minmax(0, 1fr);
+  gap: 38px;
+  align-items: start;
+}
+
+.author-profile-card {
+  position: sticky;
+  top: 110px;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.author-profile-card h2 {
+  margin-top: 0;
+  font-size: 1.35rem;
+}
+
+.author-profile-card p {
+  color: var(--muted);
 }
 
 .book-main,
@@ -1546,9 +1577,14 @@ h3 {
   .hero-grid,
   .book-hero-grid,
   .book-layout,
+  .author-layout,
   .upload-panel {
     grid-template-columns: 1fr;
     gap: 30px;
+  }
+
+  .author-profile-card {
+    position: static;
   }
 
   .book-hero-cover {
