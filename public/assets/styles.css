@@ -1177,12 +1177,106 @@ h3 {
 
 .admin-panel {
   display: grid;
-  gap: 28px;
+  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
 }
 
 .admin-panel[hidden],
-.admin-book-form[hidden] {
+.admin-book-form[hidden],
+.admin-section[hidden] {
   display: none;
+}
+
+.admin-sidebar {
+  position: sticky;
+  top: 100px;
+  display: grid;
+  gap: 18px;
+}
+
+.admin-sidebar-title h2 {
+  margin: 4px 0 0;
+  font-size: 1.4rem;
+}
+
+.admin-nav {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-nav-button,
+.admin-overview-card {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: rgba(255, 253, 248, 0.78);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.admin-nav-button {
+  padding: 12px 14px;
+  border-radius: 999px;
+}
+
+.admin-nav-button:hover,
+.admin-nav-button.is-active,
+.admin-overview-card:hover {
+  border-color: rgba(13, 67, 55, 0.35);
+  background: var(--cream);
+}
+
+.admin-nav-button.is-active {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.admin-main {
+  min-width: 0;
+}
+
+.admin-section {
+  display: none;
+  gap: 18px;
+}
+
+.admin-section.is-active {
+  display: grid;
+}
+
+.admin-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-overview-card {
+  display: grid;
+  gap: 8px;
+  min-height: 130px;
+  padding: 20px;
+  border-radius: 18px;
+}
+
+.admin-overview-card:hover {
+  transform: translateY(-2px);
+}
+
+.admin-overview-card strong {
+  color: var(--green);
+  font-family: var(--serif);
+  font-size: 1.35rem;
+}
+
+.admin-overview-card span {
+  color: var(--muted);
+  line-height: 1.7;
 }
 
 .admin-list,
@@ -1258,13 +1352,6 @@ h3 {
 
 .admin-book-result .admin-reading-actions {
   margin-top: 0;
-}
-
-.admin-reading-heading,
-.admin-add-heading,
-.admin-edit-heading,
-.admin-comments-heading {
-  margin-top: 12px;
 }
 
 .admin-search-panel {
@@ -1676,9 +1763,22 @@ h3 {
   .book-hero-grid,
   .book-layout,
   .author-layout,
-  .upload-panel {
+  .upload-panel,
+  .admin-panel {
     grid-template-columns: 1fr;
     gap: 30px;
+  }
+
+  .admin-sidebar {
+    position: static;
+  }
+
+  .admin-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-nav-button {
+    text-align: center;
   }
 
   .author-profile-card {
@@ -1729,7 +1829,9 @@ h3 {
 
   .stats,
   .grid,
-  .access-form-row {
+  .access-form-row,
+  .admin-overview-grid,
+  .admin-nav {
     grid-template-columns: 1fr;
   }
 

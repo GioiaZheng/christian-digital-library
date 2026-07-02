@@ -19,6 +19,8 @@
   const categoryList = document.querySelector("#admin-book-category-list");
   const newCategoryInput = document.querySelector("#admin-new-category");
   const addCategoryButton = document.querySelector("#admin-add-category");
+  const adminNavButtons = Array.from(document.querySelectorAll("[data-admin-target]"));
+  const adminSections = Array.from(document.querySelectorAll("[data-admin-section]"));
 
   if (!loginForm || !panel || !endpoint) return;
 
@@ -34,6 +36,31 @@
 
   const setText = (target, value) => {
     if (target) target.textContent = value;
+  };
+
+  const showAdminSection = (target) => {
+    const next = String(target || "overview").trim() || "overview";
+    let matched = false;
+    for (const section of adminSections) {
+      const active = section.dataset.adminSection === next;
+      section.classList.toggle("is-active", active);
+      section.hidden = !active;
+      if (active) matched = true;
+    }
+    if (!matched && adminSections.length) {
+      adminSections[0].classList.add("is-active");
+      adminSections[0].hidden = false;
+    }
+    for (const button of adminNavButtons) {
+      const active = button.dataset.adminTarget === next;
+      button.classList.toggle("is-active", active);
+      if (button.classList.contains("admin-nav-button")) {
+        button.setAttribute("aria-current", active ? "page" : "false");
+      }
+    }
+    if (panel && !panel.hidden) {
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   const setStatusWithPublicLink = (target, message, bookId) => {
@@ -508,6 +535,14 @@
     }
   };
 
+  adminNavButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      showAdminSection(button.dataset.adminTarget);
+    });
+  });
+
+  showAdminSection("overview");
+
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     adminCode = String(loginForm.elements.namedItem("admin_code")?.value || "").trim();
@@ -523,6 +558,7 @@
       await loadUploads();
       loginForm.hidden = true;
       panel.hidden = false;
+      showAdminSection("overview");
     } catch (error) {
       adminCode = "";
       setText(loginStatus, error.message || "登录失败。");
