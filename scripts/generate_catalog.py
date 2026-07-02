@@ -799,6 +799,45 @@ def render_admin(template: Template) -> str:
       </form>
 
       <div id="admin-panel" class="admin-panel" hidden>
+        <aside class="admin-sidebar" aria-label="管理员菜单">
+          <div class="admin-sidebar-title">
+            <p class="eyebrow">后台</p>
+            <h2>管理菜单</h2>
+          </div>
+          <nav class="admin-nav">
+            <button class="admin-nav-button is-active" type="button" data-admin-target="overview">总览</button>
+            <button class="admin-nav-button" type="button" data-admin-target="add">添加书籍</button>
+            <button class="admin-nav-button" type="button" data-admin-target="uploads">审核上传</button>
+            <button class="admin-nav-button" type="button" data-admin-target="edit">修改书目</button>
+            <button class="admin-nav-button" type="button" data-admin-target="reading">我的书单</button>
+            <button class="admin-nav-button" type="button" data-admin-target="comments">页内留言</button>
+          </nav>
+        </aside>
+        <main class="admin-main">
+          <section class="admin-section is-active" data-admin-section="overview">
+            <div class="section-heading">
+              <div><p class="eyebrow">总览</p><h2>今天要处理什么？</h2></div>
+            </div>
+            <div class="admin-overview-grid">
+              <button class="admin-overview-card" type="button" data-admin-target="uploads">
+                <strong>审核上传</strong>
+                <span>查看别人提交的书籍资料。</span>
+              </button>
+              <button class="admin-overview-card" type="button" data-admin-target="edit">
+                <strong>修改书目</strong>
+                <span>校对书名、作者、译者、分类和简介。</span>
+              </button>
+              <button class="admin-overview-card" type="button" data-admin-target="add">
+                <strong>添加书籍</strong>
+                <span>直接添加整理好的 PDF / EPUB / MOBI。</span>
+              </button>
+              <button class="admin-overview-card" type="button" data-admin-target="comments">
+                <strong>页内留言</strong>
+                <span>管理读者在阅读页留下的评论。</span>
+              </button>
+            </div>
+          </section>
+          <section class="admin-section" data-admin-section="add">
         <div class="section-heading admin-add-heading">
           <div><p class="eyebrow">添加</p><h2>直接添加书籍</h2></div>
         </div>
@@ -823,19 +862,27 @@ def render_admin(template: Template) -> str:
           <button class="button" type="submit">添加到后台</button>
           <p id="admin-add-status" class="form-status" aria-live="polite"></p>
         </form>
+          </section>
 
+          <section class="admin-section" data-admin-section="uploads">
         <div class="section-heading">
           <div><p class="eyebrow">审核</p><h2>待审核上传</h2></div>
           <button id="admin-refresh-uploads" class="button secondary" type="button">刷新</button>
         </div>
         <div id="admin-upload-list" class="admin-list" aria-live="polite"></div>
 
+          </section>
+
+          <section class="admin-section" data-admin-section="reading">
         <div class="section-heading admin-reading-heading">
           <div><p class="eyebrow">我的书单</p><h2>收藏与阅读状态</h2></div>
         </div>
         <p id="admin-reading-summary" class="result-summary" aria-live="polite">登录后显示阅读状态。</p>
         <div id="admin-reading-list" class="admin-reading-list" aria-live="polite"></div>
 
+          </section>
+
+          <section class="admin-section" data-admin-section="comments">
         <div class="section-heading admin-comments-heading">
           <div><p class="eyebrow">页内留言</p><h2>阅读评论管理</h2></div>
           <button id="admin-refresh-comments" class="button secondary" type="button">刷新</button>
@@ -843,6 +890,9 @@ def render_admin(template: Template) -> str:
         <p id="admin-comments-summary" class="result-summary" aria-live="polite">登录后显示读者留言。</p>
         <div id="admin-comments-list" class="admin-comments-list" aria-live="polite"></div>
 
+          </section>
+
+          <section class="admin-section" data-admin-section="edit">
         <div class="section-heading admin-edit-heading">
           <div><p class="eyebrow">书目资料</p><h2>修改书目信息</h2></div>
         </div>
@@ -903,6 +953,8 @@ def render_admin(template: Template) -> str:
           <button class="button" type="submit">保存修改</button>
           <p id="admin-book-status" class="form-status" aria-live="polite"></p>
         </form>
+          </section>
+        </main>
       </div>
     </div></section>
     <script src="assets/upload-config.js" defer></script>

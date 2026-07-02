@@ -120,6 +120,8 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("payload.tags = tags", admin_source)
         self.assertIn("author_bio", admin_source)
         self.assertIn("已保存并上线", admin_source)
+        self.assertIn("showAdminSection", admin_source)
+        self.assertIn("[data-admin-target]", admin_source)
 
     def test_public_catalog_overrides_are_available_without_secrets(self) -> None:
         worker_source = UPLOAD_WORKER.read_text(encoding="utf-8")
