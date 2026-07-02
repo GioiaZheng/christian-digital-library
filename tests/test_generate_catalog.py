@@ -40,6 +40,7 @@ def create_sample_project(parent: Path) -> Path:
         "id": "sample-book",
         "clean_title": "示例书目",
         "author": "示例作者",
+        "translator": "示例译者",
         "publisher": "",
         "year": "2024",
         "language": "中文",
@@ -116,6 +117,7 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn('data-book-detail-id="sample-book"', detail)
             self.assertIn('data-live-field="clean_title"', detail)
             self.assertIn("data-live-metadata='author'", detail)
+            self.assertIn("data-live-metadata='translator'", detail)
             self.assertIn("data-live-tags", detail)
             self.assertIn("../assets/upload-config.js", detail)
             self.assertIn("../assets/catalog-overrides.js", detail)
@@ -159,6 +161,7 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("提交书籍资料", about)
             self.assertIn('name="title"', about)
             self.assertIn('name="author"', about)
+            self.assertIn('name="translator"', about)
             self.assertIn('name="file"', about)
             self.assertIn('data-max-bytes="104857600"', about)
             self.assertIn("不要上传 ZIP", about)
@@ -183,12 +186,14 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn('id="admin-add-book-form"', admin)
             self.assertIn('id="admin-add-title"', admin)
             self.assertIn('id="admin-add-author"', admin)
+            self.assertIn('id="admin-add-translator"', admin)
             self.assertIn('id="admin-add-file"', admin)
             self.assertIn("单个文件最大 100 MB", admin)
             self.assertIn('id="admin-reading-summary"', admin)
             self.assertIn('id="admin-reading-list"', admin)
             self.assertIn("分类（可多个）", admin)
             self.assertIn('id="admin-book-category-list"', admin)
+            self.assertIn('id="admin-book-translator"', admin)
             self.assertIn("新增分类", admin)
             self.assertIn("标签（可多个）", admin)
             self.assertIn('name="tags"', admin)

@@ -536,8 +536,8 @@ class InventoryImportTests(unittest.TestCase):
                 encoding="utf-8",
             )
             mapping.write_text(
-                "id,object_key,size,etag,clean_title,author,category,reviewed\n"
-                "cdl-0001,incoming/示例书卷.zip,10,sample,示例书卷,,bible-study,true\n",
+                "id,object_key,size,etag,clean_title,author,translator,category,reviewed\n"
+                "cdl-0001,incoming/示例书卷.zip,10,sample,示例书卷,,,bible-study,true\n",
                 encoding="utf-8",
             )
             assets.write_text(

@@ -33,6 +33,7 @@
     setText("[data-live-field='author']", override.author || "作者信息待核实");
     setText("[data-live-field='description']", override.description || "暂无内容简介。");
     setMetadata("author", override.author || "待核实");
+    setMetadata("translator", override.translator || "待核实");
     setMetadata("publisher", override.publisher || "待核实");
     setMetadata("year", override.year || "待核实");
     setMetadata("category", override.category_name || override.category);

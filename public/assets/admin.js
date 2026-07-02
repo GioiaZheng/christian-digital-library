@@ -351,6 +351,7 @@
     bookForm.elements.namedItem("id").value = book.id || "";
     bookForm.elements.namedItem("clean_title").value = book.clean_title || "";
     bookForm.elements.namedItem("author").value = book.author || "";
+    bookForm.elements.namedItem("translator").value = book.translator || "";
     bookForm.elements.namedItem("publisher").value = book.publisher || "";
     bookForm.elements.namedItem("year").value = book.year || "";
     setSelectedCategories(
@@ -388,7 +389,10 @@
     const books = await loadCatalog();
     const matches = books
       .filter((book) =>
-        [book.id, book.clean_title, book.author, book.category_name].join(" ").toLocaleLowerCase("zh-CN").includes(value),
+        [book.id, book.clean_title, book.author, book.translator, book.category_name]
+          .join(" ")
+          .toLocaleLowerCase("zh-CN")
+          .includes(value),
       )
       .slice(0, 12);
 
@@ -410,6 +414,7 @@
       button.querySelector("span").textContent = [
         book.id,
         book.author || "作者待核",
+        book.translator ? `译者：${book.translator}` : "",
         status?.label ? `已标记：${status.label}` : "",
       ]
         .filter(Boolean)

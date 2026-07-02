@@ -34,6 +34,7 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("pending/uploads/", source)
         self.assertIn("pending/metadata/", source)
         self.assertIn("status: \"pending\"", source)
+        self.assertIn("translator", source)
         self.assertIn("env.BOOK_UPLOADS.put", source)
         self.assertNotIn(".delete(", source)
 
@@ -105,6 +106,7 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("请至少填写一个标签", worker_source)
         self.assertIn("category: categories[0]", worker_source)
         self.assertIn("categories,", worker_source)
+        self.assertIn("translator: cleanText", worker_source)
 
         admin_source = (ROOT / "public" / "assets" / "admin.js").read_text(
             encoding="utf-8"
@@ -130,6 +132,7 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("CDL_CATALOG_OVERRIDES", override_source)
         self.assertIn("applyToBooks", override_source)
         self.assertIn("getBookOverride", override_source)
+        self.assertIn('"translator"', override_source)
         self.assertIn("/catalog-overrides", override_source)
         self.assertNotIn("ADMIN_CODE", override_source)
         self.assertNotIn("ACCESS_CODE", override_source)
