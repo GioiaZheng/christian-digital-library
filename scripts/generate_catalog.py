@@ -695,6 +695,24 @@ def render_book_detail(
         {render_preview_section(book)}
         {toc_section}
         <section class="book-section"><h2>主题标签</h2><div class="tags" data-live-tags>{tags or '<span class="meta">暂无标签</span>'}</div></section>
+        <section class="book-section book-opinions" data-book-opinions data-book-id="{escape(book['id'])}">
+          <div class="section-heading compact">
+            <div>
+              <h2>读者看法</h2>
+              <p class="meta">可以简单写下你读这本书的感受。</p>
+            </div>
+            <button class="button secondary compact" type="button" data-book-opinions-refresh>刷新</button>
+          </div>
+          <div class="book-opinions-list" data-book-opinions-list aria-live="polite">
+            <p class="meta">正在读取读者看法……</p>
+          </div>
+          <form class="book-opinions-form" data-book-opinions-form>
+            <label for="book-opinion-{escape(book['id'])}">写一点看法</label>
+            <textarea id="book-opinion-{escape(book['id'])}" name="message" rows="4" maxlength="1000" placeholder="写下你对这本书的看法……" required></textarea>
+            <button class="button" type="submit">发表看法</button>
+            <p class="form-status" data-book-opinions-status aria-live="polite"></p>
+          </form>
+        </section>
       </div>
       <aside class="book-aside">
         <section class="book-section"><h2>书目信息</h2><dl class="metadata-list">{metadata}</dl></section>
@@ -707,6 +725,7 @@ def render_book_detail(
     <script src="../assets/catalog-overrides.js" defer></script>
     <script src="../assets/book-live-overrides.js" defer></script>
     <script src="../assets/access.js" defer></script>
+    <script src="../assets/book-opinions.js" defer></script>
     <script src="../assets/image-viewer.js" defer></script>"""
     return render_layout(
         template,

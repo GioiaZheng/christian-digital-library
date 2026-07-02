@@ -181,6 +181,23 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("admin-comments-list", admin_js)
         self.assertIn("删除留言", admin_js)
 
+    def test_book_opinions_are_public_and_anonymous(self) -> None:
+        access_source = ACCESS_WORKER.read_text(encoding="utf-8")
+        book_opinions_js = (ROOT / "public" / "assets" / "book-opinions.js").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("/book-opinions/", access_source)
+        self.assertIn("metadata/book-opinions/", access_source)
+        self.assertIn("handleBookOpinions", access_source)
+        self.assertIn("anonymousReaderName", access_source)
+        self.assertIn("env.BOOK_FILES.put", access_source)
+        self.assertIn("data-book-opinions", book_opinions_js)
+        self.assertIn("正在发表", book_opinions_js)
+        self.assertIn("匿名读者", book_opinions_js)
+        self.assertNotIn('name="name"', book_opinions_js)
+        self.assertNotIn("ACCESS_CODE", book_opinions_js)
+
     def test_access_js_supports_download_and_online_reading(self) -> None:
         source = (ROOT / "public" / "assets" / "access.js").read_text(encoding="utf-8")
         self.assertIn('value === "read"', source)

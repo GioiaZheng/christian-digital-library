@@ -5,7 +5,9 @@ const DEFAULT_READER_TOKEN_TTL_SECONDS = 4 * 60 * 60;
 const BOOK_ID_PATTERN = /^cdl-\d{6}$/;
 const READER_PATH_PATTERN = /^\/reader\/(cdl-\d{6})\/(manifest\.json|page-\d{4}\.(?:webp|jpg|jpeg|png))$/;
 const READER_COMMENTS_PATH_PATTERN = /^\/reader-comments\/(cdl-\d{6})\/pages\/([1-9]\d*)$/;
+const BOOK_OPINIONS_PATH_PATTERN = /^\/book-opinions\/(cdl-\d{6})$/;
 const READER_COMMENT_PREFIX = "metadata/reader-comments/";
+const BOOK_OPINION_PREFIX = "metadata/book-opinions/";
 const ALLOWED_FILE_EXTENSIONS = new Set(["zip", "pdf", "epub", "mobi"]);
 const ALLOWED_ACCESS_ACTIONS = new Set(["download", "read"]);
 
@@ -128,6 +130,10 @@ function readerObjectKey(bookId, filename) {
 
 function readerCommentsKey(bookId, pageNumber) {
   return `${READER_COMMENT_PREFIX}${bookId}/page-${pageNumber}.json`;
+}
+
+function bookOpinionsKey(bookId) {
+  return `${BOOK_OPINION_PREFIX}${bookId}.json`;
 }
 
 function readerTokenTtl(env) {
@@ -270,6 +276,84 @@ function publicReaderComment(comment) {
   };
 }
 
+function anonymousReaderName(id) {
+  const adjectives = ["安静", "温柔", "晨光", "橄榄", "溪边", "书香", "微光", "旅人"];
+  let seed = 0;
+  for (const character of String(id || "")) {
+    seed = (seed * 31 + character.charCodeAt(0)) % 9973;
+  }
+  return `${adjectives[seed % adjectives.length]}读者${String(seed).padStart(4, "0").slice(-4)}`;
+}
+
+async function loadBookOpinions(env, bookId) {
+  const object = await env.BOOK_FILES.get(bookOpinionsKey(bookId));
+  if (!object) return { opinions: [] };
+  const stored = await object.json().catch(() => ({}));
+  const opinions = Array.isArray(stored.opinions) ? stored.opinions : [];
+  return { opinions };
+}
+
+function publicBookOpinion(opinion) {
+  const id = cleanText(opinion?.id, 80);
+  return {
+    id,
+    book_id: cleanText(opinion?.book_id, 32),
+    name: cleanText(opinion?.name, 40) || anonymousReaderName(id),
+    message: cleanMultilineText(opinion?.message, 1000),
+    created_at: cleanText(opinion?.created_at, 40),
+  };
+}
+
+async function handleBookOpinions(request, env, url) {
+  const match = url.pathname.match(BOOK_OPINIONS_PATH_PATTERN);
+  if (!match) {
+    return jsonResponse(request, env, 404, { message: "读者看法区不存在。" });
+  }
+
+  const [, bookId] = match;
+  const stored = await loadBookOpinions(env, bookId);
+
+  if (request.method === "GET") {
+    return jsonResponse(request, env, 200, {
+      opinions: stored.opinions.map(publicBookOpinion).filter((opinion) => opinion.id && opinion.message),
+    });
+  }
+
+  if (request.method !== "POST") {
+    return jsonResponse(request, env, 405, { message: "读者看法区只接受查看和提交。" });
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const message = cleanMultilineText(body.message, 1000);
+  if (message.length < 2) {
+    return jsonResponse(request, env, 400, { message: "请先写一点内容再提交。" });
+  }
+
+  const now = new Date().toISOString();
+  const id = crypto.randomUUID();
+  const opinion = {
+    id,
+    book_id: bookId,
+    name: anonymousReaderName(id),
+    message,
+    created_at: now,
+  };
+  const opinions = [...stored.opinions.map(publicBookOpinion).filter((item) => item.id && item.message), opinion]
+    .slice(-300);
+
+  await env.BOOK_FILES.put(
+    bookOpinionsKey(bookId),
+    JSON.stringify({ book_id: bookId, opinions, updated_at: now }, null, 2),
+    {
+      httpMetadata: {
+        contentType: "application/json; charset=utf-8",
+      },
+    },
+  );
+
+  return jsonResponse(request, env, 201, { item: publicBookOpinion(opinion), opinions });
+}
+
 async function handleReaderComments(request, env, url) {
   const match = url.pathname.match(READER_COMMENTS_PATH_PATTERN);
   if (!match) {
@@ -343,6 +427,10 @@ export default {
 
     if (url.pathname.startsWith("/reader-comments/")) {
       return handleReaderComments(request, env, url);
+    }
+
+    if (url.pathname.startsWith("/book-opinions/")) {
+      return handleBookOpinions(request, env, url);
     }
 
     if (request.method === "GET" || request.method === "HEAD") {
