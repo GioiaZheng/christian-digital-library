@@ -1214,6 +1214,7 @@ h3 {
 .admin-shell {
   display: grid;
   gap: 30px;
+  width: min(1440px, calc(100% - 56px));
 }
 
 .admin-login-card,
@@ -1236,9 +1237,10 @@ h3 {
 
 .admin-panel {
   display: grid;
-  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: 34px;
   align-items: start;
+  min-height: 620px;
 }
 
 .admin-panel[hidden],
@@ -1818,6 +1820,10 @@ h3 {
 }
 
 @media (max-width: 820px) {
+  .admin-shell {
+    width: min(100% - 40px, 1120px);
+  }
+
   .hero-grid,
   .book-hero-grid,
   .book-layout,

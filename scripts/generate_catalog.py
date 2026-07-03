@@ -40,6 +40,7 @@ BOOK_FIELDS = [
     "can_public_download",
 ]
 ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+ASSET_VERSION = "20260703-admin-copy-1"
 
 
 class CatalogError(ValueError):
@@ -48,6 +49,10 @@ class CatalogError(ValueError):
 
 def escape(value: Any) -> str:
     return html.escape(str(value or ""), quote=True)
+
+
+def asset_url(path: str) -> str:
+    return f"{path}?v={ASSET_VERSION}"
 
 
 def author_slug(author: str) -> str:
@@ -317,7 +322,7 @@ def render_home(
     <section class="section">
       <div class="shell">
         <div class="section-heading">
-          <div><p class="eyebrow">每日推荐</p><h2>今日馆藏推荐</h2></div>
+          <div><p class="eyebrow">坚持阅读</p><h2>馆藏推荐</h2></div>
           <div class="section-actions">
             <button id="daily-refresh" class="button secondary compact" type="button">换一批</button>
             <a href="catalog.html">进入完整目录</a>
@@ -351,9 +356,9 @@ def render_home(
         <div class="grid">{featured}</div>
       </div>
     </section>
-    <script src="assets/upload-config.js" defer></script>
-    <script src="assets/catalog-overrides.js" defer></script>
-    <script src="assets/daily-recommendations.js" defer></script>"""
+    <script src="{asset_url('assets/upload-config.js')}" defer></script>
+    <script src="{asset_url('assets/catalog-overrides.js')}" defer></script>
+    <script src="{asset_url('assets/daily-recommendations.js')}" defer></script>"""
     return render_layout(
         template,
         title="基督教数字图书馆｜中文馆藏平台",
@@ -398,9 +403,9 @@ def render_catalog(template: Template, categories: list[dict[str, str]]) -> str:
         <noscript><div class="empty-state">搜索功能需要 JavaScript。你仍可前往“分类”页面浏览全部书目。</div></noscript>
       </div>
     </section>
-    <script src="assets/upload-config.js" defer></script>
-    <script src="assets/catalog-overrides.js" defer></script>
-    <script src="assets/search.js" defer></script>"""
+    <script src="{asset_url('assets/upload-config.js')}" defer></script>
+    <script src="{asset_url('assets/catalog-overrides.js')}" defer></script>
+    <script src="{asset_url('assets/search.js')}" defer></script>"""
     return render_layout(
         template,
         title="书目目录｜基督教数字图书馆",
@@ -468,9 +473,9 @@ def render_category_detail(
       <div id="category-results" class="grid" data-category-id="{escape(category['id'])}" data-category-total="{len(books)}">{cards}</div>
       <div id="category-empty-state" class="empty-state" hidden>没有找到匹配的书目，请尝试缩短关键词。</div>
     </div></section>
-    <script src="../assets/upload-config.js" defer></script>
-    <script src="../assets/catalog-overrides.js" defer></script>
-    <script src="../assets/category-filter.js" defer></script>"""
+    <script src="{asset_url('../assets/upload-config.js')}" defer></script>
+    <script src="{asset_url('../assets/catalog-overrides.js')}" defer></script>
+    <script src="{asset_url('../assets/category-filter.js')}" defer></script>"""
     return render_layout(
         template,
         title=f"{category['name']}｜基督教数字图书馆",
@@ -517,9 +522,9 @@ def render_author_page(
       <p class="lead">本站收录 {len(books)} 本相关作品。</p>
     </div></header>
     <section class="section"><div class="shell author-layout">
-      <aside class="author-profile-card">
+      <aside class="author-profile-card" data-author-profile-name="{escape(author['name'])}">
         <h2>作者简介</h2>
-        <p>{escape(bio)}</p>
+        <p data-author-profile-bio>{escape(bio)}</p>
       </aside>
       <div>
         <div class="section-heading compact">
@@ -529,9 +534,10 @@ def render_author_page(
         <div class="grid">{cards or '<div class="empty-state">暂无作品。</div>'}</div>
       </div>
     </div></section>
-    <script src="../assets/upload-config.js" defer></script>
-    <script src="../assets/catalog-overrides.js" defer></script>
-    <script src="../assets/category-filter.js" defer></script>"""
+    <script src="{asset_url('../assets/upload-config.js')}" defer></script>
+    <script src="{asset_url('../assets/catalog-overrides.js')}" defer></script>
+    <script src="{asset_url('../assets/author-live-overrides.js')}" defer></script>
+    <script src="{asset_url('../assets/category-filter.js')}" defer></script>"""
     return render_layout(
         template,
         title=f"{author['name']}｜作者｜基督教数字图书馆",
@@ -671,13 +677,13 @@ def render_book_detail(
     tags = "".join(f'<span class="tag">{escape(tag)}</span>' for tag in book["tags"])
     toc = "".join(f"<li>{escape(item)}</li>" for item in book["table_of_contents"])
     toc_section = (
-        f'<section class="book-section"><h2>目录</h2><ol class="toc">{toc}</ol></section>'
+        f'<section class="book-section"><h2>目录</h2><ol class="toc" data-live-toc>{toc}</ol></section>'
         if toc
-        else '<section class="book-section"><h2>目录</h2><p class="meta">目录待补充。</p></section>'
+        else '<section class="book-section"><h2>目录</h2><ol class="toc" data-live-toc></ol><p class="meta" data-live-toc-empty>目录待补充。</p></section>'
     )
     availability = "当前书目用于馆藏查询，文件访问按实际授权情况提供。"
     content = f"""
-    <header class="page-hero book-detail-hero" data-book-detail-id="{escape(book['id'])}"><div class="shell book-hero-grid">
+    <header class="page-hero book-detail-hero" data-book-detail-id="{escape(book['id'])}" data-book-author="{escape(book['author'])}"><div class="shell book-hero-grid">
       <div class="book-hero-copy">
         <nav class="breadcrumbs" aria-label="面包屑"><a href="../categories.html">馆藏分类</a> / <a href="../categories/{escape(category['id'])}.html">{escape(category['name'])}</a> / 当前书目</nav>
         <p class="eyebrow">书目编号 · {escape(book['id'])}</p>
@@ -721,13 +727,13 @@ def render_book_detail(
         <div class="notice"><strong>访问说明</strong><p>{escape(availability)}</p></div>
       </aside>
     </div></section>
-    <script src="../assets/access-config.js" defer></script>
-    <script src="../assets/upload-config.js" defer></script>
-    <script src="../assets/catalog-overrides.js" defer></script>
-    <script src="../assets/book-live-overrides.js" defer></script>
-    <script src="../assets/access.js" defer></script>
-    <script src="../assets/book-opinions.js" defer></script>
-    <script src="../assets/image-viewer.js" defer></script>"""
+    <script src="{asset_url('../assets/access-config.js')}" defer></script>
+    <script src="{asset_url('../assets/upload-config.js')}" defer></script>
+    <script src="{asset_url('../assets/catalog-overrides.js')}" defer></script>
+    <script src="{asset_url('../assets/book-live-overrides.js')}" defer></script>
+    <script src="{asset_url('../assets/access.js')}" defer></script>
+    <script src="{asset_url('../assets/book-opinions.js')}" defer></script>
+    <script src="{asset_url('../assets/image-viewer.js')}" defer></script>"""
     return render_layout(
         template,
         title=f"{book['clean_title']}｜基督教数字图书馆",
@@ -739,7 +745,7 @@ def render_book_detail(
 
 
 def render_about(template: Template) -> str:
-    content = """
+    content = f"""
     <header class="page-hero"><div class="shell">
       <p class="eyebrow">关于图书馆</p><h1>关于基督教数字图书馆</h1>
       <p class="lead">整理中文基督教馆藏，让查找、浏览和使用资料更简单。</p>
@@ -750,7 +756,7 @@ def render_about(template: Template) -> str:
       <h2>使用范围</h2>
       <p>馆藏资料按实际授权情况提供访问，网站目录会随着整理进度持续更新。</p>
     </div></section>"""
-    content += """
+    content += f"""
     <section class="section tint"><div class="shell">
       <div class="upload-panel">
         <div>
@@ -786,8 +792,8 @@ def render_about(template: Template) -> str:
         </form>
       </div>
     </div></section>
-    <script src="assets/upload-config.js" defer></script>
-    <script src="assets/upload.js" defer></script>"""
+    <script src="{asset_url('assets/upload-config.js')}" defer></script>
+    <script src="{asset_url('assets/upload.js')}" defer></script>"""
     return render_layout(
         template,
         title="关于项目｜基督教数字图书馆",
@@ -798,17 +804,15 @@ def render_about(template: Template) -> str:
 
 
 def render_admin(template: Template) -> str:
-    content = """
-    <header class="page-hero"><div class="shell">
+    content = f"""
+    <header class="page-hero admin-page-hero"><div class="shell">
       <p class="eyebrow">管理员</p><h1>管理馆藏</h1>
-      <p class="lead">这个页面只给管理员使用。管理员密码与阅读访问码分开配置。</p>
     </div></header>
     <section class="section"><div class="shell admin-shell">
       <form id="admin-login-form" class="admin-login-card">
         <div>
           <p class="eyebrow">登录</p>
           <h2>管理员入口</h2>
-          <p class="description">请输入管理员密码。登录后可审核上传、修改书目资料、添加书籍、标记想读/读完。密码只发给后台 Worker 验证，不写入网页。</p>
         </div>
         <div class="field">
           <label for="admin-code">管理员密码</label>
@@ -970,6 +974,11 @@ def render_admin(template: Template) -> str:
             <label for="admin-book-description">内容简介</label>
             <textarea id="admin-book-description" name="description" rows="4"></textarea>
           </div>
+          <div class="field">
+            <label for="admin-book-toc">目录</label>
+            <textarea id="admin-book-toc" name="table_of_contents" rows="5" placeholder="每行一条目录"></textarea>
+            <p class="field-help">每行一条目录；保存后会显示在书目详情页。</p>
+          </div>
           <button class="button" type="submit">保存修改</button>
           <p id="admin-book-status" class="form-status" aria-live="polite"></p>
         </form>
@@ -977,9 +986,9 @@ def render_admin(template: Template) -> str:
         </main>
       </div>
     </div></section>
-    <script src="assets/upload-config.js" defer></script>
-    <script src="assets/admin-config.js" defer></script>
-    <script src="assets/admin.js" defer></script>"""
+    <script src="{asset_url('assets/upload-config.js')}" defer></script>
+    <script src="{asset_url('assets/admin-config.js')}" defer></script>
+    <script src="{asset_url('assets/admin.js')}" defer></script>"""
     return render_layout(
         template,
         title="管理员｜基督教数字图书馆",

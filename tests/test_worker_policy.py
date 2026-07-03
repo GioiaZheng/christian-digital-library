@@ -108,6 +108,7 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("categories,", worker_source)
         self.assertIn("translator: cleanText", worker_source)
         self.assertIn("author_bio: cleanText", worker_source)
+        self.assertIn("table_of_contents: cleanList", worker_source)
 
         admin_source = (ROOT / "public" / "assets" / "admin.js").read_text(
             encoding="utf-8"
@@ -118,6 +119,7 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("selectedCategories()", admin_source)
         self.assertIn("payload.categories = categories", admin_source)
         self.assertIn("payload.tags = tags", admin_source)
+        self.assertIn("payload.table_of_contents", admin_source)
         self.assertIn("author_bio", admin_source)
         self.assertIn("已保存并上线", admin_source)
         self.assertIn("showAdminSection", admin_source)
@@ -138,6 +140,8 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("getBookOverride", override_source)
         self.assertIn('"translator"', override_source)
         self.assertIn('"author_bio"', override_source)
+        self.assertIn("getAuthorBio", override_source)
+        self.assertIn("table_of_contents", override_source)
         self.assertIn("localStorage.getItem(storageKey)", override_source)
         self.assertIn("refreshOverrides().catch", override_source)
         self.assertIn("/catalog-overrides", override_source)

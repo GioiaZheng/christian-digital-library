@@ -54,6 +54,7 @@
       category_names: names,
       tags,
       description: String(item.description || "").trim(),
+      table_of_contents: cleanList(item.table_of_contents),
       updated_at: String(item.updated_at || "").trim(),
     };
   };
@@ -134,6 +135,7 @@
     if (override.categories?.length) next.categories = override.categories;
     if (override.category_names?.length) next.category_names = override.category_names;
     if (override.tags?.length) next.tags = override.tags;
+    if (override.table_of_contents?.length) next.table_of_contents = override.table_of_contents;
     return next;
   };
 
@@ -153,9 +155,23 @@
     return overrides.get(bookId) || null;
   };
 
+  const getAuthorBio = async (authorName) => {
+    const name = String(authorName || "").trim();
+    if (!name) return "";
+    const overrides = await loadOverrides().catch((error) => {
+      console.warn("作者资料暂时无法读取。", error);
+      return new Map();
+    });
+    for (const item of overrides.values()) {
+      if (item.author === name && item.author_bio) return item.author_bio;
+    }
+    return "";
+  };
+
   window.CDL_CATALOG_OVERRIDES = {
     applyToBooks,
     getBookOverride,
+    getAuthorBio,
     categoryLabel,
   };
 })();
