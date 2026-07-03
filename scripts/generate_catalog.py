@@ -317,13 +317,14 @@ def render_home(
     <section class="section">
       <div class="shell">
         <div class="section-heading">
-          <div><p class="eyebrow">每日推荐</p><h2>今天可以读这几本</h2></div>
+          <div><p class="eyebrow">每日推荐</p><h2>今日馆藏推荐</h2></div>
           <div class="section-actions">
             <button id="daily-refresh" class="button secondary compact" type="button">换一批</button>
             <a href="catalog.html">进入完整目录</a>
           </div>
         </div>
         <div id="daily-recommendations" class="grid" aria-live="polite" aria-busy="true">
+          <article class="card skeleton-card" aria-hidden="true"><span></span><span></span><span></span></article>
           <article class="card skeleton-card" aria-hidden="true"><span></span><span></span><span></span></article>
           <article class="card skeleton-card" aria-hidden="true"><span></span><span></span><span></span></article>
           <article class="card skeleton-card" aria-hidden="true"><span></span><span></span><span></span></article>
