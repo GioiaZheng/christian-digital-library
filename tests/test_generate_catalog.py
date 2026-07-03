@@ -120,6 +120,7 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn('value="read">在线阅读', detail)
             self.assertIn('value="download">下载文件', detail)
             self.assertIn('data-book-detail-id="sample-book"', detail)
+            self.assertIn('data-book-author=', detail)
             self.assertIn('data-live-field="clean_title"', detail)
             self.assertIn('data-live-field="author_bio"', detail)
             self.assertIn("作者简介", detail)
@@ -143,8 +144,11 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertTrue(author_page.is_file())
             author_html = author_page.read_text(encoding="utf-8")
             self.assertIn("示例作者", author_html)
+            self.assertIn('data-author-profile-name="示例作者"', author_html)
+            self.assertIn("data-author-profile-bio", author_html)
             self.assertIn("示例作者简介。", author_html)
             self.assertIn("示例书目", author_html)
+            self.assertIn("../assets/author-live-overrides.js", author_html)
 
     def test_preview_heading_uses_actual_page_count(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -203,7 +207,7 @@ class CatalogGenerationTests(unittest.TestCase):
             admin = (output / "admin.html").read_text(encoding="utf-8")
 
             self.assertIn("管理馆藏", admin)
-            self.assertIn("审核上传、修改书目资料、添加书籍、标记想读/读完", admin)
+            self.assertNotIn("密码只发给后台 Worker 验证", admin)
             self.assertIn('name="admin_code"', admin)
             self.assertIn("assets/admin.js", admin)
             self.assertIn('id="admin-add-book-form"', admin)
@@ -227,6 +231,8 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("分类（可多个）", admin)
             self.assertIn('id="admin-book-category-list"', admin)
             self.assertIn('id="admin-book-translator"', admin)
+            self.assertIn('id="admin-book-toc"', admin)
+            self.assertIn('name="table_of_contents"', admin)
             self.assertIn("新增分类", admin)
             self.assertIn("标签（可多个）", admin)
             self.assertIn('name="tags"', admin)
@@ -283,7 +289,8 @@ class CatalogGenerationTests(unittest.TestCase):
                 '<h1 class="hero-title"><span>在浩繁馆藏中，</span><span>找到想读的那一本。</span></h1>',
                 home,
             )
-            self.assertIn("每日推荐", home)
+            self.assertIn("坚持阅读", home)
+            self.assertIn("馆藏推荐", home)
             self.assertIn('id="daily-recommendations"', home)
             self.assertIn('id="daily-refresh"', home)
             self.assertIn("skeleton-card", home)

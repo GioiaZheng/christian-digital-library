@@ -426,6 +426,7 @@ async function saveBookOverride(request, env, bookId) {
     categories,
     tags,
     description: cleanText(body.description, 1200),
+    table_of_contents: cleanList(body.table_of_contents, 80, 180),
     updated_at: new Date().toISOString(),
     status: "admin_override",
   };
@@ -459,6 +460,7 @@ function publicBookOverride(metadata) {
     categories,
     tags,
     description: cleanText(metadata.description, 1200),
+    table_of_contents: cleanList(metadata.table_of_contents, 80, 180),
     updated_at: cleanText(metadata.updated_at, 40),
   };
 }

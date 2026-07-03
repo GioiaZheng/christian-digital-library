@@ -22,7 +22,7 @@
   const adminNavButtons = Array.from(document.querySelectorAll("[data-admin-target]"));
   const adminSections = Array.from(document.querySelectorAll("[data-admin-section]"));
 
-  if (!loginForm || !panel || !endpoint) return;
+  if (!loginForm || !panel) return;
 
   let adminCode = "";
   let catalog = [];
@@ -80,6 +80,9 @@
   const adminUrl = (path) => `${endpoint}${path}`;
 
   const requestAdmin = async (path, options = {}) => {
+    if (!endpoint) {
+      throw new Error("后台接口未配置。");
+    }
     const headers = new Headers(options.headers || {});
     headers.set("X-CDL-Admin-Code", adminCode);
     if (options.body && !(options.body instanceof FormData) && !headers.has("Content-Type")) {
@@ -486,6 +489,9 @@
     );
     bookForm.elements.namedItem("tags").value = Array.isArray(book.tags) ? book.tags.join("、") : String(book.tags || "");
     bookForm.elements.namedItem("description").value = book.description || "";
+    bookForm.elements.namedItem("table_of_contents").value = Array.isArray(book.table_of_contents)
+      ? book.table_of_contents.join("\n")
+      : String(book.table_of_contents || "");
     setText(bookStatus, `正在修改：${book.id}`);
     bookForm.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -649,6 +655,7 @@
     payload.categories = categories;
     payload.category = categories[0];
     payload.tags = tags;
+    payload.table_of_contents = splitList(payload.table_of_contents);
     try {
       setText(bookStatus, "正在保存……");
       const data = await requestAdmin(`/admin/books/${encodeURIComponent(bookId)}`, {
