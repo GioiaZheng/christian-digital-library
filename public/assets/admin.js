@@ -236,6 +236,24 @@
     renderReadingList();
   };
 
+  const loadAdminPanelData = async () => {
+    const safeLoad = async (loader, target, fallbackMessage) => {
+      try {
+        await loader();
+      } catch (error) {
+        setText(target, error.message || fallbackMessage);
+      }
+    };
+
+    await Promise.allSettled([
+      safeLoad(loadCategories, bookStatus, "分类列表暂时无法读取。"),
+      safeLoad(loadCatalog, bookStatus, "公开书目暂时无法读取。"),
+      safeLoad(loadReadingStatuses, readingSummary, "阅读状态暂时无法读取。"),
+      safeLoad(loadComments, commentsSummary, "页内留言暂时无法读取。"),
+      safeLoad(loadUploads, uploadList, "待审核上传暂时无法读取。"),
+    ]);
+  };
+
   const findCatalogBook = (bookId) => catalog.find((book) => book.id === bookId);
 
   const formatDate = (value) => {
@@ -551,14 +569,12 @@
       return;
     }
     try {
-      await loadCategories();
-      await loadCatalog();
-      await loadReadingStatuses();
-      await loadComments();
-      await loadUploads();
+      setText(loginStatus, "正在进入后台……");
       loginForm.hidden = true;
       panel.hidden = false;
       showAdminSection("overview");
+      setText(loginStatus, "");
+      await loadAdminPanelData();
     } catch (error) {
       adminCode = "";
       setText(loginStatus, error.message || "登录失败。");
