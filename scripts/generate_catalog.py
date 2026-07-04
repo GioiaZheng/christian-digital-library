@@ -40,7 +40,7 @@ BOOK_FIELDS = [
     "can_public_download",
 ]
 ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
-ASSET_VERSION = "20260703-admin-copy-1"
+ASSET_VERSION = "20260704-multi-value-admin-1"
 
 
 class CatalogError(ValueError):
@@ -69,12 +69,31 @@ def author_href(author: str, root_prefix: str = ".") -> str:
     return f"{root_prefix}/authors/{slug}.html" if slug else ""
 
 
+def split_people(value: Any) -> list[str]:
+    seen: set[str] = set()
+    people: list[str] = []
+    for part in re.split(r"[、,，;；/／]+", str(value or "")):
+        name = re.sub(r"\s+", " ", part).strip()
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        people.append(name)
+    return people
+
+
 def render_author_link(author: str, root_prefix: str = ".") -> str:
     name = str(author or "").strip()
     href = author_href(name, root_prefix)
     if not href:
         return escape(name or "作者信息整理中")
     return f'<a class="author-link" href="{escape(href)}">{escape(name)}</a>'
+
+
+def render_author_links(author: str, root_prefix: str = ".") -> str:
+    names = split_people(author)
+    if not names:
+        return "作者信息整理中"
+    return "、".join(render_author_link(name, root_prefix) for name in names)
 
 
 def book_filter_text(book: dict[str, Any], category: dict[str, str]) -> str:
@@ -223,7 +242,7 @@ def render_layout(
 def render_book_card(
     book: dict[str, Any], categories: dict[str, dict[str, str]], link_prefix: str = ""
 ) -> str:
-    author = render_author_link(book["author"], root_prefix=link_prefix.rstrip("/") or ".")
+    author = render_author_links(book["author"], root_prefix=link_prefix.rstrip("/") or ".")
     translator = f"译者：{escape(book['translator'])}" if book["translator"] else ""
     year = escape(book["year"]) if book["year"] else ""
     byline = " · ".join(part for part in (author, translator, year) if part)
@@ -489,21 +508,22 @@ def render_category_detail(
 def author_records(books: list[dict[str, Any]]) -> list[dict[str, Any]]:
     records: dict[str, dict[str, Any]] = {}
     for book in books:
-        author = str(book.get("author") or "").strip()
-        if not author:
+        authors = split_people(book.get("author"))
+        if not authors:
             continue
-        record = records.setdefault(
-            author,
-            {
-                "name": author,
-                "slug": author_slug(author),
-                "bio": "",
-                "books": [],
-            },
-        )
-        if not record["bio"] and book.get("author_bio"):
-            record["bio"] = str(book["author_bio"]).strip()
-        record["books"].append(book)
+        for author in authors:
+            record = records.setdefault(
+                author,
+                {
+                    "name": author,
+                    "slug": author_slug(author),
+                    "bio": "",
+                    "books": [],
+                },
+            )
+            if len(authors) == 1 and not record["bio"] and book.get("author_bio"):
+                record["bio"] = str(book["author_bio"]).strip()
+            record["books"].append(book)
     return sorted(records.values(), key=lambda item: sort_title(item["name"]).casefold())
 
 
@@ -671,7 +691,7 @@ def render_book_detail(
     metadata = "".join(
         f'<div class="metadata-row"><dt>{escape(label)}</dt><dd'
         f'{f" data-live-metadata={metadata_keys[label]!r}" if label in metadata_keys else ""}>'
-        f'{render_author_link(book["author"], "..") if label == "作者" and book["author"] else escape(value)}</dd></div>'
+        f'{render_author_links(book["author"], "..") if label == "作者" and book["author"] else escape(value)}</dd></div>'
         for label, value in metadata_items
     )
     tags = "".join(f'<span class="tag">{escape(tag)}</span>' for tag in book["tags"])
@@ -688,7 +708,7 @@ def render_book_detail(
         <nav class="breadcrumbs" aria-label="面包屑"><a href="../categories.html">馆藏分类</a> / <a href="../categories/{escape(category['id'])}.html">{escape(category['name'])}</a> / 当前书目</nav>
         <p class="eyebrow">书目编号 · {escape(book['id'])}</p>
         <h1 data-live-field="clean_title">{escape(book['clean_title'])}</h1>
-        <p class="lead" data-live-field="author">{render_author_link(book['author'], '..') if book['author'] else '作者信息整理中'}</p>
+        <p class="lead" data-live-field="author">{render_author_links(book['author'], '..') if book['author'] else '作者信息整理中'}</p>
       </div>
       <div class="book-hero-cover">
         {render_cover_section(book)}
@@ -872,11 +892,15 @@ def render_admin(template: Template) -> str:
           </div>
           <div class="field">
             <label for="admin-add-author">作者</label>
-            <input id="admin-add-author" name="author" type="text" autocomplete="off" required>
+            <input id="admin-add-author" name="author" type="text" autocomplete="off" required data-admin-suggest="authors">
+            <div class="multi-suggestion-panel" data-admin-suggestions-for="admin-add-author" hidden></div>
+            <p class="field-help">可填写多个；输入时可从已有作者中选择。</p>
           </div>
           <div class="field">
             <label for="admin-add-translator">译者</label>
-            <input id="admin-add-translator" name="translator" type="text" autocomplete="off">
+            <input id="admin-add-translator" name="translator" type="text" autocomplete="off" data-admin-suggest="translators">
+            <div class="multi-suggestion-panel" data-admin-suggestions-for="admin-add-translator" hidden></div>
+            <p class="field-help">可填写多个；输入时可从已有译者中选择。</p>
           </div>
           <div class="field">
             <label for="admin-add-file">文件</label>
@@ -935,7 +959,9 @@ def render_admin(template: Template) -> str:
           </div>
           <div class="field">
             <label for="admin-book-author">作者</label>
-            <input id="admin-book-author" name="author" type="text">
+            <input id="admin-book-author" name="author" type="text" autocomplete="off" data-admin-suggest="authors">
+            <div class="multi-suggestion-panel" data-admin-suggestions-for="admin-book-author" hidden></div>
+            <p class="field-help">可填写多个；输入时可从已有作者中选择。</p>
           </div>
           <div class="field">
             <label for="admin-book-author-bio">作者简介</label>
@@ -943,7 +969,9 @@ def render_admin(template: Template) -> str:
           </div>
           <div class="field">
             <label for="admin-book-translator">译者</label>
-            <input id="admin-book-translator" name="translator" type="text">
+            <input id="admin-book-translator" name="translator" type="text" autocomplete="off" data-admin-suggest="translators">
+            <div class="multi-suggestion-panel" data-admin-suggestions-for="admin-book-translator" hidden></div>
+            <p class="field-help">可填写多个；输入时可从已有译者中选择。</p>
           </div>
           <div class="field">
             <label for="admin-book-publisher">出版社</label>
@@ -967,7 +995,8 @@ def render_admin(template: Template) -> str:
           </div>
           <div class="field">
             <label for="admin-book-tags">标签（可多个）</label>
-            <input id="admin-book-tags" name="tags" type="text" required placeholder="例如：注释、旧约、灵修">
+            <input id="admin-book-tags" name="tags" type="text" required placeholder="例如：注释、旧约、灵修" autocomplete="off" data-admin-suggest="tags">
+            <div class="multi-suggestion-panel" data-admin-suggestions-for="admin-book-tags" hidden></div>
             <p class="field-help">可用顿号、逗号或分号分隔；至少填写一个。</p>
           </div>
           <div class="field">
@@ -1007,7 +1036,10 @@ def public_catalog(
         item = {key: book[key] for key in BOOK_FIELDS}
         item["category_name"] = category_map[book["category"]]["name"]
         item["detail_url"] = f"books/{book['id']}.html"
-        item["author_url"] = author_href(book["author"], ".").removeprefix("./")
+        authors = split_people(book["author"])
+        item["authors"] = authors
+        item["author_url"] = author_href(authors[0], ".").removeprefix("./") if authors else ""
+        item["author_urls"] = [author_href(author, ".").removeprefix("./") for author in authors]
         result.append(item)
     return result
 

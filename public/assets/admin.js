@@ -119,6 +119,113 @@
       });
   };
 
+  const currentSegment = (value, caret) => {
+    const text = String(value || "");
+    const position = Number.isFinite(caret) ? caret : text.length;
+    const before = text.slice(0, position);
+    const after = text.slice(position);
+    const left = Math.max(before.lastIndexOf("、"), before.lastIndexOf(","), before.lastIndexOf("，"), before.lastIndexOf(";"), before.lastIndexOf("；"));
+    const rightCandidates = ["、", ",", "，", ";", "；"]
+      .map((separator) => after.indexOf(separator))
+      .filter((index) => index >= 0);
+    const right = rightCandidates.length ? position + Math.min(...rightCandidates) : text.length;
+    const start = left >= 0 ? left + 1 : 0;
+    return {
+      start,
+      end: right,
+      value: text.slice(start, right).trim(),
+    };
+  };
+
+  const replaceCurrentSegment = (input, replacement) => {
+    const segment = currentSegment(input.value, input.selectionStart ?? input.value.length);
+    const before = input.value.slice(0, segment.start).replace(/\s+$/, "");
+    const after = input.value.slice(segment.end).replace(/^\s+/, "");
+    const prefix = before ? `${before}、` : "";
+    const suffix = after ? `、${after.replace(/^[、,，;；]+/, "")}` : "";
+    input.value = `${prefix}${replacement}${suffix}`;
+    const caret = `${prefix}${replacement}`.length;
+    input.focus();
+    input.setSelectionRange(caret, caret);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  };
+
+  const uniqueSortedValues = (values) => {
+    const seen = new Set();
+    return values
+      .flatMap(splitList)
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .filter((item) => {
+        const key = item.toLocaleLowerCase("zh-CN");
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .sort((left, right) => left.localeCompare(right, "zh-CN"));
+  };
+
+  const suggestionValues = async (kind) => {
+    const books = await loadCatalog();
+    if (kind === "authors") return uniqueSortedValues(books.map((book) => book.author));
+    if (kind === "translators") return uniqueSortedValues(books.map((book) => book.translator));
+    if (kind === "tags") return uniqueSortedValues(books.flatMap((book) => book.tags || []));
+    return [];
+  };
+
+  const attachMultiSuggestions = (input) => {
+    const kind = input.dataset.adminSuggest;
+    const panel = document.querySelector(`[data-admin-suggestions-for="${input.id}"]`);
+    if (!kind || !panel) return;
+
+    const hide = () => {
+      panel.hidden = true;
+      panel.replaceChildren();
+    };
+
+    const render = async () => {
+      const segment = currentSegment(input.value, input.selectionStart ?? input.value.length);
+      const query = segment.value.toLocaleLowerCase("zh-CN");
+      if (!query) {
+        hide();
+        return;
+      }
+      const values = await suggestionValues(kind);
+      const matches = values
+        .filter((item) => item.toLocaleLowerCase("zh-CN").includes(query))
+        .filter((item) => item.toLocaleLowerCase("zh-CN") !== query)
+        .slice(0, 10);
+      panel.replaceChildren();
+      if (!matches.length) {
+        hide();
+        return;
+      }
+      for (const match of matches) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "suggestion-chip";
+        button.textContent = match;
+        button.addEventListener("mousedown", (event) => event.preventDefault());
+        button.addEventListener("click", () => {
+          replaceCurrentSegment(input, match);
+          hide();
+        });
+        panel.append(button);
+      }
+      panel.hidden = false;
+    };
+
+    input.addEventListener("input", () => {
+      render().catch(() => hide());
+    });
+    input.addEventListener("focus", () => {
+      render().catch(() => hide());
+    });
+    input.addEventListener("blur", () => {
+      window.setTimeout(hide, 120);
+    });
+  };
+
   const normalizeCategoryKey = (value) => String(value || "").trim().toLocaleLowerCase("zh-CN");
 
   const categoryLabel = (categoryValue) => {
@@ -565,6 +672,10 @@
     });
   });
 
+  document.querySelectorAll("[data-admin-suggest]").forEach((input) => {
+    if (input instanceof HTMLInputElement) attachMultiSuggestions(input);
+  });
+
   showAdminSection("overview");
 
   loginForm.addEventListener("submit", async (event) => {
@@ -598,6 +709,8 @@
   addBookForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(addBookForm);
+    formData.set("author", splitList(formData.get("author")).join("、"));
+    formData.set("translator", splitList(formData.get("translator")).join("、"));
     const validationMessage = validateAdminBookFile(formData);
     if (validationMessage) {
       setText(addBookStatus, validationMessage);
@@ -654,6 +767,8 @@
     }
     payload.categories = categories;
     payload.category = categories[0];
+    payload.author = splitList(payload.author).join("、");
+    payload.translator = splitList(payload.translator).join("、");
     payload.tags = tags;
     payload.table_of_contents = splitList(payload.table_of_contents);
     try {

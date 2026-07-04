@@ -9,8 +9,10 @@
   };
 
   const setMetadata = (name, value) => {
-    const element = document.querySelector(`[data-live-metadata="${CSS.escape(name)}"]`);
-    if (element && value) element.textContent = value;
+    if (!value) return;
+    document.querySelectorAll("[data-live-metadata]").forEach((element) => {
+      if (element.dataset.liveMetadata === name) element.textContent = value;
+    });
   };
 
   const renderTags = (tags) => {
@@ -39,7 +41,9 @@
   };
 
   const start = async () => {
-    const override = await window.CDL_CATALOG_OVERRIDES?.getBookOverride?.(bookId);
+    const override =
+      (await window.CDL_CATALOG_OVERRIDES?.getFreshBookOverride?.(bookId)) ||
+      (await window.CDL_CATALOG_OVERRIDES?.getBookOverride?.(bookId));
     const originalAuthor = String(marker.dataset.bookAuthor || "").trim();
     const authorName = override?.author || originalAuthor;
     const sharedAuthorBio = await window.CDL_CATALOG_OVERRIDES?.getAuthorBio?.(authorName);
