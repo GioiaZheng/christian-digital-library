@@ -118,6 +118,11 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("renderCategoryCheckboxes", admin_source)
         self.assertIn("selectedCategories()", admin_source)
         self.assertIn("payload.categories = categories", admin_source)
+        self.assertIn("data-admin-suggest", admin_source)
+        self.assertIn("attachMultiSuggestions", admin_source)
+        self.assertIn("suggestionValues", admin_source)
+        self.assertIn("payload.author = splitList(payload.author).join", admin_source)
+        self.assertIn("payload.translator = splitList(payload.translator).join", admin_source)
         self.assertIn("payload.tags = tags", admin_source)
         self.assertIn("payload.table_of_contents", admin_source)
         self.assertIn("author_bio", admin_source)
@@ -138,15 +143,24 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("CDL_CATALOG_OVERRIDES", override_source)
         self.assertIn("applyToBooks", override_source)
         self.assertIn("getBookOverride", override_source)
+        self.assertIn("getFreshBookOverride", override_source)
         self.assertIn('"translator"', override_source)
         self.assertIn('"author_bio"', override_source)
         self.assertIn("getAuthorBio", override_source)
+        self.assertIn("peopleList(item.author).includes(name)", override_source)
         self.assertIn("table_of_contents", override_source)
         self.assertIn("localStorage.getItem(storageKey)", override_source)
         self.assertIn("refreshOverrides().catch", override_source)
         self.assertIn("/catalog-overrides", override_source)
         self.assertNotIn("ADMIN_CODE", override_source)
         self.assertNotIn("ACCESS_CODE", override_source)
+
+        live_source = (ROOT / "public" / "assets" / "book-live-overrides.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('querySelectorAll("[data-live-metadata]")', live_source)
+        self.assertIn("dataset.liveMetadata", live_source)
+        self.assertIn("getFreshBookOverride", live_source)
 
     def test_access_worker_requires_secret_and_private_map(self) -> None:
         source = ACCESS_WORKER.read_text(encoding="utf-8")

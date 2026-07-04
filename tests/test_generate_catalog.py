@@ -98,10 +98,13 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertTrue((output / "books" / "sample-book.html").is_file())
             self.assertEqual(1, len(catalog))
             self.assertEqual(
-                set(GENERATOR.BOOK_FIELDS) | {"category_name", "detail_url", "author_url"},
+                set(GENERATOR.BOOK_FIELDS)
+                | {"category_name", "detail_url", "author_url", "authors", "author_urls"},
                 set(catalog[0]),
             )
             self.assertEqual("示例作者简介。", catalog[0]["author_bio"])
+            self.assertEqual(["示例作者"], catalog[0]["authors"])
+            self.assertEqual([catalog[0]["author_url"]], catalog[0]["author_urls"])
             self.assertRegex(catalog[0]["author_url"], r"^authors/.+\.html$")
             detail = (output / "books" / "sample-book.html").read_text(
                 encoding="utf-8"
@@ -149,6 +152,48 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("示例作者简介。", author_html)
             self.assertIn("示例书目", author_html)
             self.assertIn("../assets/author-live-overrides.js", author_html)
+
+    def test_multiple_authors_generate_separate_author_pages(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = create_sample_project(Path(directory))
+            rows = [
+                {
+                    "id": "multi-author-book",
+                    "clean_title": "多作者书目",
+                    "author": "第一作者、第二作者",
+                    "author_bio": "",
+                    "translator": "",
+                    "publisher": "",
+                    "year": "2024",
+                    "language": "中文",
+                    "category": "theology",
+                    "tags": "示例;测试",
+                    "description": "",
+                    "table_of_contents": "",
+                    "cover_image_url": "",
+                    "preview_page_count": "0",
+                    "preview_base_url": "",
+                    "access_required": "true",
+                    "access_url": "",
+                    "copyright_status": "待核实",
+                    "can_public_download": "false",
+                }
+            ]
+            with (project / "data" / "books.csv").open("w", encoding="utf-8", newline="") as target:
+                writer = csv.DictWriter(target, fieldnames=GENERATOR.BOOK_FIELDS)
+                writer.writeheader()
+                writer.writerows(rows)
+
+            output = project / "site"
+            GENERATOR.build_site(project, output)
+            catalog = json.loads((output / "catalog.json").read_text(encoding="utf-8"))
+            self.assertEqual(["第一作者", "第二作者"], catalog[0]["authors"])
+            self.assertEqual(2, len(catalog[0]["author_urls"]))
+
+            detail = (output / "books" / "multi-author-book.html").read_text(encoding="utf-8")
+            self.assertIn(">第一作者</a>、<a", detail)
+            self.assertTrue((output / "authors" / f"{GENERATOR.author_slug('第一作者')}.html").is_file())
+            self.assertTrue((output / "authors" / f"{GENERATOR.author_slug('第二作者')}.html").is_file())
 
     def test_preview_heading_uses_actual_page_count(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -213,9 +258,13 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn('id="admin-add-book-form"', admin)
             self.assertIn('id="admin-add-title"', admin)
             self.assertIn('id="admin-add-author"', admin)
+            self.assertIn('data-admin-suggest="authors"', admin)
+            self.assertIn('data-admin-suggestions-for="admin-add-author"', admin)
             self.assertIn('id="admin-book-author-bio"', admin)
             self.assertIn("作者简介", admin)
             self.assertIn('id="admin-add-translator"', admin)
+            self.assertIn('data-admin-suggest="translators"', admin)
+            self.assertIn('data-admin-suggestions-for="admin-add-translator"', admin)
             self.assertIn('id="admin-add-file"', admin)
             self.assertIn("单个文件最大 100 MB", admin)
             self.assertIn('id="admin-reading-summary"', admin)
@@ -231,10 +280,14 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("分类（可多个）", admin)
             self.assertIn('id="admin-book-category-list"', admin)
             self.assertIn('id="admin-book-translator"', admin)
+            self.assertIn('data-admin-suggestions-for="admin-book-author"', admin)
+            self.assertIn('data-admin-suggestions-for="admin-book-translator"', admin)
             self.assertIn('id="admin-book-toc"', admin)
             self.assertIn('name="table_of_contents"', admin)
             self.assertIn("新增分类", admin)
             self.assertIn("标签（可多个）", admin)
+            self.assertIn('data-admin-suggest="tags"', admin)
+            self.assertIn('data-admin-suggestions-for="admin-book-tags"', admin)
             self.assertIn('name="tags"', admin)
             self.assertIn("至少填写一个", admin)
             self.assertNotIn("ACCESS_CODE", admin)

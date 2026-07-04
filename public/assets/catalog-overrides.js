@@ -32,6 +32,7 @@
 
   const categoryLabel = (category) => categoryNames[category] || category || "其他";
   const categoryLabels = (categories) => cleanList(categories).map(categoryLabel);
+  const peopleList = (value) => cleanList(value);
 
   const normalizeOverride = (item) => {
     if (!item || !/^cdl-\d{6}$/.test(String(item.id || ""))) return null;
@@ -155,15 +156,25 @@
     return overrides.get(bookId) || null;
   };
 
+  const getFreshBookOverride = async (bookId) => {
+    const overrides = await refreshOverrides().catch((error) => {
+      console.warn("书目实时覆盖资料暂时无法刷新。", error);
+      return cachedOverrides || new Map();
+    });
+    return overrides.get(bookId) || null;
+  };
+
   const getAuthorBio = async (authorName) => {
-    const name = String(authorName || "").trim();
-    if (!name) return "";
+    const names = peopleList(authorName);
+    if (!names.length) return "";
     const overrides = await loadOverrides().catch((error) => {
       console.warn("作者资料暂时无法读取。", error);
       return new Map();
     });
-    for (const item of overrides.values()) {
-      if (item.author === name && item.author_bio) return item.author_bio;
+    for (const name of names) {
+      for (const item of overrides.values()) {
+        if (peopleList(item.author).includes(name) && item.author_bio) return item.author_bio;
+      }
     }
     return "";
   };
@@ -171,6 +182,7 @@
   window.CDL_CATALOG_OVERRIDES = {
     applyToBooks,
     getBookOverride,
+    getFreshBookOverride,
     getAuthorBio,
     categoryLabel,
   };
