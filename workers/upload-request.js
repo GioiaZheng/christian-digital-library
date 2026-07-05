@@ -477,6 +477,15 @@ async function listCatalogOverrides(request, env) {
   return jsonResponse(request, env, 200, { items, updated_at: new Date().toISOString() });
 }
 
+async function getCatalogOverride(request, env, bookId) {
+  if (!/^cdl-\d{6}$/.test(bookId)) {
+    return jsonResponse(request, env, 400, { message: "书号不正确。" });
+  }
+  const metadata = await loadJsonObject(env.BOOK_UPLOADS, `${ADMIN_OVERRIDE_PREFIX}${bookId}.json`).catch(() => null);
+  const item = publicBookOverride(metadata);
+  return jsonResponse(request, env, 200, { item });
+}
+
 async function handleAdmin(request, env, pathname) {
   const admin = requireAdmin(request, env);
   if (!admin.ok) {
@@ -612,6 +621,11 @@ export default {
     }
 
     const pathname = new URL(request.url).pathname.replace(/\/+$/, "");
+    const catalogOverrideMatch = pathname.match(/\/catalog-overrides\/(cdl-\d{6})$/);
+    if (request.method === "GET" && catalogOverrideMatch) {
+      return getCatalogOverride(request, env, catalogOverrideMatch[1]);
+    }
+
     if (request.method === "GET" && pathname.endsWith("/catalog-overrides")) {
       return listCatalogOverrides(request, env);
     }

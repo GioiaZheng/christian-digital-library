@@ -157,11 +157,23 @@
   };
 
   const getFreshBookOverride = async (bookId) => {
-    const overrides = await refreshOverrides().catch((error) => {
+    const id = String(bookId || "").trim();
+    if (!endpoint || !/^cdl-\d{6}$/.test(id)) return null;
+    try {
+      const response = await fetch(`${endpoint}/catalog-overrides/${encodeURIComponent(id)}`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`catalog-overrides/${id} HTTP ${response.status}`);
+      const data = await response.json();
+      const item = normalizeOverride(data.item);
+      if (item) {
+        cachedOverrides ||= readCachedOverrides() || new Map();
+        cachedOverrides.set(id, item);
+      }
+      return item;
+    } catch (error) {
       console.warn("书目实时覆盖资料暂时无法刷新。", error);
-      return cachedOverrides || new Map();
-    });
-    return overrides.get(bookId) || null;
+      const overrides = cachedOverrides || readCachedOverrides() || new Map();
+      return overrides.get(id) || null;
+    }
   };
 
   const getAuthorBio = async (authorName) => {
