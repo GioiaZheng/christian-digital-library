@@ -133,6 +133,8 @@ class WorkerPolicyTests(unittest.TestCase):
     def test_public_catalog_overrides_are_available_without_secrets(self) -> None:
         worker_source = UPLOAD_WORKER.read_text(encoding="utf-8")
         self.assertIn("/catalog-overrides", worker_source)
+        self.assertIn("catalogOverrideMatch", worker_source)
+        self.assertIn("getCatalogOverride", worker_source)
         self.assertIn("function publicBookOverride", worker_source)
         self.assertIn("function listCatalogOverrides", worker_source)
         self.assertIn('"Cache-Control": "no-store"', worker_source)
@@ -144,6 +146,7 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("applyToBooks", override_source)
         self.assertIn("getBookOverride", override_source)
         self.assertIn("getFreshBookOverride", override_source)
+        self.assertIn("/catalog-overrides/${encodeURIComponent(id)}", override_source)
         self.assertIn('"translator"', override_source)
         self.assertIn('"author_bio"', override_source)
         self.assertIn("getAuthorBio", override_source)
