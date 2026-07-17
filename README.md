@@ -1,5 +1,7 @@
 # 基督教数字图书馆
 
+[![构建与部署](https://github.com/GioiaZheng/christian-digital-library/actions/workflows/pages.yml/badge.svg)](https://github.com/GioiaZheng/christian-digital-library/actions/workflows/pages.yml)
+
 面向中文读者的基督教书目检索与浏览项目。
 
 本仓库包含静态网站、公开书目数据、页面生成脚本、测试和必要的项目文档。图书文件与公开网站分开管理，网站默认不提供下载链接。
