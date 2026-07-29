@@ -1645,7 +1645,8 @@ h3 {
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 16px;
-  background: rgba(255, 252, 246, 0.82);
+  background: rgba(255, 252, 246, 0.94);
+  backdrop-filter: blur(14px);
   box-shadow: 0 14px 38px rgba(48, 42, 31, 0.08);
 }
 
@@ -1723,6 +1724,18 @@ h3 {
   justify-items: center;
   overflow-x: auto;
   padding-bottom: 8px;
+  scroll-behavior: smooth;
+  touch-action: pan-y pinch-zoom;
+}
+
+.reader-pages.is-zoomed {
+  cursor: grab;
+}
+
+.reader-pages.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+  user-select: none;
 }
 
 .reader-page {
@@ -1740,6 +1753,7 @@ h3 {
   height: auto;
   border-radius: 16px 16px 0 0;
   cursor: zoom-in;
+  user-select: none;
 }
 
 .reader-page-error {

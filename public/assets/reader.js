@@ -22,6 +22,12 @@
   let currentPage = 1;
   let currentPageTotal = 0;
   let readerScale = 1;
+  let isReaderDragging = false;
+  let readerDragStartX = 0;
+  let readerDragStartScrollLeft = 0;
+  let pinchStartDistance = 0;
+  let pinchStartScale = 1;
+  const activeReaderPointers = new Map();
   const loadedCommentPages = new Set();
 
   const setStatus = (message) => {
@@ -66,7 +72,11 @@
   const validBookId = /^cdl-\d{6}$/.test(bookId);
 
   const applyReaderZoom = () => {
-    if (pages) pages.style.setProperty("--reader-zoom", String(readerScale));
+    if (pages) {
+      pages.style.setProperty("--reader-zoom", String(readerScale));
+      pages.classList.toggle("is-zoomed", readerScale > 1.02);
+      pages.classList.toggle("is-dragging", isReaderDragging);
+    }
     if (zoomResetButton) zoomResetButton.textContent = `${Math.round(readerScale * 100)}%`;
     if (zoomOutButton) zoomOutButton.disabled = readerScale <= 0.7;
     if (zoomInButton) zoomInButton.disabled = readerScale >= 2.6;
@@ -81,6 +91,90 @@
 
   const resetReaderZoom = () => {
     zoomReaderTo(1);
+    if (pages) pages.scrollLeft = 0;
+  };
+
+  const readerPointerDistance = () => {
+    const pointers = [...activeReaderPointers.values()];
+    if (pointers.length < 2) return 0;
+    return Math.hypot(pointers[0].clientX - pointers[1].clientX, pointers[0].clientY - pointers[1].clientY);
+  };
+
+  const stopReaderDrag = () => {
+    isReaderDragging = false;
+    applyReaderZoom();
+  };
+
+  const attachReaderPanAndPinchGestures = () => {
+    if (!pages) return;
+
+    pages.addEventListener("pointerdown", (event) => {
+      const page = event.target.closest?.(".reader-page");
+      if (!page) return;
+
+      activeReaderPointers.set(event.pointerId, {
+        clientX: event.clientX,
+        clientY: event.clientY,
+      });
+
+      if (activeReaderPointers.size === 2) {
+        pinchStartDistance = readerPointerDistance();
+        pinchStartScale = readerScale;
+        stopReaderDrag();
+        return;
+      }
+
+      if (event.pointerType === "touch" || readerScale <= 1.02 || event.button !== 0) return;
+      isReaderDragging = true;
+      readerDragStartX = event.clientX;
+      readerDragStartScrollLeft = pages.scrollLeft;
+      pages.setPointerCapture?.(event.pointerId);
+      applyReaderZoom();
+    });
+
+    pages.addEventListener(
+      "pointermove",
+      (event) => {
+        if (activeReaderPointers.has(event.pointerId)) {
+          activeReaderPointers.set(event.pointerId, {
+            clientX: event.clientX,
+            clientY: event.clientY,
+          });
+        }
+
+        if (activeReaderPointers.size >= 2 && pinchStartDistance > 0) {
+          event.preventDefault();
+          const nextDistance = readerPointerDistance();
+          if (nextDistance > 0) {
+            zoomReaderTo(pinchStartScale * (nextDistance / pinchStartDistance));
+          }
+          return;
+        }
+
+        if (!isReaderDragging) return;
+        event.preventDefault();
+        pages.scrollLeft = readerDragStartScrollLeft - (event.clientX - readerDragStartX);
+      },
+      { passive: false },
+    );
+
+    const endPointer = (event) => {
+      activeReaderPointers.delete(event.pointerId);
+      if (activeReaderPointers.size < 2) {
+        pinchStartDistance = 0;
+      }
+      if (isReaderDragging) {
+        pages.releasePointerCapture?.(event.pointerId);
+        stopReaderDrag();
+      }
+    };
+
+    pages.addEventListener("pointerup", endPointer);
+    pages.addEventListener("pointercancel", endPointer);
+    pages.addEventListener("pointerleave", (event) => {
+      if (event.pointerType !== "mouse") return;
+      endPointer(event);
+    });
   };
 
   const attachReaderZoomGestures = () => {
@@ -118,6 +212,8 @@
         resetReaderZoom();
       }
     });
+
+    attachReaderPanAndPinchGestures();
   };
 
   const updateCurrentPage = (pageNumber, pageCount = currentPageTotal) => {
