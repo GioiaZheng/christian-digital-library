@@ -40,7 +40,7 @@ BOOK_FIELDS = [
     "can_public_download",
 ]
 ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
-ASSET_VERSION = "20260704-translator-speed-1"
+ASSET_VERSION = "20260704-admin-cleanup-1"
 
 
 class CatalogError(ValueError):
