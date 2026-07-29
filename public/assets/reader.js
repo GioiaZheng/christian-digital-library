@@ -19,6 +19,9 @@
   const zoomOutButton = document.querySelector("[data-reader-zoom-out]");
   const zoomResetButton = document.querySelector("[data-reader-zoom-reset]");
   const zoomInButton = document.querySelector("[data-reader-zoom-in]");
+  const floatingActions = document.querySelector("[data-reader-floating-actions]");
+  const scrollTopButton = document.querySelector("[data-reader-scroll-top]");
+  const scrollCurrentButton = document.querySelector("[data-reader-scroll-current]");
   let currentPage = 1;
   let currentPageTotal = 0;
   let readerScale = 1;
@@ -262,6 +265,15 @@
     );
   };
 
+  scrollTopButton?.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  scrollCurrentButton?.addEventListener("click", () => {
+    if (!currentPageTotal) return;
+    scrollToPage(currentPage, currentPageTotal);
+  });
+
   const watchCurrentPage = () => {
     if (!pageInput || !("IntersectionObserver" in window)) return;
     const observer = new IntersectionObserver(
@@ -419,6 +431,7 @@
     }
 
     if (toolbar) toolbar.hidden = false;
+    if (floatingActions) floatingActions.hidden = false;
     if (pageInput) {
       pageInput.max = String(pageCount);
     }
