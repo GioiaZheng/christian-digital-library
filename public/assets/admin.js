@@ -329,7 +329,7 @@
   const loadCategories = async () => {
     if (categories.length) return categories;
     const response = await fetch("categories.json");
-    if (!response.ok) throw new Error("无法读取分类列表。");
+    if (!response.ok) throw new Error("后台暂时无法连接。");
     categories = await response.json();
     renderCategoryCheckboxes();
     return categories;

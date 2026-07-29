@@ -297,7 +297,7 @@ def render_home(
     category_map: dict[str, dict[str, str]],
 ) -> str:
     counts = Counter(book["category"] for book in books)
-    featured_books = [book for book in books if good_homepage_feature(book)][:6] or books[:6]
+    featured_books = [book for book in books if good_homepage_feature(book)][:5] or books[:5]
     featured = "".join(render_book_card(book, category_map) for book in featured_books)
     category_cards = "".join(
         f"""
@@ -646,7 +646,7 @@ def render_access_section(book: dict[str, Any]) -> str:
         return """
         <section class="access-panel">
           <h2>全文访问</h2>
-          <p>此书目当前不需要访问密码。</p>
+          <p>此书目当前可以直接访问。</p>
         </section>"""
 
     return f"""
@@ -663,7 +663,7 @@ def render_access_section(book: dict[str, Any]) -> str:
             </div>
             <p class="meta" data-access-status>访问入口正在接入中。</p>
           </form>
-          <p class="meta">访问码由服务端验证，网页不保存访问码。</p>
+          <p class="meta">输入访问码后可继续阅读或下载。</p>
         </section>"""
 
 
