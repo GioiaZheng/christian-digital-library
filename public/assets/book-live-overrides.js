@@ -50,13 +50,13 @@
     if (!override && !sharedAuthorBio) return;
 
     setText("[data-live-field='clean_title']", override?.clean_title);
-    setText("[data-live-field='author']", override?.author || (override ? "作者信息整理中" : ""));
-    setText("[data-live-field='description']", override?.description || (override ? "简介待补充。" : ""));
-    setText("[data-live-field='author_bio']", override?.author_bio || sharedAuthorBio || (override ? "作者介绍待补充。" : ""));
-    setMetadata("author", override?.author || (override ? "作者信息整理中" : ""));
-    setMetadata("translator", override?.translator || (override ? "译者信息整理中" : ""));
-    setMetadata("publisher", override?.publisher || (override ? "出版信息整理中" : ""));
-    setMetadata("year", override?.year || (override ? "出版信息整理中" : ""));
+    setText("[data-live-field='author']", override?.author || "");
+    setText("[data-live-field='description']", override?.description || "");
+    setText("[data-live-field='author_bio']", override?.author_bio || sharedAuthorBio || "");
+    setMetadata("author", override?.author || "");
+    setMetadata("translator", override?.translator || "");
+    setMetadata("publisher", override?.publisher || "");
+    setMetadata("year", override?.year || "");
     setMetadata("category", override?.category_name || override?.category);
     renderTags(override?.tags);
     renderToc(override?.table_of_contents);
