@@ -337,7 +337,12 @@ class InventoryImportTests(unittest.TestCase):
 
     def test_nivac_suffix_series_is_normalized(self) -> None:
         title, author = IMPORTER.split_title_author("incoming/出埃及記上NIVAC国际释经应用系列 (1).zip")
-        self.assertEqual("NIVAC国际释经应用系列：出埃及記上", title)
+        self.assertEqual("国际释经应用系列：出埃及記上", title)
+        self.assertEqual("", author)
+
+    def test_nivac_tail_noise_is_removed(self) -> None:
+        title, author = IMPORTER.split_title_author("incoming/国际释经应用系列：創世記(卷上)NIVAC+Hebrews.zip")
+        self.assertEqual("国际释经应用系列：創世記(卷上)", title)
         self.assertEqual("", author)
 
     def test_international_application_series_catalog_number_is_removed(self) -> None:

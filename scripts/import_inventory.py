@@ -649,6 +649,7 @@ def format_catalog_title(value: str) -> str:
 
 def normalize_bible_series_title(value: str) -> str:
     value = clean_title(value)
+    value = re.sub(r"NIVAC(?:\+[A-Za-z]+)?\+?$", "", value, flags=re.IGNORECASE).strip()
     value = re.sub(
         r"^NIVAC(?:\+[A-Za-z]+)?\+?(?=国际释经应用系列)",
         "",
@@ -661,16 +662,20 @@ def normalize_bible_series_title(value: str) -> str:
         value,
     )
     if match:
-        return f"{match.group('series')}：{clean_title(match.group('title'))}"
+        series = match.group("series").replace("NIVAC国际释经应用系列", "国际释经应用系列")
+        return f"{series}：{clean_title(match.group('title'))}"
     match = re.match(rf"^(?P<title>.+?)[（(](?P<series>{series_pattern})[）)\}}]$", value)
     if match:
-        return f"{match.group('series')}：{clean_title(match.group('title'))}"
+        series = match.group("series").replace("NIVAC国际释经应用系列", "国际释经应用系列")
+        return f"{series}：{clean_title(match.group('title'))}"
     match = re.match(rf"^(?P<title>.+?)\s+(?P<series>{series_pattern})$", value)
     if match:
-        return f"{match.group('series')}：{clean_title(match.group('title'))}"
+        series = match.group("series").replace("NIVAC国际释经应用系列", "国际释经应用系列")
+        return f"{series}：{clean_title(match.group('title'))}"
     match = re.match(rf"^(?P<title>.+?)(?P<series>{series_pattern})$", value)
     if match:
-        return f"{match.group('series')}：{clean_title(match.group('title'))}"
+        series = match.group("series").replace("NIVAC国际释经应用系列", "国际释经应用系列")
+        return f"{series}：{clean_title(match.group('title'))}"
     return value
 
 
@@ -791,7 +796,7 @@ def normalize_series_parts(parts: list[str]) -> tuple[str, str] | None:
 
         title = clean_title("：".join(title_parts))
         if title:
-            return f"{series}：{title}", author
+            return normalize_bible_series_title(f"{series}：{title}"), author
 
     return None
 
