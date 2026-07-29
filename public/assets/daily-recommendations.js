@@ -103,14 +103,15 @@
   const pickDailyBooks = (books, offset = 0) => {
     const random = randomFromSeed(hashSeed(`${todayKey()}-${offset}`));
     const picked = [];
+    const limit = 6;
 
     for (const rank of [3, 2, 1]) {
       const pool = books.filter((book) => recommendationRank(book) === rank && !picked.some((item) => item.id === book.id));
-      while (pool.length && picked.length < 5) {
+      while (pool.length && picked.length < limit) {
         const index = Math.floor(random() * pool.length);
         picked.push(pool.splice(index, 1)[0]);
       }
-      if (picked.length >= 5) break;
+      if (picked.length >= limit) break;
     }
     return picked;
   };

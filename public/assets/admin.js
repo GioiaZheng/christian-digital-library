@@ -28,6 +28,7 @@
   let catalog = [];
   let categories = [];
   let readingStatuses = new Map();
+  const suggestionCache = new Map();
   const readingStatusOptions = [
     { value: "want_to_read", label: "想读" },
     { value: "finished", label: "读完" },
@@ -81,7 +82,7 @@
 
   const requestAdmin = async (path, options = {}) => {
     if (!endpoint) {
-      throw new Error("后台接口未配置。");
+      throw new Error("暂时无法进入后台。");
     }
     const headers = new Headers(options.headers || {});
     headers.set("X-CDL-Admin-Code", adminCode);
@@ -166,11 +167,14 @@
   };
 
   const suggestionValues = async (kind) => {
+    if (suggestionCache.has(kind)) return suggestionCache.get(kind);
     const books = await loadCatalog();
-    if (kind === "authors") return uniqueSortedValues(books.map((book) => book.author));
-    if (kind === "translators") return uniqueSortedValues(books.map((book) => book.translator));
-    if (kind === "tags") return uniqueSortedValues(books.flatMap((book) => book.tags || []));
-    return [];
+    let values = [];
+    if (kind === "authors") values = uniqueSortedValues(books.map((book) => book.author));
+    if (kind === "translators") values = uniqueSortedValues(books.map((book) => book.translator));
+    if (kind === "tags") values = uniqueSortedValues(books.flatMap((book) => book.tags || []));
+    suggestionCache.set(kind, values);
+    return values;
   };
 
   const attachMultiSuggestions = (input) => {
@@ -682,19 +686,25 @@
     event.preventDefault();
     adminCode = String(loginForm.elements.namedItem("admin_code")?.value || "").trim();
     if (!adminCode) {
-      setText(loginStatus, "请输入管理员密码。");
+      setText(loginStatus, "请输入密码。");
       return;
     }
     try {
       setText(loginStatus, "正在进入后台……");
+      const readingData = await requestAdmin("/admin/reading-status");
+      readingStatuses = new Map((readingData.items || []).map((item) => [item.id, item]));
       loginForm.hidden = true;
       panel.hidden = false;
       showAdminSection("overview");
       setText(loginStatus, "");
+      renderReadingList();
       await loadAdminPanelData();
     } catch (error) {
       adminCode = "";
-      setText(loginStatus, error.message || "登录失败。");
+      loginForm.hidden = false;
+      panel.hidden = true;
+      const message = String(error.message || "");
+      setText(loginStatus, /接口|配置|不存在|HTTP 404/i.test(message) ? "暂时无法进入后台。" : message || "登录失败。");
     }
   });
 
@@ -727,6 +737,7 @@
         body: formData,
       });
       addBookForm.reset();
+      suggestionCache.clear();
       setText(addBookStatus, `已添加《${data.item?.title || "新书"}》，同步目录后会显示到公开网站。`);
     } catch (error) {
       setText(addBookStatus, error.message || "添加失败。");
@@ -778,6 +789,7 @@
         body: JSON.stringify(payload),
       });
       applySavedBook(bookId, data.item);
+      suggestionCache.clear();
       setText(bookStatus, "已保存到后台，正在同步公开列表……");
       await renderBookResults();
       setStatusWithPublicLink(bookStatus, "已保存并上线。公开页面刷新后即可看到最新资料。", bookId);
