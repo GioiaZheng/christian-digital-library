@@ -9,6 +9,7 @@
   const pages = document.querySelector("[data-reader-pages]");
   const toolbar = document.querySelector("[data-reader-toolbar]");
   const detailLink = document.querySelector("[data-reader-detail]");
+  const floatingDetailLink = document.querySelector("[data-reader-floating-detail]");
   const detailFallbackLink = document.querySelector("[data-reader-detail-fallback]");
   const backButton = document.querySelector("[data-reader-back]");
   const jumpForm = document.querySelector("[data-reader-jump]");
@@ -236,6 +237,10 @@
 
   if (detailLink) {
     detailLink.href = detailHref;
+  }
+
+  if (floatingDetailLink) {
+    floatingDetailLink.href = detailHref;
   }
 
   if (detailFallbackLink) {

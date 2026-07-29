@@ -1685,6 +1685,9 @@ h3 {
 }
 
 .reader-floating-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid rgba(23, 63, 53, 0.24);
   border-radius: 999px;
   background: rgba(255, 252, 246, 0.94);
@@ -1694,6 +1697,8 @@ h3 {
   font: inherit;
   font-family: "Microsoft YaHei", sans-serif;
   padding: 10px 14px;
+  text-align: center;
+  text-decoration: none;
 }
 
 .reader-floating-button:hover {
