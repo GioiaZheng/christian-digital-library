@@ -72,6 +72,36 @@ class CleanCatalogDataTest(unittest.TestCase):
         self.assertEqual(row["clean_title"], "理性信仰（壹册）")
         self.assertEqual(row["author"], "")
 
+    def test_removes_nivac_prefix_and_tail_noise(self):
+        row = {
+            "id": "cdl-test",
+            "clean_title": "NIVAC国际释经应用系列：創世記(卷上)NIVAC+Hebrews",
+            "author": "",
+            "translator": "",
+            "category": "bible-study",
+            "tags": "释经;創世記",
+        }
+
+        changed = clean_row(row)
+
+        self.assertTrue(changed)
+        self.assertEqual(row["clean_title"], "国际释经应用系列：創世記(卷上)")
+
+    def test_normalizes_nivac_prefix_titles(self):
+        row = {
+            "id": "cdl-test",
+            "clean_title": "NIVAC 帖前后注释",
+            "author": "",
+            "translator": "",
+            "category": "bible-study",
+            "tags": "注释",
+        }
+
+        changed = clean_row(row)
+
+        self.assertTrue(changed)
+        self.assertEqual(row["clean_title"], "帖撒罗尼迦前后书注释")
+
 
 if __name__ == "__main__":
     unittest.main()

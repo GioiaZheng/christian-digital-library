@@ -18,6 +18,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BOOKS = ROOT / "data" / "books.csv"
 
 FORMAT_NOISE_RE = re.compile(r"\s*(?:单排版|双排版)\s*$")
+NIVAC_PREFIX_RE = re.compile(r"^NIVAC\s*(?=国际释经应用系列)", re.IGNORECASE)
+NIVAC_TAIL_RE = re.compile(r"NIVAC(?:\+[A-Za-z]+)?\+?$", re.IGNORECASE)
 
 BIBLE_STUDY_HINTS = (
     "圣经",
@@ -33,8 +35,13 @@ BIBLE_STUDY_HINTS = (
 
 def normalize_title(title: str) -> str:
     title = title.strip()
+    title = re.sub(r"^NIVAC\+\s*[（(]\s*(?P<title>.+?)\s*[）)]$", r"国际释经应用系列：\g<title>", title, flags=re.IGNORECASE)
+    title = re.sub(r"^NIVAC\s+(?P<title>.+)$", r"\g<title>", title, flags=re.IGNORECASE)
+    title = title.replace("帖前后注释", "帖撒罗尼迦前后书注释")
     title = re.sub(r"\s*[（(]\s*(?:单排版|双排版)\s*[）)]\s*$", "", title)
     title = FORMAT_NOISE_RE.sub("", title)
+    title = NIVAC_PREFIX_RE.sub("", title)
+    title = NIVAC_TAIL_RE.sub("", title).strip()
     title = re.sub(r"^\d{1,3}\s+\d{1,3}[.．]?\s*(?=[\u3400-\u9fff])", "", title)
     title = re.sub(r"\s+", " ", title).strip(" ：:")
     return title
