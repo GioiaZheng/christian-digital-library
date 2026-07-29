@@ -1613,16 +1613,16 @@ h3 {
 .reader-shell {
   width: min(100% - 28px, 980px);
   margin-inline: auto;
-  padding: 36px 0 72px;
+  padding: 24px 0 72px;
 }
 
 .reader-intro {
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 
 .reader-intro h1 {
   margin-bottom: 10px;
-  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-size: clamp(1.55rem, 3.1vw, 2.55rem);
 }
 
 .reader-fallback-link {
@@ -1634,7 +1634,7 @@ h3 {
 
 .reader-toolbar {
   position: sticky;
-  top: 76px;
+  top: 70px;
   z-index: 24;
   display: flex;
   flex-wrap: wrap;
@@ -1669,6 +1669,35 @@ h3 {
   color: var(--muted);
   font-family: "Microsoft YaHei", sans-serif;
   font-size: 0.82rem;
+}
+
+.reader-floating-actions {
+  position: fixed;
+  right: clamp(14px, 2vw, 28px);
+  bottom: clamp(16px, 2.4vw, 32px);
+  z-index: 28;
+  display: grid;
+  gap: 10px;
+}
+
+.reader-floating-actions[hidden] {
+  display: none;
+}
+
+.reader-floating-button {
+  border: 1px solid rgba(23, 63, 53, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 252, 246, 0.94);
+  box-shadow: 0 14px 34px rgba(48, 42, 31, 0.12);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-family: "Microsoft YaHei", sans-serif;
+  padding: 10px 14px;
+}
+
+.reader-floating-button:hover {
+  background: var(--accent-soft);
 }
 
 .reader-text-button {
@@ -1951,6 +1980,16 @@ h3 {
 
   .reader-toolbar-links {
     justify-content: space-between;
+  }
+
+  .reader-floating-actions {
+    right: 14px;
+    bottom: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reader-floating-button {
+    padding: 9px 10px;
   }
 
   .reader-page-jump input,
