@@ -1849,7 +1849,7 @@ cdl-003932,国际释经应用：加拉太书注释,麦克奈特,,,,,中文,bible
 cdl-003933,国际释经应用：加拉太书注释,麦克奈特,,,,,中文,bible-study,释经;注释;加拉太,,,,5,,true,,待核实,false
 cdl-003934,国际释经应用：加拉太书注释,麦克奈特,,,,,中文,bible-study,释经;注释;加拉太,,,,5,,true,,待核实,false
 cdl-003941,国际释经应用：启示录,基纳,,,,,中文,bible-study,释经;启示录,,,,5,,true,,待核实,false
-cdl-001505,国际释经应用：希伯来书—乔治·格思里,backup,,,,,中文,bible-study,释经;希伯来书,,,,5,,true,,待核实,false
+cdl-001505,国际释经应用：希伯来书,乔治·格思里,,,,,中文,bible-study,释经;希伯来书;国际释经应用,,,,5,,true,,待核实,false
 cdl-003949,国际释经应用：帖撒罗尼迦前后书,麦克霍姆兹,,,,,中文,bible-study,释经;帖撒罗尼迦,,,,5,,true,,待核实,false
 cdl-003950,国际释经应用：彼得前书,史葛 麦克奈特,,,,,中文,bible-study,释经;彼得前,,,,5,,true,,待核实,false
 cdl-003951,国际释经应用：彼得前书,史葛 麦克奈特,,,,,中文,bible-study,释经;彼得前,,,,5,,true,,待核实,false
@@ -2026,9 +2026,9 @@ cdl-001174,圣经信息系列：23以赛亚书,,,,,,中文,bible-study,圣经;�
 cdl-001016,以斯拉记、哈该书——圣经信息系列,,,,,,中文,bible-study,圣经信息系列;以斯拉记;哈该书,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001016.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001016,true,,待核实,false
 cdl-001195,但以理书——圣经信息系列,,,,,,中文,bible-study,圣经信息系列;但以理书,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001195.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001195,true,,待核实,false
 cdl-001251,圣经信息系列：书名待核,撒迦利亚,,,,,中文,bible-study,圣经,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001251.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001251,true,,待核实,false
-cdl-001508,圣经信息系列：书名待核,backup,,,,,中文,bible-study,圣经,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001508.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001508,true,,待核实,false
-cdl-001509,圣经信息系列：书名待核,backup,,,,,中文,bible-study,圣经,,,,5,,true,,待核实,false
-cdl-001510,圣经信息系列：书名待核,backup,,,,,中文,bible-study,圣经,,,,5,,true,,待核实,false
+cdl-001508,圣经信息系列（待整理）,,,,,,中文,bible-study,圣经信息系列;圣经,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001508.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001508,true,,待核实,false
+cdl-001509,圣经信息系列（待整理）,,,,,,中文,bible-study,圣经信息系列;圣经,,,,5,,true,,待核实,false
+cdl-001510,圣经信息系列（待整理）,,,,,,中文,bible-study,圣经信息系列;圣经,,,,5,,true,,待核实,false
 cdl-002394,圣经信息系列：以弗所书,斯托得,,,,,中文,bible-study,圣经;以弗所,,,,0,,true,,待核实,false
 cdl-004058,圣经信息系列：以弗所书,,,,,,中文,bible-study,圣经;以弗所,,,,5,,true,,待核实,false
 cdl-004041,圣经信息系列：以斯帖记,,,,,,中文,bible-study,圣经;以斯帖,,,,5,,true,,待核实,false
@@ -2658,7 +2658,7 @@ cdl-001887,基督的神人二性,马丁 开姆尼茨,,,,,中文,theology,基督,
 cdl-004409,基督的荣耀,,,,,,中文,theology,基督,,,,5,,true,,待核实,false
 cdl-005634,基督真伪徒辨,歌士瑞,,,,,中文,theology,基督,,,,5,,true,,待核实,false
 cdl-001731,基督荣耀的身体,凯波尔,,,,,中文,theology,基督,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001731.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001731,true,,待核实,false
-cdl-001511,基督荣耀的身体 教会论,backup,,,,,中文,theology,基督;教会,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001511.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001511,true,,待核实,false
+cdl-001511,基督荣耀的身体：教会论,,,,,,中文,theology,基督;教会论;神学,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001511.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001511,true,,待核实,false
 cdl-000304,基督论教义,,,,,,中文,theology,教义;基督论,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000304.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000304,true,,待核实,false
 cdl-000216,基督道理的开端-使徒信经的信仰,,,,,,中文,theology,信经;基督;信仰,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000216.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000216,true,,待核实,false
 cdl-004410,基督那测不透的丰富,,,,,,中文,theology,基督,,,,5,,true,,待核实,false
@@ -3502,7 +3502,7 @@ cdl-004908,彼得后书犹大书,,,,,,中文,bible-study,彼得后,,,,5,,true,,�
 cdl-001392,彼得和祷告的能力,,,,,,中文,spiritual-life,祷告,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001392.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001392,true,,待核实,false
 cdl-004909,彼得的生平,,,,,,中文,church-history,生平,,,,5,,true,,待核实,false
 cdl-004910,彼得的生平,,,,,,中文,church-history,生平,,,,2,,true,,待核实,false
-cdl-001109,彼犹,冯国泰 李汤马,,,,,中文,other,,,,,5,,true,,待核实,false
+cdl-001109,彼得前后书、犹大书,冯国泰、李汤马,,,,,中文,bible-study,彼得前书;彼得后书;犹大书;新约,,,,5,,true,,待核实,false
 cdl-004911,律法与福音,C W F Walther,,,,,中文,other,,,,,5,,true,,待核实,false
 cdl-004912,律法主义与灵恩,chou,,,,,中文,other,,,,,5,,true,,待核实,false
 cdl-004913,律法主义和反律主义,,,,,,中文,other,,,,,5,,true,,待核实,false
@@ -3897,7 +3897,7 @@ cdl-005221,救赎进程,范甘麦伦,,,,,中文,theology,救赎,,,,5,,true,,待�
 cdl-005222,救赎进程,范甘麦伦,,,,,中文,theology,救赎,,,,5,,true,,待核实,false
 cdl-006227,教义神学新释卷一 余达心著,聆聽上帝愛的言說,,,,,中文,theology,神学;教义,,,,5,,true,,待核实,false
 cdl-006228,教义神学新释卷一 余达心著,聆聽上帝愛的言說,,,,,中文,theology,神学;教义,,,,5,,true,,待核实,false
-cdl-000392,教会,ChurchChina 第一期,,,,,中文,theology,教会,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000392.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000392,true,,待核实,false
+cdl-000392,教会（Church China 第一期）,,,,,,中文,theology,教会;Church China;神学,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000392.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000392,true,,待核实,false
 cdl-000393,教会,,,,,,中文,theology,教会,,,,5,,true,,待核实,false
 cdl-003064,以基督为中心的婚恋,,,,,,中文,family-ministry,婚恋;家庭;基督中心,,,,5,,true,,待核实,false
 cdl-005223,重新探索神的设计蓝图,,,,,,中文,theology,教会;神学;实践,,,,5,,true,,待核实,false
@@ -4521,11 +4521,11 @@ cdl-005586,来自太空的挑战13340404,,,,,,中文,other,,,,,5,,true,,待核�
 cdl-005587,杨腓力&蒂姆·斯塔福圣经阅读指南：新约,,,,,,中文,bible-study,圣经;新约,,,,5,,true,,待核实,false
 cdl-005588,杨金兰,新约古希腊语教程练习册,,,,,中文,other,,,,,5,,true,,待核实,false
 cdl-005589,构解牧养辅导,,,,,,中文,pastoral,牧养;辅导,,,,5,,true,,待核实,false
-cdl-005590,林前,冯国泰 李汤马,,,,,中文,other,,,,,5,,true,,待核实,false
+cdl-005590,哥林多前书,冯国泰、李汤马,,,,,中文,bible-study,哥林多前书;新约;圣经研究,,,,5,,true,,待核实,false
 cdl-005591,林前1 Cor.1(649-680),,,,,,中文,other,,,,,5,,true,,待核实,false
 cdl-005592,林前1 Cor.2(681-710),,,,,,中文,other,,,,,5,,true,,待核实,false
 cdl-005593,林前1 Cor.3(711-732),,,,,,中文,other,,,,,5,,true,,待核实,false
-cdl-005594,林后,史艾德 史威廉,,,,,中文,other,,,,,5,,true,,待核实,false
+cdl-005594,哥林多后书,史艾德、史威廉,,,,,中文,bible-study,哥林多后书;新约;圣经研究,,,,5,,true,,待核实,false
 cdl-005595,林後2 Cor.1(733-760),,,,,,中文,other,,,,,5,,true,,待核实,false
 cdl-005596,林後2 Cor.2(761-796),,,,,,中文,other,,,,,5,,true,,待核实,false
 cdl-005599,林汉达中国历史故事集,林汉达,,,,,中文,church-history,历史,,,,5,,true,,待核实,false
@@ -5121,8 +5121,8 @@ cdl-005975,神学讲演录,纳西盎的格里高利,,,,,中文,theology,神学,,
 cdl-005976,神学诠释学,,,,,,中文,theology,神学,,,,5,,true,,待核实,false
 cdl-005977,神学院招生简章,,,,,,中文,theology,神学,,,,5,,true,,待核实,false
 cdl-005978,神学院没教的讲道秘诀,安迪 史坦利 蓝恩 琼斯,,,,,中文,pastoral,讲道,,,,5,,true,,待核实,false
-cdl-001513,神學導論講義：201409Final Version,backup,,,,,中文,theology,神學,,,,5,,true,,待核实,false
-cdl-001514,神學導論讀本：201501Final Version,backup,,,,,中文,theology,神學,,,,5,,true,,待核实,false
+cdl-001513,神學導論講義,,,,,,中文,theology,神學;導論;講義,,,,5,,true,,待核实,false
+cdl-001514,神學導論讀本,,,,,,中文,theology,神學;導論;讀本,,,,5,,true,,待核实,false
 cdl-005979,神必救赎：以赛亚书诠释,,,,,,中文,bible-study,以赛亚,,,,5,,true,,待核实,false
 cdl-006911,神必救赎：以赛亚书诠释,马有藻,,,,,中文,bible-study,以赛亚,,,,5,,true,,待核实,false
 cdl-005980,神必记念(撒迦利亚书诠释),,,,,,中文,bible-study,撒迦利亚,,,,5,,true,,待核实,false
@@ -5216,7 +5216,7 @@ cdl-006048,福音是什么,卡森,,,,,中文,other,,,,,5,,true,,待核实,false
 cdl-006049,福音是什么,卡森,,,,,中文,other,,,,,5,,true,,待核实,false
 cdl-006050,福音派与基督教的未来,,,,,,中文,theology,基督,,,,5,,true,,待核实,false
 cdl-000573,福音派危机,薛华,,,,,中文,other,,,,,5,,true,,待核实,false
-cdl-006051,福音真意,pdf,,,,,中文,other,,,,,5,,true,,待核实,false
+cdl-006051,福音真意,,,,,,中文,missions,福音;宣教;信仰,,,,5,,true,,待核实,false
 cdl-000865,福音神学,,,,,,中文,theology,神学,,,,5,,true,,待核实,false
 cdl-001926,福音神学暨福音难题解答,吴主光,,,,,中文,theology,神学,,,,5,,true,,待核实,false
 cdl-006052,福音讲章系列,,,,,,中文,pastoral,讲章,,,,5,,true,,待核实,false
@@ -5609,7 +5609,7 @@ cdl-006231,聖經信息系以西结书,莱特,,,,,中文,bible-study,聖經;以�
 cdl-006232,聖經創意教材,达菲罗宾斯,,,,,中文,bible-study,聖經,,,,5,,true,,待核实,false
 cdl-006233,聖經架構與時間表(繁體字),,,,,,中文,bible-study,聖經,,,,5,,true,,待核实,false
 cdl-006234,聖經與古蘭經：認識猶太教、基督宗教與伊斯蘭教的第一本書 (塞日.拉菲特(Serge Lafitte)) (Z,Library,,,,,中文,bible-study,聖經,,,,5,,true,,待核实,false
-cdl-001515,聖經輔導學基本訓練課程：201403Final Version,backup,,,,,中文,bible-study,聖經,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001515.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001515,true,,待核实,false
+cdl-001515,聖經輔導學基本訓練課程,,,,,,中文,pastoral,聖經輔導;輔導;訓練,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001515.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001515,true,,待核实,false
 cdl-006235,聖靈、禱告、復興,,,,,,中文,spiritual-life,禱告,,,,5,,true,,待核实,false
 cdl-006236,聖靈的大能,,,,,,中文,theology,聖靈,,,,5,,true,,待核实,false
 cdl-006237,聖靈的果子(查经课程),欧福娜,,,,,中文,theology,聖靈,,,,5,,true,,待核实,false
@@ -5957,10 +5957,10 @@ cdl-002314,诗中之诗：诗篇总论,唐佑之,,,,,中文,bible-study,诗篇,,
 cdl-006458,诗人的眼睛 圣经文学新视角,郭秀娟,,,,,中文,bible-study,圣经,,,,5,,true,,待核实,false
 cdl-006459,诗学,,,,,,中文,other,,,,,5,,true,,待核实,false
 cdl-002199,诗情祷语：与诗篇一起祷告,毕德生 Eugene H Peterson,,,,,中文,bible-study,诗篇,,,,5,,true,,待核实,false
-cdl-006460,诗篇,欧尔顿,,,,,中文,bible-study,诗篇,,,,5,,true,,待核实,false
+cdl-006460,诗篇,欧尔顿,,,,,中文,bible-study,诗篇;旧约;圣经研究,,,,5,,true,,待核实,false
 cdl-006463,诗篇：神子民的祷告（上）,威尔克,,,,,中文,bible-study,诗篇;祷告;圣经研究,,,,5,,true,,待核实,false
 cdl-006464,诗篇：神子民的祷告（下）,威尔克,,,,,中文,bible-study,诗篇;祷告;圣经研究,,,,5,,true,,待核实,false
-cdl-006465,诗篇,欧尔顿,,,,,中文,bible-study,诗篇,,,,5,,true,,待核实,false
+cdl-006465,诗篇,欧尔顿,,,,,中文,bible-study,诗篇;旧约;圣经研究,,,,5,,true,,待核实,false
 cdl-006466,诗篇,,,,,,中文,bible-study,诗篇,,,,5,,true,,待核实,false
 cdl-001047,诗篇 卷一 赖建国,,,,,,中文,bible-study,诗篇,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001047.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001047,true,,待核实,false
 cdl-006462,诗篇 无白边 适配手机屏,,,,,,中文,bible-study,诗篇,,,,5,,true,,待核实,false
@@ -6368,7 +6368,7 @@ cdl-006735,雅各书结构式注释,李保罗,,,,,中文,bible-study,注释;雅�
 cdl-006736,雅各书至启示录,,,,,,中文,bible-study,雅各书;启示录,,,,5,,true,,待核实,false
 cdl-001993,雅各布书研经材料：校园研经材料写作小组,,,,,,中文,bible-study,研经,,,,5,,true,,待核实,false
 cdl-006737,雅各書James(1205-1244),,,,,,中文,bible-study,雅各書,,,,5,,true,,待核实,false
-cdl-006738,雅歌,黄朱伦,,,,,中文,bible-study,雅歌,,,,5,,true,,待核实,false
+cdl-006738,雅歌,黄朱伦,,,,,中文,bible-study,雅歌;旧约;圣经研究,,,,5,,true,,待核实,false
 cdl-005622,雅歌：福音书房,歌中的歌,,,,,中文,bible-study,雅歌,,,,5,,true,,待核实,false
 cdl-005623,雅歌：福音书房,歌中的歌,,,,,中文,bible-study,雅歌,,,,5,,true,,待核实,false
 cdl-006739,雅歌书,格莱德希尔,,,,,中文,bible-study,雅歌,,,,5,,true,,待核实,false
@@ -6700,15 +6700,15 @@ cdl-001497,意大利文艺复兴时期的文化,,,,,,中文,culture-society,文�
 cdl-001498,罗马史 上卷,,,,,,中文,other,,,,,5,,true,,待核实,false
 cdl-001499,罗马史 下卷,,,,,,中文,other,,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001499.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001499,true,,待核实,false
 cdl-001500,英吉利教会史,,,,,,中文,church-history,教会史,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001500.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001500,true,,待核实,false
-cdl-001502,backup,信徒之家,,,,,中文,other,,,,,5,,true,,待核实,false
-cdl-001516,backup,舊約中的基督 上,,,,,中文,other,,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001516.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001516,true,,待核实,false
-cdl-001517,backup,舊約中的基督 下,,,,,中文,other,,,,,5,,true,,待核实,false
-cdl-001501,backup：为真道而战：提摩太后书的信息,斯托得,,,,,中文,bible-study,提摩太,,,,5,,true,,待核实,false
-cdl-001503,backup：国际释经应用：创世记(卷上),约翰 华尔顿,,,,,中文,bible-study,释经;创世记,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001503.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001503,true,,待核实,false
-cdl-001504,backup：国际释经应用：创世记(卷下),约翰 华尔顿,,,,,中文,bible-study,释经;创世记,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001504.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001504,true,,待核实,false
-cdl-001506,backup：国际释经应用：约翰福音(卷上),白基,,,,,中文,bible-study,释经;约翰福音,,,,5,,true,,待核实,false
-cdl-001507,backup：国际释经应用：约翰福音(卷下),白基,,,,,中文,bible-study,释经;约翰福音,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001507.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001507,true,,待核实,false
-cdl-001512,backup：奇異恩典：聖靈與救贖,Final Version,,,,,中文,theology,救贖,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001512.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001512,true,,待核实,false
+cdl-001502,信徒之家,,,,,,中文,spiritual-life,信徒;生命成长,,,,5,,true,,待核实,false
+cdl-001516,舊約中的基督（上）,,,,,,中文,bible-study,舊約;基督;圣经研究,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001516.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001516,true,,待核实,false
+cdl-001517,舊約中的基督（下）,,,,,,中文,bible-study,舊約;基督;圣经研究,,,,5,,true,,待核实,false
+cdl-001501,为真道而战：提摩太后书的信息,斯托得,,,,,中文,bible-study,提摩太后书;新约;圣经信息,,,,5,,true,,待核实,false
+cdl-001503,国际释经应用：创世记（卷上）,约翰·华尔顿,,,,,中文,bible-study,释经;创世记;国际释经应用,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001503.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001503,true,,待核实,false
+cdl-001504,国际释经应用：创世记（卷下）,约翰·华尔顿,,,,,中文,bible-study,释经;创世记;国际释经应用,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001504.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001504,true,,待核实,false
+cdl-001506,国际释经应用：约翰福音（卷上）,白基,,,,,中文,bible-study,释经;约翰福音;国际释经应用,,,,5,,true,,待核实,false
+cdl-001507,国际释经应用：约翰福音（卷下）,白基,,,,,中文,bible-study,释经;约翰福音;国际释经应用,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001507.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001507,true,,待核实,false
+cdl-001512,奇異恩典：聖靈與救贖,,,,,,中文,theology,聖靈;救贖;神学,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001512.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001512,true,,待核实,false
 cdl-001522,Bulletin 02-082013,,,,,,中文,other,,,,,5,,true,,待核实,false
 cdl-001523,Bulletin 03-032014,,,,,,中文,other,,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001523.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001523,true,,待核实,false
 cdl-001524,Bulletin 04-092014,,,,,,中文,other,,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001524.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001524,true,,待核实,false
