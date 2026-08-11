@@ -527,6 +527,36 @@ def author_records(books: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(records.values(), key=lambda item: sort_title(item["name"]).casefold())
 
 
+def author_bio_index(books: list[dict[str, Any]]) -> dict[str, str]:
+    """从已核过的单作者书目中抽取作者简介，供同作者页面复用。"""
+    bios: dict[str, str] = {}
+    for book in books:
+        bio = str(book.get("author_bio") or "").strip()
+        authors = split_people(book.get("author"))
+        if not bio or len(authors) != 1:
+            continue
+        bios.setdefault(authors[0], bio)
+    return bios
+
+
+def apply_shared_author_bios(books: list[dict[str, Any]]) -> None:
+    """同一个作者的简介只维护一次，但不覆盖每本书独立的内容简介。"""
+    bios = author_bio_index(books)
+    if not bios:
+        return
+    for book in books:
+        if book.get("author_bio"):
+            continue
+        authors = split_people(book.get("author"))
+        matched = [(author, bios[author]) for author in authors if author in bios]
+        if not matched:
+            continue
+        if len(matched) == 1:
+            book["author_bio"] = matched[0][1]
+        else:
+            book["author_bio"] = "\n\n".join(f"{author}：{bio}" for author, bio in matched)
+
+
 def render_author_page(
     template: Template,
     author: dict[str, Any],
@@ -1070,6 +1100,7 @@ def build_site(root: Path = ROOT, output: Path | None = None) -> dict[str, int]:
     categories = load_categories(root / "data" / "categories.json")
     category_map = {category["id"]: category for category in categories}
     books = sorted(load_books(root / "data" / "books.csv", set(category_map)), key=book_sort_key)
+    apply_shared_author_bios(books)
     template = Template((root / "src" / "templates" / "base.html").read_text(encoding="utf-8"))
 
     if output.exists():

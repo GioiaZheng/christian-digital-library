@@ -32,6 +32,33 @@ BIBLE_STUDY_HINTS = (
     "研经",
 )
 
+CHINESE_VOLUME_NUMERALS = {
+    "1": "一",
+    "2": "二",
+    "3": "三",
+    "4": "四",
+    "5": "五",
+    "6": "六",
+    "7": "七",
+    "8": "八",
+    "9": "九",
+    "10": "十",
+}
+
+
+def split_title_author_suffix(title: str) -> tuple[str, str] | None:
+    """处理“书名：作者：2”这类从文件名导入来的重复尾巴。"""
+    parts = [part.strip() for part in re.split(r"[：:]", title) if part.strip()]
+    if len(parts) < 3 or not parts[-1].isdigit():
+        return None
+    author = parts[-2]
+    if len(author) > 12 or re.search(r"[A-Za-z0-9]", author):
+        return None
+    clean_title = "：".join(parts[:-2]).strip()
+    if not clean_title:
+        return None
+    return clean_title, author
+
 
 def normalize_title(title: str) -> str:
     title = title.strip()
@@ -43,6 +70,7 @@ def normalize_title(title: str) -> str:
     title = NIVAC_PREFIX_RE.sub("", title)
     title = NIVAC_TAIL_RE.sub("", title).strip()
     title = re.sub(r"^\d{1,3}\s+\d{1,3}[.．]?\s*(?=[\u3400-\u9fff])", "", title)
+    title = re.sub(r"^\d{1,3}\s*(?=分辨真伪)", "", title)
     title = re.sub(r"\s+", " ", title).strip(" ：:")
     return title
 
@@ -79,6 +107,34 @@ def clean_row(row: dict[str, str]) -> bool:
     if row.get("id") == "cdl-005079":
         row["clean_title"] = "我能知道神的旨意吗"
         row["author"] = "司布尔"
+
+    # 明显的字段错位：作者名进了书名，英文副题和中文书名进了作者栏。
+    if row.get("id") == "cdl-001567":
+        row["clean_title"] = "你的恩赐知多少"
+        row["author"] = "马有藻"
+
+    if row.get("id") in {"cdl-004185", "cdl-004186"} and row.get("author", "").strip() == "地狱来鸿":
+        row["clean_title"] = "地狱来鸿"
+        row["author"] = "C.S.路易斯"
+
+    if row.get("id") == "cdl-004384" and row.get("author", "").strip() == "基督教要义":
+        row["clean_title"] = "基督教要义（三联旧版，上中下合集）"
+        row["author"] = "约翰·加尔文"
+
+    if row.get("id") == "cdl-006727":
+        row["clean_title"] = "雅各书学习指南"
+
+    # 文件名前缀把分类塞进标题。
+    church_history = re.match(r"^教会历史[-－—](?P<title>.+?)[-－—](?P<volume>\d+)$", row.get("clean_title", "").strip())
+    if church_history:
+        volume = CHINESE_VOLUME_NUMERALS.get(church_history.group("volume"), church_history.group("volume"))
+        row["clean_title"] = f"{church_history.group('title')}（{volume}）"
+        row["category"] = "church-history"
+
+    # 文件名尾部的“：作者：2”是撞名编号，不是书名的一部分。
+    title_author = split_title_author_suffix(row.get("clean_title", ""))
+    if title_author and not row.get("author", "").strip():
+        row["clean_title"], row["author"] = title_author
 
     volume_noise = re.match(r"^([一二三四五六七八九十壹贰叁]+册)\s*电子修订版$", row.get("author", "").strip())
     if volume_noise:

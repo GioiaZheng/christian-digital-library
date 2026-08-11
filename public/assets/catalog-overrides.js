@@ -23,11 +23,23 @@
     return source
       .map((item) => String(item || "").trim())
       .filter(Boolean)
+      .filter((item) => !isCorruptText(item))
       .filter((item) => {
         if (seen.has(item)) return false;
         seen.add(item);
         return true;
       });
+  };
+
+  const isCorruptText = (value) => {
+    const text = String(value || "").trim();
+    if (!text) return false;
+    return /\?{2,}/.test(text) || /�{2,}/.test(text);
+  };
+
+  const cleanText = (value) => {
+    const text = String(value || "").trim();
+    return isCorruptText(text) ? "" : text;
   };
 
   const categoryLabel = (category) => categoryNames[category] || category || "其他";
@@ -38,25 +50,25 @@
     if (!item || !/^cdl-\d{6}$/.test(String(item.id || ""))) return null;
     const categories = cleanList(item.categories || item.category);
     const tags = cleanList(item.tags);
-    const category = categories[0] || String(item.category || "").trim();
+    const category = categories[0] || cleanText(item.category);
     const names = categoryLabels(categories.length ? categories : [category]);
     return {
       ...item,
       id: String(item.id),
-      clean_title: String(item.clean_title || "").trim(),
-      author: String(item.author || "").trim(),
-      author_bio: String(item.author_bio || "").trim(),
-      translator: String(item.translator || "").trim(),
-      publisher: String(item.publisher || "").trim(),
-      year: String(item.year || "").trim(),
+      clean_title: cleanText(item.clean_title),
+      author: cleanList(item.authors || item.author).join("、"),
+      author_bio: cleanText(item.author_bio),
+      translator: cleanList(item.translators || item.translator).join("、"),
+      publisher: cleanText(item.publisher),
+      year: cleanText(item.year),
       category,
       categories,
       category_name: names[0] || categoryLabel(category),
       category_names: names,
       tags,
-      description: String(item.description || "").trim(),
+      description: cleanText(item.description),
       table_of_contents: cleanList(item.table_of_contents),
-      updated_at: String(item.updated_at || "").trim(),
+      updated_at: cleanText(item.updated_at),
     };
   };
 

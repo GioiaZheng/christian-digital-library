@@ -142,6 +142,16 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("../assets/book-opinions.js", detail)
             self.assertIn("../assets/image-viewer.js", detail)
 
+            catalog_overrides = (output / "assets" / "catalog-overrides.js").read_text(
+                encoding="utf-8"
+            )
+            book_overrides = (output / "assets" / "book-live-overrides.js").read_text(
+                encoding="utf-8"
+            )
+            self.assertIn("isCorruptText", catalog_overrides)
+            self.assertIn("cleanText(item.clean_title)", catalog_overrides)
+            self.assertIn("const cleanValue", book_overrides)
+
             author_slug = GENERATOR.author_slug("示例作者")
             author_page = output / "authors" / f"{author_slug}.html"
             self.assertTrue(author_page.is_file())
@@ -152,6 +162,70 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("示例作者简介。", author_html)
             self.assertIn("示例书目", author_html)
             self.assertIn("../assets/author-live-overrides.js", author_html)
+
+    def test_author_bio_is_shared_without_overwriting_book_description(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = create_sample_project(Path(directory))
+            rows = [
+                {
+                    "id": "bio-source",
+                    "clean_title": "作者简介来源书",
+                    "author": "同一作者",
+                    "author_bio": "这是一段作者简介。",
+                    "translator": "",
+                    "publisher": "",
+                    "year": "",
+                    "language": "中文",
+                    "category": "theology",
+                    "tags": "测试",
+                    "description": "第一本书的简介。",
+                    "table_of_contents": "",
+                    "cover_image_url": "",
+                    "preview_page_count": "0",
+                    "preview_base_url": "",
+                    "access_required": "true",
+                    "access_url": "",
+                    "copyright_status": "待核实",
+                    "can_public_download": "false",
+                },
+                {
+                    "id": "bio-target",
+                    "clean_title": "同作者第二本书",
+                    "author": "同一作者",
+                    "author_bio": "",
+                    "translator": "",
+                    "publisher": "",
+                    "year": "",
+                    "language": "中文",
+                    "category": "theology",
+                    "tags": "测试",
+                    "description": "第二本书自己的简介。",
+                    "table_of_contents": "",
+                    "cover_image_url": "",
+                    "preview_page_count": "0",
+                    "preview_base_url": "",
+                    "access_required": "true",
+                    "access_url": "",
+                    "copyright_status": "待核实",
+                    "can_public_download": "false",
+                },
+            ]
+            with (project / "data" / "books.csv").open(
+                "w", encoding="utf-8", newline=""
+            ) as target:
+                writer = csv.DictWriter(target, fieldnames=GENERATOR.BOOK_FIELDS)
+                writer.writeheader()
+                writer.writerows(rows)
+
+            output = project / "site"
+            GENERATOR.build_site(project, output)
+            target_detail = (output / "books" / "bio-target.html").read_text(
+                encoding="utf-8"
+            )
+
+            self.assertIn("这是一段作者简介。", target_detail)
+            self.assertIn("第二本书自己的简介。", target_detail)
+            self.assertNotIn("第一本书的简介。", target_detail)
 
     def test_multiple_authors_generate_separate_author_pages(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
