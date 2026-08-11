@@ -42,6 +42,18 @@
     return isCorruptText(text) ? "" : text;
   };
 
+  const normalizeComparableText = (value) =>
+    String(value || "")
+      .replace(/[()\[\]（）【】《》〈〉:：·.\s_-]+/g, "")
+      .trim();
+
+  const isSuspiciousShortOverride = (currentValue, overrideValue) => {
+    const current = normalizeComparableText(currentValue);
+    const override = normalizeComparableText(overrideValue);
+    if (!current || !override) return false;
+    return current.length >= override.length + 4 && current.includes(override);
+  };
+
   const categoryLabel = (category) => categoryNames[category] || category || "其他";
   const categoryLabels = (categories) => cleanList(categories).map(categoryLabel);
   const peopleList = (value) => cleanList(value);
@@ -139,6 +151,7 @@
     if (!book || !override) return book;
     const next = { ...book };
     for (const key of ["clean_title", "author", "author_bio", "translator", "publisher", "year", "description", "updated_at"]) {
+      if (key === "clean_title" && isSuspiciousShortOverride(book.clean_title, override.clean_title)) continue;
       if (override[key]) next[key] = override[key];
     }
     if (override.category) {

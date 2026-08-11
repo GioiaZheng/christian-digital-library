@@ -8,6 +8,18 @@
     const text = String(value || "").trim();
     return isCorruptText(text) ? "" : text;
   };
+
+  const normalizeComparableText = (value) =>
+    String(value || "")
+      .replace(/[()\[\]（）【】《》〈〉:：·.\s_-]+/g, "")
+      .trim();
+
+  const isSuspiciousShortOverride = (currentValue, overrideValue) => {
+    const current = normalizeComparableText(currentValue);
+    const override = normalizeComparableText(overrideValue);
+    if (!current || !override) return false;
+    return current.length >= override.length + 4 && current.includes(override);
+  };
   const cleanListValue = (value) => {
     const list = Array.isArray(value) ? value : String(value || "").split(/[;；、,，]/);
     return list.map(cleanValue).filter(Boolean).join("、");
@@ -61,7 +73,9 @@
     const author = cleanListValue(override?.authors || override?.author);
     const translator = cleanListValue(override?.translators || override?.translator);
 
-    setText("[data-live-field='clean_title']", override?.clean_title);
+    const originalTitle = String(marker.dataset.bookTitle || "").trim();
+    const titleOverride = isSuspiciousShortOverride(originalTitle, override?.clean_title) ? "" : override?.clean_title;
+    setText("[data-live-field='clean_title']", titleOverride);
     setText("[data-live-field='author']", author);
     setText("[data-live-field='description']", override?.description || "");
     setText("[data-live-field='author_bio']", override?.author_bio || "");
@@ -73,7 +87,7 @@
     renderTags(override?.tags);
     renderToc(override?.table_of_contents);
 
-    const cleanTitle = cleanValue(override?.clean_title);
+    const cleanTitle = cleanValue(titleOverride);
     if (cleanTitle) {
       document.title = `${cleanTitle}｜基督教数字图书馆`;
       document.querySelectorAll("[data-live-title-attr]").forEach((element) => {
