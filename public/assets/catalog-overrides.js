@@ -201,6 +201,32 @@
     }
   };
 
+  const authorBioForName = (name, item) => {
+    const authorName = cleanText(name);
+    const bio = cleanText(item?.author_bio);
+    const authors = peopleList(item?.author);
+    if (!authorName || !bio || !authors.includes(authorName)) return "";
+    if (authors.length === 1) return bio;
+
+    const lines = bio
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    let collecting = false;
+    const collected = [];
+    for (const line of lines) {
+      const match = line.match(/^(.{1,80}?)[：:]\s*(.*)$/);
+      if (match && authors.includes(match[1].trim())) {
+        if (collecting) break;
+        collecting = match[1].trim() === authorName;
+        if (collecting && match[2].trim()) collected.push(match[2].trim());
+        continue;
+      }
+      if (collecting) collected.push(line);
+    }
+    return collected.join("\n").trim();
+  };
+
   const getAuthorBio = async (authorName) => {
     const names = peopleList(authorName);
     if (!names.length) return "";
@@ -210,7 +236,8 @@
     });
     for (const name of names) {
       for (const item of overrides.values()) {
-        if (peopleList(item.author).includes(name) && item.author_bio) return item.author_bio;
+        const bio = authorBioForName(name, item);
+        if (bio) return bio;
       }
     }
     return "";
