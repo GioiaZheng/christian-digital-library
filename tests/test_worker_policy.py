@@ -154,6 +154,9 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("authors.includes(authorName)", override_source)
         self.assertIn("table_of_contents", override_source)
         self.assertIn("isSuspiciousShortOverride", override_source)
+        self.assertIn("isWeakMetadataOverride", override_source)
+        self.assertIn("shouldApplyCategoryOverride", override_source)
+        self.assertIn('category === "other"', override_source)
         self.assertIn("localStorage.getItem(storageKey)", override_source)
         self.assertIn("refreshOverrides().catch", override_source)
         self.assertIn("/catalog-overrides", override_source)
@@ -167,6 +170,8 @@ class WorkerPolicyTests(unittest.TestCase):
         self.assertIn("dataset.liveMetadata", live_source)
         self.assertIn("getFreshBookOverride", live_source)
         self.assertIn("isSuspiciousShortOverride", live_source)
+        self.assertIn("setTextIfStronger", live_source)
+        self.assertIn("categoryLooksWeaker", live_source)
 
     def test_access_worker_requires_secret_and_private_map(self) -> None:
         source = ACCESS_WORKER.read_text(encoding="utf-8")

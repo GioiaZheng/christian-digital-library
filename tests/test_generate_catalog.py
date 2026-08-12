@@ -138,6 +138,8 @@ class CatalogGenerationTests(unittest.TestCase):
             self.assertIn("../assets/upload-config.js", detail)
             self.assertIn("../assets/catalog-overrides.js", detail)
             self.assertIn("../assets/book-live-overrides.js", detail)
+            self.assertIn('data-book-category="theology"', detail)
+            self.assertIn('data-book-category-name="神学与教义"', detail)
             self.assertIn("../assets/access.js", detail)
             self.assertIn("../assets/book-opinions.js", detail)
             self.assertIn("../assets/image-viewer.js", detail)

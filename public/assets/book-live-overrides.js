@@ -20,6 +20,36 @@
     if (!current || !override) return false;
     return current.length >= override.length + 4 && current.includes(override);
   };
+
+  const isTyndaleSeriesTitle = (value) => {
+    const text = normalizeComparableText(value);
+    return text.includes("\u4e01\u9053\u5c14") && text.includes("\u5723\u7ecf\u6ce8\u91ca");
+  };
+
+  const isWeakMetadataOverride = (currentValue, overrideValue) => {
+    const current = normalizeComparableText(currentValue);
+    const override = normalizeComparableText(overrideValue);
+    if (!current || !override || current === override) return false;
+    if (isSuspiciousShortOverride(currentValue, overrideValue)) return true;
+    if (isTyndaleSeriesTitle(currentValue) && !isTyndaleSeriesTitle(overrideValue)) return true;
+    return override.length <= 12 && current.length >= override.length + 6;
+  };
+
+  const setTextIfStronger = (selector, currentValue, overrideValue) => {
+    if (isWeakMetadataOverride(currentValue, overrideValue)) return;
+    setText(selector, overrideValue);
+  };
+
+  const setMetadataIfStronger = (name, currentValue, overrideValue) => {
+    if (isWeakMetadataOverride(currentValue, overrideValue)) return;
+    setMetadata(name, overrideValue);
+  };
+
+  const categoryLooksWeaker = (overrideValue) => {
+    const originalCategory = String(marker.dataset.bookCategory || "").trim();
+    const category = cleanValue(overrideValue);
+    return originalCategory && originalCategory !== "other" && category === "other";
+  };
   const cleanListValue = (value) => {
     const list = Array.isArray(value) ? value : String(value || "").split(/[;；、,，]/);
     return list.map(cleanValue).filter(Boolean).join("、");
@@ -74,16 +104,21 @@
     const translator = cleanListValue(override?.translators || override?.translator);
 
     const originalTitle = String(marker.dataset.bookTitle || "").trim();
-    const titleOverride = isSuspiciousShortOverride(originalTitle, override?.clean_title) ? "" : override?.clean_title;
-    setText("[data-live-field='clean_title']", titleOverride);
-    setText("[data-live-field='author']", author);
+    const originalAuthor = String(marker.dataset.bookAuthor || "").trim();
+    const originalCategory = String(marker.dataset.bookCategoryName || marker.dataset.bookCategory || "").trim();
+    const categoryOverride = override?.category_name || override?.category;
+    const titleOverride = isWeakMetadataOverride(originalTitle, override?.clean_title) ? "" : override?.clean_title;
+    setTextIfStronger("[data-live-field='clean_title']", originalTitle, titleOverride);
+    setTextIfStronger("[data-live-field='author']", originalAuthor, author);
     setText("[data-live-field='description']", override?.description || "");
     setText("[data-live-field='author_bio']", override?.author_bio || "");
-    setMetadata("author", author);
+    setMetadataIfStronger("author", originalAuthor, author);
     setMetadata("translator", translator);
     setMetadata("publisher", override?.publisher || "");
     setMetadata("year", override?.year || "");
-    setMetadata("category", override?.category_name || override?.category);
+    if (!categoryLooksWeaker(override?.category)) {
+      setMetadataIfStronger("category", originalCategory, categoryOverride);
+    }
     renderTags(override?.tags);
     renderToc(override?.table_of_contents);
 
