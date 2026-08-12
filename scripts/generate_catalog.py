@@ -40,7 +40,7 @@ BOOK_FIELDS = [
     "can_public_download",
 ]
 ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
-ASSET_VERSION = "20260704-admin-cleanup-1"
+ASSET_VERSION = "20260704-author-pages-1"
 
 
 class CatalogError(ValueError):
@@ -505,7 +505,39 @@ def render_category_detail(
     )
 
 
-def author_records(books: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def author_bio_for_author(author: str, author_bio: str, authors: list[str]) -> str:
+    """Return the portion of an author_bio that safely belongs to one author."""
+    bio = str(author_bio or "").strip()
+    if not author or not bio:
+        return ""
+    if len(authors) == 1 and authors[0] == author:
+        return bio
+
+    # For multi-author books, avoid copying a combined biography to every author.
+    # If the text is written as "作者名：简介", use only the matching section.
+    lines = [line.strip() for line in re.split(r"\n{1,}", bio) if line.strip()]
+    collecting = False
+    collected: list[str] = []
+    author_names = set(authors)
+    heading_pattern = re.compile(r"^(.{1,80}?)[：:]\s*(.*)$")
+    for line in lines:
+        match = heading_pattern.match(line)
+        if match and match.group(1).strip() in author_names:
+            if collecting:
+                break
+            collecting = match.group(1).strip() == author
+            if collecting and match.group(2).strip():
+                collected.append(match.group(2).strip())
+            continue
+        if collecting:
+            collected.append(line)
+    return "\n".join(collected).strip()
+
+
+def author_records(
+    books: list[dict[str, Any]], bios: dict[str, str] | None = None
+) -> list[dict[str, Any]]:
+    bios = bios or author_bio_index(books)
     records: dict[str, dict[str, Any]] = {}
     for book in books:
         authors = split_people(book.get("author"))
@@ -521,10 +553,43 @@ def author_records(books: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     "books": [],
                 },
             )
-            if len(authors) == 1 and not record["bio"] and book.get("author_bio"):
-                record["bio"] = str(book["author_bio"]).strip()
+            if not record["bio"]:
+                record["bio"] = bios.get(author, "")
             record["books"].append(book)
     return sorted(records.values(), key=lambda item: sort_title(item["name"]).casefold())
+
+
+def author_bio_index(books: list[dict[str, Any]]) -> dict[str, str]:
+    """从已核过的单作者书目中抽取作者简介，供同作者页面复用。"""
+    bios: dict[str, str] = {}
+    for book in books:
+        bio = str(book.get("author_bio") or "").strip()
+        authors = split_people(book.get("author"))
+        if not bio or not authors:
+            continue
+        for author in authors:
+            author_bio = author_bio_for_author(author, bio, authors)
+            if author_bio:
+                bios.setdefault(author, author_bio)
+    return bios
+
+
+def apply_shared_author_bios(books: list[dict[str, Any]]) -> None:
+    """同一个作者的简介只维护一次，但不覆盖每本书独立的内容简介。"""
+    bios = author_bio_index(books)
+    if not bios:
+        return
+    for book in books:
+        if book.get("author_bio"):
+            continue
+        authors = split_people(book.get("author"))
+        matched = [(author, bios[author]) for author in authors if author in bios]
+        if not matched:
+            continue
+        if len(matched) == 1:
+            book["author_bio"] = matched[0][1]
+        else:
+            book["author_bio"] = "\n\n".join(f"{author}：{bio}" for author, bio in matched)
 
 
 def render_author_page(
@@ -703,7 +768,7 @@ def render_book_detail(
     )
     availability = "当前书目用于馆藏查询，文件访问按实际授权情况提供。"
     content = f"""
-    <header class="page-hero book-detail-hero" data-book-detail-id="{escape(book['id'])}" data-book-author="{escape(book['author'])}"><div class="shell book-hero-grid">
+    <header class="page-hero book-detail-hero" data-book-detail-id="{escape(book['id'])}" data-book-title="{escape(book['clean_title'])}" data-book-author="{escape(book['author'])}"><div class="shell book-hero-grid">
       <div class="book-hero-copy">
         <nav class="breadcrumbs" aria-label="面包屑"><a href="../categories.html">馆藏分类</a> / <a href="../categories/{escape(category['id'])}.html">{escape(category['name'])}</a> / 当前书目</nav>
         <p class="eyebrow">书目编号 · {escape(book['id'])}</p>
@@ -1070,6 +1135,7 @@ def build_site(root: Path = ROOT, output: Path | None = None) -> dict[str, int]:
     categories = load_categories(root / "data" / "categories.json")
     category_map = {category["id"]: category for category in categories}
     books = sorted(load_books(root / "data" / "books.csv", set(category_map)), key=book_sort_key)
+    apply_shared_author_bios(books)
     template = Template((root / "src" / "templates" / "base.html").read_text(encoding="utf-8"))
 
     if output.exists():

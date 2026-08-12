@@ -23,11 +23,35 @@
     return source
       .map((item) => String(item || "").trim())
       .filter(Boolean)
+      .filter((item) => !isCorruptText(item))
       .filter((item) => {
         if (seen.has(item)) return false;
         seen.add(item);
         return true;
       });
+  };
+
+  const isCorruptText = (value) => {
+    const text = String(value || "").trim();
+    if (!text) return false;
+    return /\?{2,}/.test(text) || /�{2,}/.test(text);
+  };
+
+  const cleanText = (value) => {
+    const text = String(value || "").trim();
+    return isCorruptText(text) ? "" : text;
+  };
+
+  const normalizeComparableText = (value) =>
+    String(value || "")
+      .replace(/[()\[\]（）【】《》〈〉:：·.\s_-]+/g, "")
+      .trim();
+
+  const isSuspiciousShortOverride = (currentValue, overrideValue) => {
+    const current = normalizeComparableText(currentValue);
+    const override = normalizeComparableText(overrideValue);
+    if (!current || !override) return false;
+    return current.length >= override.length + 4 && current.includes(override);
   };
 
   const categoryLabel = (category) => categoryNames[category] || category || "其他";
@@ -38,25 +62,25 @@
     if (!item || !/^cdl-\d{6}$/.test(String(item.id || ""))) return null;
     const categories = cleanList(item.categories || item.category);
     const tags = cleanList(item.tags);
-    const category = categories[0] || String(item.category || "").trim();
+    const category = categories[0] || cleanText(item.category);
     const names = categoryLabels(categories.length ? categories : [category]);
     return {
       ...item,
       id: String(item.id),
-      clean_title: String(item.clean_title || "").trim(),
-      author: String(item.author || "").trim(),
-      author_bio: String(item.author_bio || "").trim(),
-      translator: String(item.translator || "").trim(),
-      publisher: String(item.publisher || "").trim(),
-      year: String(item.year || "").trim(),
+      clean_title: cleanText(item.clean_title),
+      author: cleanList(item.authors || item.author).join("、"),
+      author_bio: cleanText(item.author_bio),
+      translator: cleanList(item.translators || item.translator).join("、"),
+      publisher: cleanText(item.publisher),
+      year: cleanText(item.year),
       category,
       categories,
       category_name: names[0] || categoryLabel(category),
       category_names: names,
       tags,
-      description: String(item.description || "").trim(),
+      description: cleanText(item.description),
       table_of_contents: cleanList(item.table_of_contents),
-      updated_at: String(item.updated_at || "").trim(),
+      updated_at: cleanText(item.updated_at),
     };
   };
 
@@ -127,6 +151,7 @@
     if (!book || !override) return book;
     const next = { ...book };
     for (const key of ["clean_title", "author", "author_bio", "translator", "publisher", "year", "description", "updated_at"]) {
+      if (key === "clean_title" && isSuspiciousShortOverride(book.clean_title, override.clean_title)) continue;
       if (override[key]) next[key] = override[key];
     }
     if (override.category) {
@@ -176,6 +201,32 @@
     }
   };
 
+  const authorBioForName = (name, item) => {
+    const authorName = cleanText(name);
+    const bio = cleanText(item?.author_bio);
+    const authors = peopleList(item?.author);
+    if (!authorName || !bio || !authors.includes(authorName)) return "";
+    if (authors.length === 1) return bio;
+
+    const lines = bio
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    let collecting = false;
+    const collected = [];
+    for (const line of lines) {
+      const match = line.match(/^(.{1,80}?)[：:]\s*(.*)$/);
+      if (match && authors.includes(match[1].trim())) {
+        if (collecting) break;
+        collecting = match[1].trim() === authorName;
+        if (collecting && match[2].trim()) collected.push(match[2].trim());
+        continue;
+      }
+      if (collecting) collected.push(line);
+    }
+    return collected.join("\n").trim();
+  };
+
   const getAuthorBio = async (authorName) => {
     const names = peopleList(authorName);
     if (!names.length) return "";
@@ -185,7 +236,8 @@
     });
     for (const name of names) {
       for (const item of overrides.values()) {
-        if (peopleList(item.author).includes(name) && item.author_bio) return item.author_bio;
+        const bio = authorBioForName(name, item);
+        if (bio) return bio;
       }
     }
     return "";
