@@ -15,7 +15,7 @@
 
   let cachedOverrides = null;
   let refreshPromise = null;
-  const storageKey = "cdl.catalogOverrides.v1";
+  const storageKey = "cdl.catalogOverrides.v2";
 
   const cleanList = (value) => {
     const source = Array.isArray(value) ? value : String(value || "").split(/[、,，;；\n]+/);
@@ -52,6 +52,41 @@
     const override = normalizeComparableText(overrideValue);
     if (!current || !override) return false;
     return current.length >= override.length + 4 && current.includes(override);
+  };
+
+  const isTyndaleSeriesTitle = (value) => {
+    const text = normalizeComparableText(value);
+    return text.includes("\u4e01\u9053\u5c14") && text.includes("\u5723\u7ecf\u6ce8\u91ca");
+  };
+
+  const isWeakMetadataOverride = (currentValue, overrideValue) => {
+    const current = normalizeComparableText(currentValue);
+    const override = normalizeComparableText(overrideValue);
+    if (!current || !override || current === override) return false;
+    if (isSuspiciousShortOverride(currentValue, overrideValue)) return true;
+    if (isTyndaleSeriesTitle(currentValue) && !isTyndaleSeriesTitle(overrideValue)) return true;
+    return override.length <= 12 && current.length >= override.length + 6;
+  };
+
+  const shouldApplyTextOverride = (key, book, override) => {
+    const value = override[key];
+    if (!value) return false;
+    if (key === "clean_title" && isWeakMetadataOverride(book.clean_title, value)) return false;
+    if (key === "author" && isWeakMetadataOverride(book.author, value)) return false;
+    return true;
+  };
+
+  const shouldApplyCategoryOverride = (book, override) => {
+    const category = cleanText(override?.category);
+    if (!category) return false;
+    if (book.category && book.category !== "other" && category === "other") return false;
+    return true;
+  };
+
+  const shouldApplyTagsOverride = (book, override) => {
+    if (!override?.tags?.length) return false;
+    if (Array.isArray(book.tags) && book.tags.length >= override.tags.length + 2) return false;
+    return true;
   };
 
   const categoryLabel = (category) => categoryNames[category] || category || "其他";
@@ -151,16 +186,15 @@
     if (!book || !override) return book;
     const next = { ...book };
     for (const key of ["clean_title", "author", "author_bio", "translator", "publisher", "year", "description", "updated_at"]) {
-      if (key === "clean_title" && isSuspiciousShortOverride(book.clean_title, override.clean_title)) continue;
-      if (override[key]) next[key] = override[key];
+      if (shouldApplyTextOverride(key, book, override)) next[key] = override[key];
     }
-    if (override.category) {
+    if (shouldApplyCategoryOverride(book, override)) {
       next.category = override.category;
       next.category_name = override.category_name || categoryLabel(override.category);
+      if (override.categories?.length) next.categories = override.categories;
+      if (override.category_names?.length) next.category_names = override.category_names;
     }
-    if (override.categories?.length) next.categories = override.categories;
-    if (override.category_names?.length) next.category_names = override.category_names;
-    if (override.tags?.length) next.tags = override.tags;
+    if (shouldApplyTagsOverride(book, override)) next.tags = override.tags;
     if (override.table_of_contents?.length) next.table_of_contents = override.table_of_contents;
     return next;
   };

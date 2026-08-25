@@ -40,7 +40,7 @@ BOOK_FIELDS = [
     "can_public_download",
 ]
 ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
-ASSET_VERSION = "20260704-author-pages-1"
+ASSET_VERSION = "20260825-live-overrides-1"
 
 
 class CatalogError(ValueError):
@@ -768,7 +768,7 @@ def render_book_detail(
     )
     availability = "当前书目用于馆藏查询，文件访问按实际授权情况提供。"
     content = f"""
-    <header class="page-hero book-detail-hero" data-book-detail-id="{escape(book['id'])}" data-book-title="{escape(book['clean_title'])}" data-book-author="{escape(book['author'])}"><div class="shell book-hero-grid">
+    <header class="page-hero book-detail-hero" data-book-detail-id="{escape(book['id'])}" data-book-title="{escape(book['clean_title'])}" data-book-author="{escape(book['author'])}" data-book-category="{escape(book['category'])}" data-book-category-name="{escape(category['name'])}"><div class="shell book-hero-grid">
       <div class="book-hero-copy">
         <nav class="breadcrumbs" aria-label="面包屑"><a href="../categories.html">馆藏分类</a> / <a href="../categories/{escape(category['id'])}.html">{escape(category['name'])}</a> / 当前书目</nav>
         <p class="eyebrow">书目编号 · {escape(book['id'])}</p>
