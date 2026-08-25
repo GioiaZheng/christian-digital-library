@@ -532,7 +532,31 @@ class CatalogGenerationTests(unittest.TestCase):
     def test_homepage_feature_prefers_clean_titles(self) -> None:
         self.assertFalse(GENERATOR.good_homepage_feature({"clean_title": "003cc0701 合神心意的敬拜"}))
         self.assertFalse(GENERATOR.good_homepage_feature({"clean_title": "10丁道尔"}))
+        self.assertFalse(GENERATOR.good_homepage_feature({"clean_title": "(下)新圣注(下)01"}))
         self.assertTrue(GENERATOR.good_homepage_feature({"clean_title": "个人的属灵生活"}))
+
+    def test_internal_scan_fragments_are_not_public(self) -> None:
+        visible = {
+            "id": "visible-book",
+            "clean_title": "雅各书——新约圣经注释",
+            "tags": [],
+        }
+        fragment_by_title = {
+            "id": "fragment-title",
+            "clean_title": "(下)新圣注(下)01",
+            "tags": [],
+        }
+        fragment_by_tag = {
+            "id": "fragment-tag",
+            "clean_title": "资料页（RT）",
+            "tags": ["内部资料", "分段文件"],
+        }
+
+        public_books = GENERATOR.public_books_only(
+            [fragment_by_title, visible, fragment_by_tag]
+        )
+
+        self.assertEqual([visible], public_books)
 
     def test_book_sort_key_pushes_numbered_titles_back(self) -> None:
         books = [

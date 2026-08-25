@@ -265,9 +265,32 @@ def render_book_card(
         </article>"""
 
 
+INTERNAL_BOOK_TAGS = {"内部资料", "分段文件", "资料页"}
+INTERNAL_BOOK_TITLE_PATTERNS = (
+    re.compile(r"\(R\)T", re.IGNORECASE),
+    re.compile(r"资料页(?:（RT）|\(RT\))?"),
+    re.compile(r"(?:[（(][上中下][）)])?新圣注(?:[（(][上中下][）)])?\d{1,3}"),
+)
+
+
+def is_internal_catalog_record(book: dict[str, Any]) -> bool:
+    """Return True for scan fragments or metadata pages that should not be public."""
+    title = str(book.get("clean_title") or "").strip()
+    tags = set(book.get("tags") or [])
+    if tags & INTERNAL_BOOK_TAGS:
+        return True
+    return any(pattern.fullmatch(title) for pattern in INTERNAL_BOOK_TITLE_PATTERNS)
+
+
+def public_books_only(books: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [book for book in books if not is_internal_catalog_record(book)]
+
+
 def good_homepage_feature(book: dict[str, Any]) -> bool:
     title = str(book.get("clean_title") or "").strip()
     if not title:
+        return False
+    if is_internal_catalog_record(book):
         return False
     if re.match(r"^[0-9A-Za-z]", title):
         return False
@@ -348,7 +371,6 @@ def render_home(
           </div>
         </div>
         <div id="daily-recommendations" class="grid" aria-live="polite" aria-busy="true">
-          <article class="card skeleton-card" aria-hidden="true"><span></span><span></span><span></span></article>
           <article class="card skeleton-card" aria-hidden="true"><span></span><span></span><span></span></article>
           <article class="card skeleton-card" aria-hidden="true"><span></span><span></span><span></span></article>
           <article class="card skeleton-card" aria-hidden="true"><span></span><span></span><span></span></article>
@@ -1134,8 +1156,11 @@ def build_site(root: Path = ROOT, output: Path | None = None) -> dict[str, int]:
 
     categories = load_categories(root / "data" / "categories.json")
     category_map = {category["id"]: category for category in categories}
-    books = sorted(load_books(root / "data" / "books.csv", set(category_map)), key=book_sort_key)
-    apply_shared_author_bios(books)
+    all_books = sorted(
+        load_books(root / "data" / "books.csv", set(category_map)), key=book_sort_key
+    )
+    apply_shared_author_bios(all_books)
+    books = public_books_only(all_books)
     template = Template((root / "src" / "templates" / "base.html").read_text(encoding="utf-8"))
 
     if output.exists():
