@@ -170,7 +170,7 @@ cdl-002798,三联 哈佛燕京 第四辑.历史哲学的重建,,,,,,中文,churc
 cdl-002799,三联 哈佛燕京 第四辑.心学之思 王阳明哲学的阐释,,,,,,中文,culture-society,哲学,,,,5,,true,,待核实,false
 cdl-002800,三联 哈佛燕京 第四辑.社会人类学与中国研究,,,,,,中文,culture-society,社会,,,,5,,true,,待核实,false
 cdl-002801,三联 哈佛燕京 第四辑.绵延之维,,,,,,中文,other,,,,,5,,true,,待核实,false
-cdl-002802,三联书店·文化生活译丛：教育的目的,,,,,,中文,culture-society,文化;教育,,,,5,,true,,待核实,false
+cdl-002802,教育的目的,,,,三联书店,,中文,culture-society,教育;文化生活译丛,,,,5,,true,,待核实,false
 cdl-002803,三联哈佛燕京学术丛书1994-2014,,,,,,中文,other,,,,,5,,true,,待核实,false
 cdl-004384,基督教要义（三联旧版，上中下合集）,约翰·加尔文,,,,,中文,other,系统神学;改革宗;加尔文;基督教要义,,,,5,,true,,待核实,false
 cdl-005112,提升你的讲道能力（上册）,,,,,,中文,pastoral,讲道;讲道训练;教会事奉,,,,5,,true,,待核实,false
@@ -1207,10 +1207,10 @@ cdl-003438,列王记神学注释,,,,,,中文,bible-study,注释,,,,5,,true,,待�
 cdl-003439,列王记神学注释,,,,,,中文,bible-study,注释,,,,5,,true,,待核实,false
 cdl-001615,刘三讲古生命塑造系列,品格蜡像馆,,,,,中文,other,,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001615.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001615,true,,待核实,false
 cdl-003450,刘小枫主编,道与言 华夏文化与基督文化相遇,,,,,中文,other,基督教与中国文化;思想史;文化交流,,,,5,,true,,待核实,false
-cdl-003440,刘小枫主编 历代基督教学术文库 女性主义神学景观 那片流淌着奶和蜜的土地 三联书店1995,,,,,,中文,theology,神学,,,,5,,true,,待核实,false
-cdl-003441,刘小枫主编 历代基督教学术文库 论基督徒 三联书店1995,,,,,,中文,theology,基督,,,,5,,true,,待核实,false
-cdl-003442,刘小枫主编 历代基督教学术文库 论怀疑者 哲学片断 三联书店1996,,,,,,中文,theology,基督,,,,5,,true,,待核实,false
-cdl-003443,刘小枫主编 历代基督教学术文库 论隐秘的上帝 三联书店版1996,,,,,,中文,theology,上帝;基督,,,,5,,true,,待核实,false
+cdl-003440,那片流淌着奶和蜜的土地：女性主义神学景观,,,,三联书店,1995,中文,theology,神学;女性主义神学;历代基督教学术文库,,,,5,,true,,待核实,false
+cdl-003441,论基督徒,,,,三联书店,1995,中文,theology,基督徒;神学;历代基督教学术文库,,,,5,,true,,待核实,false
+cdl-003442,论怀疑者：哲学片断,,,,三联书店,1996,中文,theology,怀疑;哲学;神学;历代基督教学术文库,,,,5,,true,,待核实,false
+cdl-003443,论隐秘的上帝,,,,三联书店,1996,中文,theology,上帝;神学;历代基督教学术文库,,,,5,,true,,待核实,false
 cdl-003444,刘小枫主编 基督教学术研究文库 02 被钉十字架的上帝 J.Moltmann,,,,,,中文,theology,上帝;十字架;基督,,,,5,,true,,待核实,false
 cdl-003445,刘小枫主编 基督教学术研究文库 03 道与言 华夏文化与基督文化相遇,,,,,,中文,theology,基督,,,,5,,true,,待核实,false
 cdl-003446,刘小枫主编 基督教学术研究文库 05 诠释学 宗教 希望 多元性与含混性,,,,,,中文,theology,基督,,,,5,,true,,待核实,false
@@ -3949,7 +3949,7 @@ cdl-005241,教会大变身：后现代教会发展新思维,,,,,,中文,theology
 cdl-005242,教会大学与神学教育,,,,,,中文,theology,神学,,,,5,,true,,待核实,false
 cdl-005243,教会大计,麦福士,,,,,中文,theology,教会,,,,5,,true,,待核实,false
 cdl-005245,教会教义学,,,,,,中文,theology,教义,,,,5,,true,,待核实,false
-cdl-005244,教会教义学 三联书店 版,卡尔巴特,,,,,中文,theology,教义,,,,5,,true,,待核实,false
+cdl-005244,教会教义学,卡尔·巴特,,,三联书店,,中文,theology,教义;系统神学;卡尔·巴特,,,,5,,true,,待核实,false
 cdl-000956,教会教义学 精选本,,,,,,中文,theology,教义,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000956.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000956,true,,待核实,false
 cdl-000409,教会教义学精义,瑞士 巴特,,,,,中文,theology,教义,,,,5,,true,,待核实,false
 cdl-001729,教会是什么,薛利,,,,,中文,theology,教会,,,,5,,true,,待核实,false
