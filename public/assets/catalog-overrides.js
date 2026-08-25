@@ -15,7 +15,7 @@
 
   let cachedOverrides = null;
   let refreshPromise = null;
-  const storageKey = "cdl.catalogOverrides.v1";
+  const storageKey = "cdl.catalogOverrides.v2";
 
   const cleanList = (value) => {
     const source = Array.isArray(value) ? value : String(value || "").split(/[、,，;；\n]+/);

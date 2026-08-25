@@ -40,7 +40,7 @@ BOOK_FIELDS = [
     "can_public_download",
 ]
 ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
-ASSET_VERSION = "20260704-author-pages-1"
+ASSET_VERSION = "20260825-live-overrides-1"
 
 
 class CatalogError(ValueError):
