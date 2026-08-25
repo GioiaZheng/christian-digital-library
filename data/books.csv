@@ -1,7 +1,7 @@
 ﻿id,clean_title,author,author_bio,translator,publisher,year,language,category,tags,description,table_of_contents,cover_image_url,preview_page_count,preview_base_url,access_required,access_url,copyright_status,can_public_download
 cdl-000028,一个不信派的标本,,,,,,中文,theology,护教;信仰辨析;自由派神学,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000028.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000028,true,,待核实,false
 cdl-000957,一个广告人的自白,,,,,,中文,culture-society,传播;广告;职场;文化,,,,5,,true,,待核实,false
-cdl-000030,一个重大的呼召——决心度敬虔圣洁的生活,劳威廉-William Law,,,,1728,中文,spiritual-life,灵修;门徒训练;敬虔生活,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000030.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000030,true,,待核实,false
+cdl-000030,一个重大的呼召——决心度敬虔圣洁的生活,劳威廉（William Law）,,,,1728,中文,spiritual-life,灵修;门徒训练;敬虔生活,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000030.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000030,true,,待核实,false
 cdl-001578,一切都更新,傅立德（Wendell Friest）,,,,,中文,spiritual-life,生命更新;灵修;信仰生活,,,,5,,true,,待核实,false
 cdl-002657,一封可以改變你一生的書信,,,,,,中文,other,福音;布道;信仰入门,,,,5,,true,,待核实,false
 cdl-001683,一掷千金的上帝,提摩太·凯勒（Timothy Keller）,提摩太·凯勒（Timothy Keller，1950-2023）是美国牧师、神学作家和纽约救赎主长老教会创办牧师。他长期关注城市宣教、福音护教、恩典神学与基督徒公共生活。,,更新传道会,,中文,theology,恩典;福音;浪子比喻;神学,本书从耶稣关于两个儿子的比喻出发，重新说明恩典、悔改与回家的福音意义，指出人逃离神的方式不只一种，而真正的归回在于被父亲丰盛的恩典接纳。,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001683.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001683,true,,版权受保护,false
@@ -109,12 +109,12 @@ cdl-002729,丁道尔：诗篇上——旧约圣经注释,柯德纳（Derek Kidne
 cdl-002730,丁道尔：诗篇下——旧约圣经注释,柯德纳（Derek Kidner）,柯德纳（Derek Kidner，1913-2008）是英国旧约学者，曾任剑桥丁道尔之家院长。他撰写多卷《丁道尔旧约圣经注释》和《圣经信息系列》，以简洁、细致的解经风格著称。,刘良淑,校园书房出版社,1995,中文,bible-study,圣经;旧约;注释;诗篇下;丁道尔;丁道尔旧约圣经注释,《丁道尔：诗篇下——旧约圣经注释》属于丁道尔旧约圣经注释系列，帮助读者理解诗篇下的历史背景、经文脉络与神学信息。,,,5,,true,,版权受保护,false
 cdl-002741,丁道尔：那鸿书、哈巴谷书、西番雅书——旧约圣经注释,贝克（David W. Baker）,贝克（David W. Baker）是旧约学者，研究旧约、闪族语文和古代近东背景，参与撰写小先知书相关注释。,潘秋松,校园书房出版社,1998,中文,bible-study,圣经;旧约;注释;那鸿书、哈巴谷书、西番雅书;丁道尔;丁道尔旧约圣经注释,《丁道尔：那鸿书、哈巴谷书、西番雅书——旧约圣经注释》属于丁道尔旧约圣经注释系列，帮助读者理解那鸿书、哈巴谷书、西番雅书的历史背景、经文脉络与神学信息。,,,5,,true,,版权受保护,false
 cdl-002733,丁道尔：雅歌——旧约圣经注释,卡洛德（G. Lloyd Carr）,卡洛德（G. Lloyd Carr）是旧约学者，撰写《雅歌》丁道尔注释，研究旧约诗歌、智慧文学和希伯来文本。,潘秋松,校园书房出版社,1994,中文,bible-study,圣经;旧约;注释;雅歌;丁道尔;丁道尔旧约圣经注释,《丁道尔：雅歌——旧约圣经注释》属于丁道尔旧约圣经注释系列，帮助读者理解雅歌的历史背景、经文脉络与神学信息。,,,5,,true,,版权受保护,false
-cdl-000033,七座山的异象,约翰尼 恩罗,,,,,中文,missions,职场宣教;国度;文化使命;异象,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000033.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000033,true,,待核实,false
-cdl-002743,万国代祷手册,万迪克 沃莫莉,,,,,中文,reference,手册,,,,5,,true,,待核实,false
+cdl-000033,七座山的异象,约翰尼·恩罗,,,,,中文,missions,职场宣教;国度;文化使命;异象,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000033.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000033,true,,待核实,false
+cdl-002743,万国代祷手册,万迪克·沃莫莉,,,,,中文,reference,手册,,,,5,,true,,待核实,false
 cdl-002744,万爱之源,,,,,,中文,spiritual-life,神的爱;灵修;信仰生活,,,,5,,true,,待核实,false
 cdl-002745,万物得到改造而不是毁灭：基督教末世论的含义,安希孟,,,,,中文,theology,基督,,,,5,,true,,待核实,false
 cdl-002746,万王之王,,,,,,中文,theology,基督;基督论;神学,,,,5,,true,,待核实,false
-cdl-000034,丈夫，天生需要帮助者,迈克尔 珀尔,,,,,中文,family-ministry,婚姻家庭;丈夫;夫妻关系,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000034.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000034,true,,待核实,false
+cdl-000034,丈夫，天生需要帮助者,迈克尔·珀尔,,,,,中文,family-ministry,婚姻家庭;丈夫;夫妻关系,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000034.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000034,true,,待核实,false
 cdl-002747,三一神論,,,,,,中文,theology,三一论;神论;系统神学,,,,5,,true,,待核实,false
 cdl-002258,三一神论,唐崇荣,,,,,中文,theology,三一论;唐崇荣;系统神学,,,,5,,true,,待核实,false
 cdl-002748,三位一体,洛兰·伯特纳,,,,,中文,theology,三位一体;神学;教义;系统神学,本书从圣经与教义传统出发，说明基督教三位一体信仰的基本内容与神学意义。,,,5,,true,,待核实,false
@@ -176,7 +176,7 @@ cdl-004384,基督教要义（三联旧版，上中下合集）,约翰·加尔文
 cdl-005112,提升你的讲道能力（上册）,,,,,,中文,pastoral,讲道;讲道训练;教会事奉,,,,5,,true,,待核实,false
 cdl-002804,上古基督教思想简史,,,,,,中文,church-history,简史,,,,5,,true,,待核实,false
 cdl-002805,上山之钥,李慕圣,,,,,中文,spiritual-life,灵修;生命成长;信仰生活,,,,5,,true,,待核实,false
-cdl-002227,上帝，为什么：黑人·苦难·恶,安东尼 平,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
+cdl-002227,上帝，为什么：黑人·苦难·恶,安东尼·平,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
 cdl-001898,上帝、世俗社会与道德的基础当代宗教哲学的探索,关启文,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
 cdl-002806,上帝与女性：传统基督教文化视野中的西方女性,,,,,,中文,theology,上帝;基督,,,,5,,true,,待核实,false
 cdl-000035,上帝为什么要向迦南人发动战争,,,,,,中文,theology,上帝,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000035.jpg,3,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000035,true,,待核实,false
@@ -191,7 +191,7 @@ cdl-002365,上帝子民的伦理学：重现申命记中的恩典社会,萊特,,
 cdl-000036,上帝子民的倫理學 申命記注釋,萊特,,,,,中文,bible-study,申命記,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000036.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000036,true,,待核实,false
 cdl-002813,上帝对亚伯拉罕的诺言,,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
 cdl-002814,上帝是为了我们还是他自己,约翰派博,,,,,中文,theology,上帝,,,,3,,true,,待核实,false
-cdl-001901,上帝是否存在,理查德德 斯温伯尔尼,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
+cdl-001901,上帝是否存在,理查德·斯温伯尔尼,,,,,中文,theology,上帝;护教;自然神学;哲学神学,,,,5,,true,,待核实,false
 cdl-002815,上帝死了，神学何为,,,,,,中文,theology,神学,,,,5,,true,,待核实,false
 cdl-002816,上帝疯狂了,,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
 cdl-001580,上帝的企管学,保罗·史蒂文斯（Paul Stevens）,,,,,中文,culture-society,职场;管理;信仰与工作,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001580.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001580,true,,待核实,false
@@ -202,21 +202,21 @@ cdl-000038,上帝的守望者,,,,,,中文,theology,上帝,,,https://christian-di
 cdl-002819,上帝的属性,,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
 cdl-002820,上帝的恩典,约翰·慕理（John Murray）,约翰·慕理（John Murray，1898-1975）是苏格兰改革宗神学家，曾任威斯敏斯特神学院系统神学教授。他在救赎论、伦理学、律法与恩典等主题上影响深远。,,,,中文,theology,恩典;救恩论;改革宗;神学,本书从改革宗神学角度讨论上帝恩典的性质、根基与施行，帮助读者认识救恩完全出于神主动而丰盛的怜悯。,,,5,,true,,版权受保护,false
 cdl-002622,上帝的神秘：卡尔·巴特与后现代神学基础,,,,,,中文,theology,神学,,,,5,,true,,待核实,false
-cdl-002426,上帝的蓝图,沃恩 罗伯茨 Vaughan Roberts,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
+cdl-002426,上帝的蓝图,沃恩·罗伯茨（Vaughan Roberts）,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
 cdl-002821,上帝的蓝图,单页,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
 cdl-002822,上帝的蓝图目录版,,,,,,中文,reference,目录,,,,5,,true,,待核实,false
-cdl-000039,上帝的起源,伊 斯克袄尔佐夫,,,,,中文,theology,上帝,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000039.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000039,true,,待核实,false
+cdl-000039,上帝的起源,伊·斯克袄尔佐夫,,,,,中文,theology,上帝,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000039.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000039,true,,待核实,false
 cdl-002823,上帝的道與歷史的動向,,,,,,中文,church-history,歷史,,,,5,,true,,待核实,false
 cdl-002645,上帝知道什么：时间与神圣知识问题,,,,,,中文,spiritual-life,与神,,,,5,,true,,待核实,false
 cdl-002824,上帝考验亚伯拉罕的爱,,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
-cdl-000040,上帝道成肉身的隐喻,约翰 希克,,,,,中文,theology,上帝;道成肉身,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000040.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000040,true,,待核实,false
+cdl-000040,上帝道成肉身的隐喻,约翰·希克,,,,,中文,theology,上帝;道成肉身,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000040.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000040,true,,待核实,false
 cdl-005348,新约正典的起源、发展和意义,麦慈格（Bruce M. Metzger）,,刘平、曹静,上海人民出版社,2008,中文,bible-study,圣经;新约;正典;圣经历史,,,,5,,true,,待核实,false
 cdl-000042,上瘾的真相：揭开瘾情，重获新生的康愈之路,王倩倩,,,,,中文,pastoral,成瘾;辅导;康复;生命更新,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000042.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000042,true,,待核实,false
 cdl-002825,上行之诗,信徒的上行历程,,,,,中文,bible-study,诗篇;灵修;信徒生命,,,,5,,true,,待核实,false
 cdl-005113,提升你的讲道能力（下册）,,,,,,中文,pastoral,讲道;讲道训练;教会事奉,,,,5,,true,,待核实,false
 cdl-002826,不为五斗米折腰：从腓立比看诚信正直,曾立华,,,,,中文,bible-study,腓立比,,,,5,,true,,待核实,false
 cdl-001845,不做陌生人,黄伯和,,,,,中文,spiritual-life,关系;团契;信仰生活,,,,5,,true,,待核实,false
-cdl-002827,不再一样,布克比 金科德,,,,,中文,spiritual-life,经历神;灵修;门徒训练;神的旨意,,,,5,,true,,待核实,false
+cdl-002827,不再一样,亨利·布克比、克劳德·金,,,,,中文,spiritual-life,经历神;灵修;门徒训练;神的旨意,,,,5,,true,,待核实,false
 cdl-002828,不再一样的领导力 亨利布克比 & 理察布克比,,,,,,中文,pastoral,领导力;教会事奉;属灵领导,,,,5,,true,,待核实,false
 cdl-001581,不再一样的领导力,亨利·布克比,,,,,中文,pastoral,领导力;教会事奉;属灵领导,,,,5,,true,,待核实,false
 cdl-002830,不列颠百科全书：国际中文版（第11卷）,,,,,,中文,reference,百科全书;工具书;参考书,,,,5,,true,,待核实,false
@@ -228,10 +228,10 @@ cdl-002835,不变的爱(玛拉基书注释),,,,,,中文,bible-study,注释;玛�
 cdl-002836,不变的爱(玛拉基书注释),,,,,,中文,bible-study,注释;玛拉基,,,,5,,true,,待核实,false
 cdl-002837,不变的爱(繁体),,,,,,中文,bible-study,玛拉基书;旧约;注释;神的爱,,,,5,,true,,待核实,false
 cdl-002405,不变的爱：玛拉基书注释,华德凯瑟,,,,,中文,bible-study,注释;玛拉基,,,,5,,true,,待核实,false
-cdl-002838,不变的爱：玛拉基书注释,华德 凯瑟,,,,,中文,bible-study,注释;玛拉基,,,,5,,true,,待核实,false
+cdl-002838,不变的爱：玛拉基书注释,华德·凯瑟,,,,,中文,bible-study,注释;玛拉基,,,,5,,true,,待核实,false
 cdl-002839,不可叫人小看你年轻,,,,,,中文,pastoral,青年;门徒训练;基督徒生活;事奉,,,,5,,true,,待核实,false
 cdl-002840,不可或缺的增长,卢家骏,,,,,中文,pastoral,教会增长;牧养;事工,,,,5,,true,,待核实,false
-cdl-001582,不可理喻的上帝：杜博生,DOBSON JAMES C,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
+cdl-001582,不可理喻的上帝,詹姆士·杜博森（James C. Dobson）,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
 cdl-002841,不可能的可能性 尼布尔的人性,,,,,,中文,theology,尼布尔;人性论;神学思想;文化研究,,,,5,,true,,待核实,false
 cdl-000006,不可能的可能性 简评尼布尔的人性观,张秀英,,,,,中文,theology,尼布尔;人性论;神学思想;文化研究,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000006.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000006,true,,待核实,false
 cdl-002842,不可虚伪,赵中辉,,,,,中文,spiritual-life,基督徒生活;诚实;灵修,,,,2,,true,,待核实,false
@@ -244,9 +244,9 @@ cdl-002846,不朽的声音：世界经典演讲,,,,,,中文,culture-society,演�
 cdl-002847,不知之云,,,,,,中文,theology,灵修;默观祈祷;神秘神学;经典,,,,5,,true,,待核实,false
 cdl-002848,不要恐惧抑郁症,,,,,,中文,culture-society,心理辅导;抑郁;医治;关怀,,,,5,,true,,待核实,false
 cdl-001992,与上帝立约,施达雄,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
-cdl-001919,与主同在,Tom O Hara s j,,,,,中文,spiritual-life,与主,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001919.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001919,true,,待核实,false
+cdl-001919,与主同在,"汤姆·奥哈拉（Tom O'Hara, S.J.）",,,,,中文,spiritual-life,与主,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001919.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001919,true,,待核实,false
 cdl-000633,与主同轭,,,,,,中文,spiritual-life,与主,,,,5,,true,,待核实,false
-cdl-001814,与众不同的圣经教学,罗依 苏克,,,,,中文,bible-study,圣经,,,,5,,true,,待核实,false
+cdl-001814,与众不同的圣经教学,罗依·苏克,,,,,中文,bible-study,圣经,,,,5,,true,,待核实,false
 cdl-002234,与你同行：默想十架苦路,卢云,,,,,中文,spiritual-life,十架苦路;默想;灵修;卢云,,,,5,,true,,待核实,false
 cdl-002849,与你同行默想十架苦路—卢云,,,,,,中文,spiritual-life,十架苦路;默想;灵修;卢云,,,,5,,true,,待核实,false
 cdl-002214,以利亚：与其得力之秘诀,F. B. 麦尔,,,,,中文,spiritual-life,以利亚;灵修;信心;圣经人物,,,,5,,true,,待核实,false
@@ -262,7 +262,7 @@ cdl-000048,与神对话 3,,,,,,中文,spiritual-life,与神,,,https://christian-
 cdl-000049,与神对话 4,,,,,,中文,spiritual-life,与神,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000049.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000049,true,,待核实,false
 cdl-000337,与神对话（二）,尼尔·唐纳德·沃尔什,,,,,中文,culture-society,灵性;宗教思想;当代宗教,,,,5,,true,,待核实,false
 cdl-000338,与神对话（三）,尼尔·唐纳德·沃尔什,,,,,中文,culture-society,灵性;宗教思想;当代宗教,,,,5,,true,,待核实,false
-cdl-000050,与神面对面,比尔 强生,,,,,中文,spiritual-life,与神,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000050.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000050,true,,待核实,false
+cdl-000050,与神面对面,比尔·强生,,,,,中文,spiritual-life,与神,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000050.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000050,true,,待核实,false
 cdl-002851,与马同跑：耶利米的非凡人生,尤金·毕德生,,,南京大学出版社,,中文,bible-study,耶利米;先知书;生命操练,,,,5,,true,,待核实,false
 cdl-000051,世界历史与救赎历史,洛维特,,,,,中文,church-history,历史,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000051.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000051,true,,待核实,false
 cdl-000052,世界在等待的門徒,斯托得,,,,,中文,spiritual-life,門徒,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000052.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000052,true,,待核实,false
@@ -274,14 +274,14 @@ cdl-002854,世界猶太人歷史,,,,,,中文,church-history,歷史,,,,5,,true,,�
 cdl-002855,世界观的故事,,,,,,中文,culture-society,世界观;文化;思想史,,,,5,,true,,待核实,false
 cdl-002856,东方的遗产,,,,,,中文,culture-society,历史;东方文明;文化,,,,5,,true,,待核实,false
 cdl-002857,东正教和东正教在中国,,,,,,中文,church-history,东正教;中国教会史;教会历史,,,,5,,true,,待核实,false
-cdl-000053,东正教教会学说概要,C H 布尔加科夫,,,,,中文,theology,教会,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000053.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000053,true,,待核实,false
-cdl-000054,东正教神学导论,弗 洛斯基,,,,,中文,theology,神学,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000054.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000054,true,,待核实,false
+cdl-000053,东正教教会学说概要,C. H. 布尔加科夫,,,,,中文,theology,教会,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000053.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000053,true,,待核实,false
+cdl-000054,东正教神学导论,弗拉基米尔·洛斯基,,,,,中文,theology,神学,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000054.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000054,true,,待核实,false
 cdl-000055,丝绸之路的音乐文化,周吉,,,,,中文,culture-society,文化,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000055.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000055,true,,待核实,false
 cdl-002858,丢人现眼的福音派,,,,,,中文,other,福音派;教会反思;公共信仰,,,,5,,true,,待核实,false
 cdl-001611,两个13亿训练手册,黄约瑟,,,,,中文,reference,手册,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001611.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001611,true,,待核实,false
 cdl-002859,两河流域史前时代,,,,,,中文,culture-society,古代近东;历史;考古,,,,5,,true,,待核实,false
 cdl-002860,两种上帝,,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
-cdl-002417,两种上帝：弗洛伊德的问题，鲁益师的回答,尼可里 Armand M Nicholi Jr,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
+cdl-002417,两种上帝：弗洛伊德的问题，鲁益师的回答,阿曼德·尼可利（Armand M. Nicholi Jr.）,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
 cdl-002861,两种智慧(雅各书),,,,,,中文,bible-study,雅各书,,,,5,,true,,待核实,false
 cdl-002862,两种智慧(雅各书),,,,,,中文,bible-study,雅各书,,,,5,,true,,待核实,false
 cdl-002863,两约中间史略,,,,,,中文,culture-society,两约中间期;圣经历史;犹太背景,,,,5,,true,,待核实,false
@@ -291,7 +291,7 @@ cdl-000916,个人布道,,,,,,中文,missions,布道,,,https://christian-digital-
 cdl-000001,个人的属灵生活,,,,,,中文,spiritual-life,属灵生活;属灵,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000001.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000001,true,,待核实,false
 cdl-002866,个体的人：祁克果的基督教生存论思想,,,,,,中文,theology,基督,,,,5,,true,,待核实,false
 cdl-000354,中世纪上帝的文化,张绥,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
-cdl-002574,中世纪教会史,毕尔麦尔 等 宗教文化,,,,,中文,church-history,教会史,,,,5,,true,,待核实,false
+cdl-002574,中世纪教会史,毕尔麦尔等,,,宗教文化出版社,,中文,church-history,教会史,,,,5,,true,,待核实,false
 cdl-000638,中世纪教育文选,,,,,,中文,culture-society,教育,,,,5,,true,,待核实,false
 cdl-000639,中俄廣告修辭策略對比分析,高雯君,,,,,中文,culture-society,广告;修辞;比较研究,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000639.jpg,1,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000639,true,,待核实,false
 cdl-000640,中国上古神话通论,,,,,,中文,culture-society,中国神话;上古文化;文化研究,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000640.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000640,true,,待核实,false
@@ -314,7 +314,7 @@ cdl-002871,中国天主教史人物传,方豪,,,,,中文,other,天主教;中国�
 cdl-002872,中国天主教史论丛,方豪,,,,,中文,culture-society,天主教;中国教会史;历史研究,,,,5,,true,,待核实,false
 cdl-001585,中国教会史论文集,赵天恩,,,,,中文,church-history,教会史,,,,5,,true,,待核实,false
 cdl-002656,中国文化与基督教,,,,,,中文,theology,基督,,,,5,,true,,待核实,false
-cdl-002873,中国文化与基督教的冲撞,J 谢和耐,,,,,中文,theology,基督,,,,5,,true,,待核实,false
+cdl-002873,中国文化与基督教的冲撞,谢和耐（Jacques Gernet）,,,,,中文,culture-society,中国文化;基督教;文化交流;历史研究,,,,5,,true,,待核实,false
 cdl-001586,中国文化处境的神学反思：梁燕城,徐济时,,,,,中文,theology,神学,,,,5,,true,,待核实,false
 cdl-000726,中国景教 中国古代基督教研究,朱谦之,,,,,中文,theology,基督,,,,5,,true,,待核实,false
 cdl-000058,中国现代哲学史资料汇编,,,,,,中文,culture-society,哲学,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000058.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000058,true,,待核实,false
@@ -354,7 +354,7 @@ cdl-002877,丰盛教会的故事,,,,,,中文,theology,教会,,,,5,,true,,待核�
 cdl-000076,丰盛的恩典,班扬,,,,,中文,theology,恩典,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000076.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000076,true,,待核实,false
 cdl-002879,丰盛的恩典,,,,,,中文,theology,恩典,,,,5,,true,,待核实,false
 cdl-002878,丰盛的恩典,约翰·班扬,,,,,中文,spiritual-life,恩典;约翰·班扬;灵修;基督徒生活,,,,5,,true,,待核实,false
-cdl-001602,丰盛的敬拜 1993：梅智理,MOYE JERRY,,,,,中文,spiritual-life,敬拜,,,,5,,true,,待核实,false
+cdl-001602,丰盛的敬拜,梅智理（Jerry Moye）,,,,,中文,spiritual-life,敬拜;赞美;教会生活,,,,5,,true,,待核实,false
 cdl-002880,丰盛的生命,,,,,,中文,spiritual-life,生命成长;灵修;基督徒生活,,,,5,,true,,待核实,false
 cdl-000077,为主受苦,魏恩波,,,,,中文,other,受苦;逼迫;见证;基督徒生活,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000077.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000077,true,,待核实,false
 cdl-000914,为主忠心服事老年人,,,,,,中文,pastoral,老人事工;教会事奉;牧养关怀,,,,5,,true,,待核实,false
@@ -370,7 +370,7 @@ cdl-002889,为何不是短歌 为何是圣诗,,,,,,中文,spiritual-life,圣诗;
 cdl-000078,为何我们今日需要读清教徒,,,,,,中文,church-history,清教徒,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000078.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000078,true,,待核实,false
 cdl-002890,为何我们今日需要读清教徒,,,,,,中文,church-history,清教徒,,,,5,,true,,待核实,false
 cdl-001639,为何教会不像样,陈喜谦,,,,,中文,theology,教会,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001639.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001639,true,,待核实,false
-cdl-000079,为何是他,提姆 凯勒,,,,,中文,theology,护教;信仰疑问;怀疑主义;提摩太凯勒,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000079.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000079,true,,待核实,false
+cdl-000079,为何是他,提姆·凯勒,,,,,中文,theology,护教;信仰疑问;怀疑主义;提摩太凯勒,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000079.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000079,true,,待核实,false
 cdl-002891,为何要传福音 唐崇荣,,,,,,中文,missions,传福音,,,,5,,true,,待核实,false
 cdl-002893,为婚姻立界线,,,,,,中文,family-ministry,婚姻,,,,5,,true,,待核实,false
 cdl-002892,为婚姻立界线：下一个男人或女人真的会更好吗,,,,,,中文,family-ministry,婚姻;家庭;界线,,,,5,,true,,待核实,false
@@ -379,9 +379,9 @@ cdl-002895,为工作立界线,,,,,,中文,culture-society,职场;界线;工作�
 cdl-002343,为真理而战,史托德,,,,,中文,theology,护教;真理;福音派;史托德,,,,5,,true,,待核实,false
 cdl-002896,为真道而战—提摩太后书—史托德,,,,,,中文,bible-study,提摩太,,,,5,,true,,待核实,false
 cdl-001640,为神赢得我们的城市：如何攻破属灵的坚固营垒,约翰·道生,,,,,中文,missions,城市;宣教;属灵争战,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001640.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001640,true,,待核实,false
-cdl-001894,为神赢得我们的城市：如何攻破属灵的坚固营垒,约翰 道生,,,,,中文,spiritual-life,属灵,,,,5,,true,,待核实,false
+cdl-001894,为神赢得我们的城市：如何攻破属灵的坚固营垒,约翰·道生,,,,,中文,spiritual-life,属灵,,,,5,,true,,待核实,false
 cdl-002897,为约会立界线,,,,,,中文,family-ministry,恋爱;界线;婚姻家庭;心理辅导,,,,5,,true,,待核实,false
-cdl-001962,为自己出征,Robert Fisher,,,,,中文,culture-society,自我成长;寓言;心理,,,,5,,true,,待核实,false
+cdl-001962,为自己出征,罗伯特·费希尔（Robert Fisher）,,,,,中文,culture-society,自我成长;寓言;心理,,,,5,,true,,待核实,false
 cdl-002898,为谁辛苦为谁忙,,,,,,中文,spiritual-life,事奉;人生;信仰生活,,,,5,,true,,待核实,false
 cdl-002899,为青少年立界线,,,,,,中文,family-ministry,青少年,,,,5,,true,,待核实,false
 cdl-002900,为青少年立界线,,,,,,中文,family-ministry,青少年,,,,5,,true,,待核实,false
@@ -402,11 +402,11 @@ cdl-001149,主耶稣与神的国度,卡森,,,,,中文,spiritual-life,与神,,,,5
 cdl-000657,主耶稣基督的宝血,,,,,,中文,theology,基督,,,,5,,true,,待核实,false
 cdl-002903,主耶稣基督的宝血,麦卫真,,,,,中文,theology,基督,,,,5,,true,,待核实,false
 cdl-000658,主耶稣的比喻,,,,,,中文,bible-study,耶稣比喻;福音书;释经;圣经研究,,,,5,,true,,待核实,false
-cdl-002416,主耶稣的比喻,斯诺德格拉斯 Klyne R Snodgrass,,,,,中文,bible-study,耶稣比喻;福音书;释经;圣经研究,,,,5,,true,,待核实,false
+cdl-002416,主耶稣的比喻,克莱恩·斯诺德格拉斯（Klyne R. Snodgrass）,,,,,中文,bible-study,耶稣比喻;福音书;释经;圣经研究,,,,5,,true,,待核实,false
 cdl-002904,主耶稣的比喻,斯诺德格拉斯,,,,,中文,bible-study,耶稣比喻;福音书;释经;圣经研究,,,,5,,true,,待核实,false
 cdl-000659,主耶稣的比喻系列课程,,,,,,中文,bible-study,耶稣比喻;福音书;课程;圣经研究,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000659.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000659,true,,待核实,false
 cdl-000660,主耶稣的画像,,,,,,中文,bible-study,耶稣;基督论;福音书,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000660.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000660,true,,待核实,false
-cdl-002020,主耶稣的画像,博克 Darrell L Bock,,,,,中文,bible-study,耶稣;基督论;福音书;圣经研究,,,,5,,true,,待核实,false
+cdl-002020,主耶稣的画像,达雷尔·博克（Darrell L. Bock）,,,,,中文,bible-study,耶稣;基督论;福音书;圣经研究,,,,5,,true,,待核实,false
 cdl-000939,主耶穌幫助我學生本,,,,,,中文,pastoral,儿童教材;主日学;门徒训练,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000939.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000939,true,,待核实,false
 cdl-000661,主耶稣与祂的朋友,,,,,,中文,spiritual-life,耶稣;门徒;灵修;信仰生活,,,,5,,true,,待核实,false
 cdl-000662,主耶穌與神的國度,,,,,,中文,spiritual-life,與神,,,,5,,true,,待核实,false
@@ -440,16 +440,16 @@ cdl-002917,买不停：基督徒消费探索,,,,,,中文,culture-society,消费�
 cdl-002918,了解和赢得泛灵论者,,,,,,中文,missions,泛灵论;宣教;跨文化,,,,5,,true,,待核实,false
 cdl-002919,了解学生,播道,,,,,中文,pastoral,学生事工;教育;牧养,,,,5,,true,,待核实,false
 cdl-001587,争战的祷告：彼得,魏格纳,,,,,中文,spiritual-life,祷告,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001587.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001587,true,,待核实,false
-cdl-000081,争战的赞美,罗伯 盖恩,,,,,中文,spiritual-life,赞美,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000081.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000081,true,,待核实,false
+cdl-000081,争战的赞美,罗伯·盖恩,,,,,中文,spiritual-life,赞美,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000081.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000081,true,,待核实,false
 cdl-002920,事奉神：基督徒的生活侍奉,克兰菲德,,,,,中文,theology,基督,,,,5,,true,,待核实,false
 cdl-002921,二元论与三元论的人观探讨 于忠纶,,,,,,中文,theology,人论;系统神学;神学争议,,,,5,,true,,待核实,false
 cdl-002922,二十一世纪宗教与文明新探,,,,,,中文,culture-society,宗教,,,,0,,true,,待核实,false
 cdl-002923,二十一世纪旧约导论,,,,,,中文,bible-study,旧约,,,,0,,true,,待核实,false
-cdl-000082,二十世纪宗教思想,约翰 麦奎利,,,,,中文,culture-society,宗教,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000082.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000082,true,,待核实,false
+cdl-000082,二十世纪宗教思想,约翰·麦奎利,,,,,中文,culture-society,宗教,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000082.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000082,true,,待核实,false
 cdl-002924,二十世纪宗教思想,约翰·麦奎利,,,,,中文,theology,宗教思想;现代神学;二十世纪神学,,,,5,,true,,待核实,false
 cdl-002925,二十世纪旧约导论,,,,,,中文,bible-study,旧约,,,,5,,true,,待核实,false
 cdl-000083,二十世纪神学评介,葛伦斯vs奥尔森,,,,,中文,theology,神学,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000083.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000083,true,,待核实,false
-cdl-002926,二十世纪神学评介,葛伦斯 奥尔森,,,,,中文,theology,神学,,,,5,,true,,待核实,false
+cdl-002926,二十世纪神学评介,史丹利·葛伦斯、罗杰·奥尔森,,,,,中文,theology,神学,,,,5,,true,,待核实,false
 cdl-000084,二十世纪西方宗教哲学文选,刘小枫,,,,,中文,culture-society,哲学;宗教,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000084.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000084,true,,待核实,false
 cdl-001715,二十世纪马太福音研究文集,黄根春,,,,,中文,bible-study,马太福音,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001715.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001715,true,,待核实,false
 cdl-002927,二十世纪马太福音研究文集,黄根春选,,,,,中文,bible-study,马太福音,,,,5,,true,,待核实,false
@@ -503,7 +503,7 @@ cdl-002960,亲爱主 牵我手,卢云,,,,,中文,spiritual-life,祷告;灵修;�
 cdl-002237,亲爱主，牵我手：认识祷告真义,卢云,,,,,中文,spiritual-life,祷告,,,,5,,true,,待核实,false
 cdl-002961,亲爱的别把上帝缩小了,,,,,,中文,theology,上帝,,,,5,,true,,待核实,false
 cdl-002962,亲眼见你 十个扭转性的祷告,,,,,,中文,spiritual-life,祷告,,,,5,,true,,待核实,false
-cdl-000090,人之废,C. S. 路易斯,,,,,中文,culture-society,伦理;教育;文化批判;C.S.路易斯,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000090.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000090,true,,待核实,false
+cdl-000090,人之废,C.S. 路易斯,,,,,中文,culture-society,伦理;教育;文化批判;C.S.路易斯,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000090.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000090,true,,待核实,false
 cdl-001696,人啊，你往何处去,葛培理,,,,,中文,other,福音;布道;人生意义;葛培理,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001696.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001696,true,,待核实,false
 cdl-002963,人如何改变 在恩典中经历蜕变的喜乐,,,,,,中文,theology,恩典,,,,5,,true,,待核实,false
 cdl-002964,人性与神性的激荡,,,,,,中文,spiritual-life,与神,,,,5,,true,,待核实,false
@@ -590,8 +590,8 @@ cdl-003017,从女性主义视角看生命伦理学,鲁琳,,,,,中文,culture-soc
 cdl-003018,从女性主义角度诠释路得记和以斯帖记中的女性角色,,,,,,中文,bible-study,路得记;以斯帖,,,,5,,true,,待核实,false
 cdl-003019,从属灵领袖摩西谈起,,,,,,中文,spiritual-life,属灵,,,,5,,true,,待核实,false
 cdl-003022,从属灵领袖摩西谈起,,,,,,中文,spiritual-life,属灵,,,,5,,true,,待核实,false
-cdl-000095,从岁首到年终,C S 路易斯,,,,,中文,spiritual-life,灵修;每日默想;C.S.路易斯,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000095.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000095,true,,待核实,false
-cdl-003023,从岁首到年终,C S Lewis,,,,,中文,spiritual-life,灵修;每日默想;C.S.路易斯,,,,5,,true,,待核实,false
+cdl-000095,从岁首到年终,C.S. 路易斯,,,,,中文,spiritual-life,灵修;每日默想;C.S.路易斯,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000095.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000095,true,,待核实,false
+cdl-003023,从岁首到年终,C.S. 路易斯,,,,,中文,spiritual-life,灵修;每日默想;C.S.路易斯,,,,5,,true,,待核实,false
 cdl-003024,从岁首到年终路易斯,,,,,,中文,spiritual-life,灵修;每日默想;C.S.路易斯,,,,5,,true,,待核实,false
 cdl-006768,从希伯来书看基督徒的卓越生命,非凡信仰,,,,,中文,bible-study,希伯来书,,,,5,,true,,待核实,false
 cdl-002175,从幻想到祈祷,卢云,,,,,中文,spiritual-life,卢云;祷告;灵修,,,,5,,true,,待核实,false
@@ -636,7 +636,7 @@ cdl-003050,从路加著作看颠覆现实的基督信仰,,,,,,中文,theology,�
 cdl-003051,从路加著作看颠覆现实的基督信仰,鲍维均,,,,,中文,theology,基督;信仰,,,,5,,true,,待核实,false
 cdl-000100,从释经到讲道,桂丹诺,,,,,中文,bible-study,释经,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000100.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000100,true,,待核实,false
 cdl-001183,从释经到讲道,桂丹诺,,,,,中文,bible-study,释经,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001183.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001183,true,,待核实,false
-cdl-003052,从释经到讲道,桂丹诺 加尔文,,,,,中文,bible-study,释经,,,,5,,true,,待核实,false
+cdl-003052,从释经到讲道,桂丹诺（Sidney Greidanus）,,,,,中文,bible-study,释经,,,,5,,true,,待核实,false
 cdl-003053,从释经到讲道,,,,,,中文,bible-study,释经,,,,5,,true,,待核实,false
 cdl-003054,从释经学到生活应用,陆苏河,,,,,中文,bible-study,释经,,,,5,,true,,待核实,false
 cdl-000101,从马礼逊到司徒雷登,,,,,,中文,church-history,马礼逊,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000101.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000101,true,,待核实,false
@@ -659,7 +659,7 @@ cdl-000201,以基督为中心的释经讲章,君王的使者,,,,,中文,bible-st
 cdl-003068,以基督仆人的心志学习神学,,,,,,中文,theology,神学,,,,5,,true,,待核实,false
 cdl-003069,以弗所,,,,,,中文,bible-study,以弗所,,,,5,,true,,待核实,false
 cdl-001352,以弗所书,,,,,,中文,bible-study,以弗所,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-001352.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-001352,true,,待核实,false
-cdl-001721,以弗所书,约翰 斯托得,,,,,中文,bible-study,以弗所,,,,5,,true,,待核实,false
+cdl-001721,以弗所书,约翰·斯托得,,,,,中文,bible-study,以弗所,,,,5,,true,,待核实,false
 cdl-003072,以弗所书,斯托得,,,,,中文,bible-study,以弗所,,,,5,,true,,待核实,false
 cdl-003073,以弗所书,冯国泰,,,,,中文,bible-study,以弗所,,,,5,,true,,待核实,false
 cdl-003076,以弗所书,,,,,,中文,bible-study,以弗所,,,,5,,true,,待核实,false
@@ -693,7 +693,7 @@ cdl-003092,以斯拉记 马太亨利,,,,,,中文,bible-study,以斯拉,,,,5,,tru
 cdl-003093,以斯拉记——天道圣经注释,区应毓,区应毓是华人圣经学者与教会领袖，曾任加拿大华人神学院院长。他长期从事圣经教学、教会牧养和旧约历史书研究。,无,天道书楼,1998,中文,bible-study,圣经;旧约;以斯拉记;注释;天道圣经注释,本书属于《天道圣经注释》系列，从历史考据、文体结构和神学信息等方面解释以斯拉记。,,,5,,true,,版权受保护,false
 cdl-003094,以斯拉记、尼希米记、以斯帖记,华候活,,,,,中文,bible-study,以斯拉;尼希米;以斯帖,,,,5,,true,,待核实,false
 cdl-003095,以斯拉记、尼希米记、以斯帖记,,,,,,中文,bible-study,以斯拉;尼希米;以斯帖,,,,5,,true,,待核实,false
-cdl-003096,以斯拉记、尼希米记、以斯帖记,盖瑞 史密斯,,,,,中文,bible-study,以斯拉;尼希米;以斯帖,,,,5,,true,,待核实,false
+cdl-003096,以斯拉记、尼希米记、以斯帖记,盖瑞·史密斯,,,,,中文,bible-study,以斯拉;尼希米;以斯帖,,,,5,,true,,待核实,false
 cdl-003097,以斯拉记、尼希米记、以斯贴记,华候活,,,,,中文,bible-study,以斯拉;尼希米,,,,5,,true,,待核实,false
 cdl-003098,以斯拉记、尼西米记、以斯帖记全套课程,,,,,,中文,bible-study,以斯拉;以斯帖,,,,5,,true,,待核实,false
 cdl-000104,以神为本,许宏,,,,,中文,theology,神本主义;基督徒生活;神学,,,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/covers/cdl-000104.jpg,5,https://christian-digital-library-assets.gioia-zheng-stud.workers.dev/previews/cdl-000104,true,,待核实,false
