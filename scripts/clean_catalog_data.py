@@ -45,6 +45,49 @@ CHINESE_VOLUME_NUMERALS = {
     "10": "十",
 }
 
+TAG_ALIASES = {
+    "聖經": "圣经", "舊約": "旧约", "新約": "新约", "註釋": "注释", "釋經": "释经", "研經": "研经",
+    "創世記": "创世记", "出埃及記": "出埃及记", "利未記": "利未记", "民數記": "民数记",
+    "申命記": "申命记", "詩篇": "诗篇", "傳道書": "传道书", "啟示錄": "启示录",
+    "羅馬書": "罗马书", "約翰福音": "约翰福音", "使徒行傳": "使徒行传",
+    "歷史": "历史", "聖靈": "圣灵", "歌羅西": "歌罗西书", "馬太福音": "马太福音",
+    "馬可福音": "马可福音", "解經": "解经", "傳福音": "传福音", "傳道": "传道",
+    "古蘭經": "古兰经", "聖經輔導": "圣经辅导", "加拉太": "加拉太书",
+    "以弗所": "以弗所书", "腓立比": "腓立比书", "歌罗西": "歌罗西书",
+}
+
+BIBLE_BOOK_TAGS = {
+    "创世记": "旧约", "出埃及记": "旧约", "利未记": "旧约", "民数记": "旧约", "申命记": "旧约",
+    "约书亚记": "旧约", "士师记": "旧约", "路得记": "旧约", "撒母耳记": "旧约", "列王纪": "旧约",
+    "历代志": "旧约", "以斯拉记": "旧约", "尼希米记": "旧约", "以斯帖记": "旧约", "约伯记": "旧约",
+    "诗篇": "旧约", "箴言": "旧约", "传道书": "旧约", "雅歌": "旧约", "以赛亚书": "旧约",
+    "耶利米书": "旧约", "耶利米哀歌": "旧约", "以西结书": "旧约", "但以理书": "旧约", "何西阿书": "旧约",
+    "约珥书": "旧约", "阿摩司书": "旧约", "俄巴底亚书": "旧约", "约拿书": "旧约", "弥迦书": "旧约",
+    "那鸿书": "旧约", "哈巴谷书": "旧约", "西番雅书": "旧约", "哈该书": "旧约", "撒迦利亚书": "旧约",
+    "玛拉基书": "旧约", "马太福音": "新约", "马可福音": "新约", "路加福音": "新约", "约翰福音": "新约",
+    "使徒行传": "新约", "罗马书": "新约", "哥林多前书": "新约", "哥林多后书": "新约", "加拉太书": "新约",
+    "以弗所书": "新约", "腓立比书": "新约", "歌罗西书": "新约", "帖撒罗尼迦前书": "新约", "帖撒罗尼迦后书": "新约",
+    "提摩太前书": "新约", "提摩太后书": "新约", "提多书": "新约", "腓利门书": "新约", "希伯来书": "新约",
+    "雅各书": "新约", "彼得前书": "新约", "彼得后书": "新约", "约翰一书": "新约", "约翰二书": "新约",
+    "约翰三书": "新约", "犹大书": "新约", "启示录": "新约",
+}
+
+SUBJECT_TAG_HINTS = {
+    "末世论": ("末世论",), "终末论": ("末世论",), "圣经神学": ("圣经神学",),
+    "系统神学": ("系统神学",), "教义学": ("教义学",), "护教学": ("护教学",),
+    "基督教伦理": ("基督教伦理",), "伦理学": ("伦理学",), "教会史": ("教会史",),
+    "基督教史": ("基督教史",), "景教": ("景教", "中国基督教史"), "宗教改革": ("宗教改革",),
+    "东正教": ("东正教",), "灵修": ("灵修",), "祷告": ("祷告",), "门徒": ("门徒训练",),
+    "婚姻": ("婚姻",), "家庭": ("家庭",), "辅导": ("辅导",), "宣教": ("宣教",),
+    "讲道": ("讲道",), "释经": ("释经",), "研经": ("研经",), "注释": ("注释",),
+    "无误": ("圣经无误",), "默示": ("圣经默示",), "三一": ("三一论",),
+    "基督论": ("基督论",), "救恩": ("救恩论",), "称义": ("称义",), "圣灵": ("圣灵论",),
+    "教会论": ("教会论",), "创造": ("创造论",), "罪论": ("罪论",),
+    "巴特": ("卡尔·巴特",), "祁克果": ("祁克果",), "加尔文": ("加尔文",), "路德": ("马丁·路德",),
+}
+
+OVERLY_GENERIC_TAGS = {"其他", "待核实", "书名待核", "作者待核", "基督教"}
+
 
 def split_title_author_suffix(title: str) -> tuple[str, str] | None:
     """处理“书名：作者：2”这类从文件名导入来的重复尾巴。"""
@@ -91,6 +134,35 @@ def infer_category(title: str, current: str) -> str:
     if "尽心认识神" in title or "神的旨意" in title:
         return "spiritual-life"
     return current or "other"
+
+def normalize_tags(title: str, current_tags: str) -> str:
+    """统一标签写法，并从题名补充可以确定的主题。"""
+    tags = []
+    for raw_tag in re.split(r"[;；,，]", current_tags):
+        tag = TAG_ALIASES.get(raw_tag.strip(), raw_tag.strip())
+        if tag and tag not in OVERLY_GENERIC_TAGS and tag not in tags:
+            tags.append(tag)
+
+    normalized_title = title
+    for old_tag, new_tag in TAG_ALIASES.items():
+        normalized_title = normalized_title.replace(old_tag, new_tag)
+
+    for book, testament in BIBLE_BOOK_TAGS.items():
+        if book in normalized_title:
+            for tag in (book, testament):
+                if tag not in tags:
+                    tags.append(tag)
+
+    for hint, inferred_tags in SUBJECT_TAG_HINTS.items():
+        if hint in normalized_title:
+            for tag in inferred_tags:
+                if tag not in tags:
+                    tags.append(tag)
+
+    if len(tags) > 1:
+        tags = [tag for tag in tags if tag not in {"基督", "神学", "圣经"}]
+
+    return ";".join(tags)
 
 
 def clean_row(row: dict[str, str]) -> bool:
@@ -155,7 +227,7 @@ def clean_row(row: dict[str, str]) -> bool:
         for hint in ("圣经", "注释", "研经"):
             if hint in row["clean_title"] and hint not in tags:
                 tags.append(hint)
-    row["tags"] = ";".join(dict.fromkeys(tag.strip() for tag in tags if tag.strip()))
+    row["tags"] = normalize_tags(row["clean_title"], ";".join(tags))
 
     return row != before
 
@@ -171,8 +243,8 @@ def clean_books(path: Path) -> int:
         if clean_row(row):
             changed += 1
 
-    with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+    with path.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 

@@ -1,9 +1,19 @@
 import unittest
 
-from scripts.clean_catalog_data import clean_row
+from scripts.clean_catalog_data import clean_row, normalize_tags
 
 
 class CleanCatalogDataTest(unittest.TestCase):
+    def test_normalizes_and_enriches_subject_tags(self):
+        tags = normalize_tags("丁道尔：彼得前书——新约圣经注释", "聖經;註釋;其他")
+        self.assertEqual(tags, "注释;彼得前书;新约")
+
+    def test_keeps_uncertain_existing_tag_without_guessing(self):
+        self.assertEqual(normalize_tags("不可言说的言说", "语言哲学"), "语言哲学")
+
+    def test_adds_clear_theological_subjects_from_title(self):
+        self.assertEqual(normalize_tags("基督教末世论的含义", "基督"), "末世论")
+
     def test_repairs_parent_ing_time_split(self):
         row = {
             "id": "cdl-test",
