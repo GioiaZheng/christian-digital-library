@@ -270,6 +270,7 @@ INTERNAL_BOOK_TITLE_PATTERNS = (
     re.compile(r"\(R\)T", re.IGNORECASE),
     re.compile(r"资料页(?:（RT）|\(RT\))?"),
     re.compile(r"(?:[（(][上中下][）)])?新圣注(?:[（(][上中下][）)])?\d{1,3}"),
+    re.compile(r"(?:.*[：:])?书名待核"),
 )
 
 
@@ -282,8 +283,50 @@ def is_internal_catalog_record(book: dict[str, Any]) -> bool:
     return any(pattern.fullmatch(title) for pattern in INTERNAL_BOOK_TITLE_PATTERNS)
 
 
+def normalized_catalog_value(value: Any) -> str:
+    """Normalize catalog text for conservative duplicate matching."""
+    return re.sub(
+        r"[\s:：·,，。._—\-（）()《》〈〉\[\]]+",
+        "",
+        str(value or ""),
+    ).casefold()
+
+
+def public_book_identity(book: dict[str, Any]) -> tuple[str, ...]:
+    """Return the edition-level identity used to collapse duplicate imports."""
+    return tuple(
+        normalized_catalog_value(book.get(field))
+        for field in ("clean_title", "author", "translator", "publisher", "year")
+    )
+
+
+def public_book_quality(book: dict[str, Any]) -> tuple[int, int]:
+    """Score duplicate records by useful public metadata and preview coverage."""
+    useful_fields = (
+        "author", "author_bio", "translator", "publisher", "year",
+        "description", "table_of_contents", "cover_image_url",
+        "preview_base_url", "access_url",
+    )
+    completeness = sum(bool(book.get(field)) for field in useful_fields)
+    preview_pages = int(book.get("preview_page_count") or 0)
+    return completeness, preview_pages
+
+
 def public_books_only(books: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [book for book in books if not is_internal_catalog_record(book)]
+    visible = [book for book in books if not is_internal_catalog_record(book)]
+    selected: dict[tuple[str, ...], dict[str, Any]] = {}
+    order: list[tuple[str, ...]] = []
+
+    for book in visible:
+        identity = public_book_identity(book)
+        if identity not in selected:
+            selected[identity] = book
+            order.append(identity)
+            continue
+        if public_book_quality(book) > public_book_quality(selected[identity]):
+            selected[identity] = book
+
+    return [selected[identity] for identity in order]
 
 
 def good_homepage_feature(book: dict[str, Any]) -> bool:
