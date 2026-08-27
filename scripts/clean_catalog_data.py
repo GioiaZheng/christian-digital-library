@@ -88,6 +88,22 @@ SUBJECT_TAG_HINTS = {
 
 OVERLY_GENERIC_TAGS = {"其他", "待核实", "书名待核", "作者待核", "基督教"}
 
+# 只用主题含义明确、不会轻易跨分类的标签清理“其他”。这些规则不覆盖已经
+# 人工归类的书目，也刻意排除“创造论”等容易由普通书名误推出来的标签。
+CATEGORY_TAG_RULES = (
+    ("reference", {"辞典", "百科", "工具书", "索引"}),
+    ("church-history", {"中国教会史", "教会史", "宗教改革"}),
+    ("missions", {"布道", "宣教", "差传"}),
+    ("pastoral", {"圣经辅导", "教会治理", "牧养", "讲道"}),
+    ("family-ministry", {"婚姻", "亲子", "家庭事工"}),
+    ("bible-study", set(BIBLE_BOOK_TAGS) | {"释经", "注释", "研经"}),
+    (
+        "theology",
+        {"救恩论", "系统神学", "基督论", "三一论", "护教学", "教义学", "末世论", "圣灵论", "教会论", "罪论"},
+    ),
+    ("spiritual-life", {"属灵操练", "灵修", "祷告", "默想", "门徒训练"}),
+)
+
 
 def split_title_author_suffix(title: str) -> tuple[str, str] | None:
     """处理“书名：作者：2”这类从文件名导入来的重复尾巴。"""
@@ -126,9 +142,13 @@ def normalize_person_field(value: str) -> str:
     return re.sub(r"\s+", " ", value).strip(" ：:")
 
 
-def infer_category(title: str, current: str) -> str:
+def infer_category(title: str, current: str, current_tags: str = "") -> str:
     if current and current != "other":
         return current
+    tags = {tag.strip() for tag in re.split(r"[;；,，]", current_tags) if tag.strip()}
+    for category, category_tags in CATEGORY_TAG_RULES:
+        if tags & category_tags:
+            return category
     if any(hint in title for hint in BIBLE_STUDY_HINTS):
         return "bible-study"
     if "尽心认识神" in title or "神的旨意" in title:
@@ -220,7 +240,8 @@ def clean_row(row: dict[str, str]) -> bool:
         if field in row:
             row[field] = normalize_person_field(row.get(field, ""))
 
-    row["category"] = infer_category(row["clean_title"], row.get("category", ""))
+    row["tags"] = normalize_tags(row["clean_title"], row.get("tags", ""))
+    row["category"] = infer_category(row["clean_title"], row.get("category", ""), row["tags"])
 
     tags = [tag for tag in re.split(r"[;；]", row.get("tags", "")) if tag.strip()]
     if row["category"] == "bible-study":
