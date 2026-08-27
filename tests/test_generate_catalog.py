@@ -558,6 +558,43 @@ class CatalogGenerationTests(unittest.TestCase):
 
         self.assertEqual([visible], public_books)
 
+    def test_duplicate_imports_collapse_to_richest_public_record(self) -> None:
+        sparse = {
+            "id": "duplicate-a",
+            "clean_title": "丁道尔：雅各书——新约圣经注释",
+            "author": "丁道尔",
+            "author_bio": "",
+            "translator": "贺安慈",
+            "publisher": "校园书房出版社",
+            "year": "1988",
+            "description": "",
+            "table_of_contents": "",
+            "cover_image_url": "",
+            "preview_base_url": "",
+            "access_url": "",
+            "preview_page_count": 0,
+            "tags": [],
+        }
+        rich = {
+            **sparse,
+            "id": "duplicate-b",
+            "description": "本卷注释雅各书。",
+            "cover_image_url": "covers/duplicate-b.jpg",
+            "preview_base_url": "previews/duplicate-b",
+            "preview_page_count": 5,
+        }
+
+        self.assertEqual([rich], GENERATOR.public_books_only([sparse, rich]))
+
+    def test_placeholder_titles_are_not_public(self) -> None:
+        placeholder = {
+            "id": "placeholder-a",
+            "clean_title": "天道圣经注释：书名待核",
+            "tags": [],
+        }
+
+        self.assertEqual([], GENERATOR.public_books_only([placeholder]))
+
     def test_book_sort_key_pushes_numbered_titles_back(self) -> None:
         books = [
             {"id": "b", "clean_title": "100名画旧约"},
