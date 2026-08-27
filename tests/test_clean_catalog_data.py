@@ -112,6 +112,58 @@ class CleanCatalogDataTest(unittest.TestCase):
         self.assertTrue(changed)
         self.assertEqual(row["clean_title"], "帖撒罗尼迦前后书注释")
 
+    def test_reclassifies_other_from_high_confidence_subject_tag(self):
+        row = {
+            "id": "cdl-test",
+            "clean_title": "中国士绅反教的原因",
+            "author": "吕实强",
+            "translator": "",
+            "category": "other",
+            "tags": "中国教会史;近代史",
+        }
+
+        self.assertTrue(clean_row(row))
+        self.assertEqual(row["category"], "church-history")
+
+    def test_biblical_counseling_is_pastoral_not_bible_study(self):
+        row = {
+            "id": "cdl-test",
+            "clean_title": "人是怎么改变的",
+            "author": "大卫·鲍力生",
+            "translator": "",
+            "category": "other",
+            "tags": "圣经辅导;生命改变;成圣",
+        }
+
+        self.assertTrue(clean_row(row))
+        self.assertEqual(row["category"], "pastoral")
+
+    def test_does_not_override_existing_reviewed_category(self):
+        row = {
+            "id": "cdl-test",
+            "clean_title": "教会中的家庭事工",
+            "author": "",
+            "translator": "",
+            "category": "pastoral",
+            "tags": "家庭事工",
+        }
+
+        clean_row(row)
+        self.assertEqual(row["category"], "pastoral")
+
+    def test_does_not_treat_ordinary_creation_word_as_theology(self):
+        row = {
+            "id": "cdl-test",
+            "clean_title": "创造真爱的五项修炼",
+            "author": "",
+            "translator": "",
+            "category": "other",
+            "tags": "创造论;两性关系",
+        }
+
+        clean_row(row)
+        self.assertEqual(row["category"], "other")
+
 
 if __name__ == "__main__":
     unittest.main()
